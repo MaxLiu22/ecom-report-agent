@@ -1,8 +1,10 @@
 <script setup>
 import { ref } from 'vue';
+import Yesterday from '@/views/Yesterday.vue';
 
 const message = ref('');
-const sidebarExpanded = ref(false);
+const sidebarExpanded = ref(true);
+const showReportContent = ref(false);
 
 const sendMessage = () => {
   if (message.value.trim()) {
@@ -13,6 +15,10 @@ const sendMessage = () => {
 
 const toggleSidebar = () => {
   sidebarExpanded.value = !sidebarExpanded.value;
+};
+
+const showReport = () => {
+  showReportContent.value = true;
 };
 </script>
 
@@ -72,7 +78,7 @@ const toggleSidebar = () => {
         <div class="chat-history">
           <div class="time-group">
             <h3 class="time-label">30 Days</h3>
-            <div class="chat-item">
+            <div class="chat-item" @click="showReport">
               <span class="chat-title">Report 1</span>
               <div class="chat-menu">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -97,39 +103,47 @@ const toggleSidebar = () => {
     
     <!-- 主内容区域 -->
     <div class="main-content">
-      <!-- Logo 和标题 -->
-    <div class="header-section">
-      <div class="logo-container">
-        <img src="@/assets/eu_logo.svg" class="eu-logo" alt="EU Logo"/>
-        <h1 class="title">IntraEU.AI</h1>
-      </div>
-    </div>
-    
-    <!-- 输入框区域 -->
-    <div class="input-section">
-      <div class="input-container">
-        <input 
-          type="text" 
-          v-model="message" 
-          class="message-input" 
-          placeholder="请帮我生成一个 IntraEU 卖家分析报告"
-          @keyup.enter="sendMessage"
-        />
-        <div class="button-group">
-          <button class="attachment-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <button class="send-btn" @click="sendMessage">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22 2L11 13" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
+      <!-- 默认内容 -->
+      <div v-if="!showReportContent" class="default-content">
+        <!-- Logo 和标题 -->
+        <div class="header-section">
+          <div class="logo-container">
+            <img src="@/assets/eu_logo.svg" class="eu-logo" alt="EU Logo"/>
+            <h1 class="title">IntraEU.AI</h1>
+          </div>
+        </div>
+        
+        <!-- 输入框区域 -->
+        <div class="input-section">
+          <div class="input-container">
+            <input 
+              type="text" 
+              v-model="message" 
+              class="message-input" 
+              placeholder="请帮我生成一个 IntraEU 卖家分析报告"
+              @keyup.enter="sendMessage"
+            />
+            <div class="button-group">
+              <button class="attachment-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="send-btn" @click="sendMessage">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22 2L11 13" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      
+      <!-- 报告内容 -->
+      <div v-if="showReportContent" class="report-content-wrapper">
+        <Yesterday />
+      </div>
     </div>
   </div>
 </template>
@@ -153,7 +167,7 @@ const toggleSidebar = () => {
   flex-direction: column;
   justify-content: space-between;
   padding-top: 10px;
-  padding-bottom: 20px;
+  padding-bottom: 5px;
   transition: width 0.3s ease;
   z-index: 10;
 }
@@ -261,15 +275,15 @@ const toggleSidebar = () => {
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 0;
+  gap: 12px;
+  padding: 15px 0;
   border-top: 1px solid #e0e0e0;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .profile-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   background-color: #004b5f;
   border-radius: 50%;
   display: flex;
@@ -278,13 +292,13 @@ const toggleSidebar = () => {
 }
 
 .profile-logo {
-  width: 16px;
-  height: 20px;
+  width: 20px;
+  height: 25px;
   filter: brightness(0) invert(1);
 }
 
 .profile-text {
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
   font-weight: 500;
 }
@@ -438,5 +452,21 @@ const toggleSidebar = () => {
   .header-section {
     margin-bottom: 40px;
   }
+}
+
+.default-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.report-content-wrapper {
+  width: 100%;
+  height: calc(100vh - 50px);
+  background-color: #f0f0f0;
+  padding: 0;
+  margin: 0;
 }
 </style>

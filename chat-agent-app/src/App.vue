@@ -31,7 +31,7 @@ const toggleSidebar = () => {
         <div class="menu-item"><span>B2B</span><span class="arrow">›</span></div>
         <div class="menu-item"><span>品牌</span><span class="arrow">›</span></div>
         <div class="menu-item"><span>学习</span><span class="arrow">›</span></div>
-        <div class="ai-button" @click="() => { router.push('/about'); sidebarVisible = false; }">
+        <div class="ai-button" @click="() => { router.push('/agent'); sidebarVisible = false; }">
           <img src="@/assets/eu_logo.svg" class="ai-icon" alt="EU Logo"/> IntraEU.AI
         </div>
       </nav>
