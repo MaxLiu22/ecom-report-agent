@@ -2,17 +2,102 @@
 import { ref } from 'vue';
 
 const message = ref('');
+const sidebarExpanded = ref(false);
+
 const sendMessage = () => {
   if (message.value.trim()) {
     console.log('发送消息:', message.value);
     message.value = '';
   }
 };
+
+const toggleSidebar = () => {
+  sidebarExpanded.value = !sidebarExpanded.value;
+};
 </script>
 
 <template>
   <div class="about">
-    <!-- Logo 和标题 -->
+    <!-- 左侧侧边栏 -->
+    <div class="sidebar" :class="{ 'sidebar-expanded': sidebarExpanded }">
+      <!-- 收起状态的图标 -->
+      <div class="sidebar-collapsed" v-if="!sidebarExpanded">
+        <div class="sidebar-icons">
+          <!-- 展开图标 -->
+          <div class="sidebar-icon" @click="toggleSidebar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 4L16 12L8 20" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          <!-- 聊天图标 -->
+          <div class="sidebar-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 9H16M8 13H12" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        
+        <!-- 底部圆形图标 -->
+        <div class="sidebar-bottom">
+          <div class="bottom-icon">
+            <img src="@/assets/eu_logo.svg" class="bottom-logo" alt="EU Logo"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 展开状态的内容 -->
+      <div class="sidebar-expanded-content" v-if="sidebarExpanded">
+        <!-- 顶部区域 -->
+        <div class="sidebar-header">
+          <div class="sidebar-title-row">
+            <h2 class="sidebar-title">IntraEU.AI</h2>
+            <div class="sidebar-icon" @click="toggleSidebar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 4L8 12L16 20" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          
+          <button class="new-chat-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#4285f4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            New chat
+          </button>
+        </div>
+
+        <!-- 聊天历史区域 -->
+        <div class="chat-history">
+          <div class="time-group">
+            <h3 class="time-label">30 Days</h3>
+            <div class="chat-item">
+              <span class="chat-title">Report 1</span>
+              <div class="chat-menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="1" fill="#666"/>
+                  <circle cx="12" cy="5" r="1" fill="#666"/>
+                  <circle cx="12" cy="19" r="1" fill="#666"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部用户区域 -->
+        <div class="user-profile">
+          <div class="profile-icon">
+            <img src="@/assets/eu_logo.svg" class="profile-logo" alt="Profile"/>
+          </div>
+          <span class="profile-text">My Profile</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 主内容区域 -->
+    <div class="main-content">
+      <!-- Logo 和标题 -->
     <div class="header-section">
       <div class="logo-container">
         <img src="@/assets/eu_logo.svg" class="eu-logo" alt="EU Logo"/>
@@ -45,17 +130,216 @@ const sendMessage = () => {
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .about {
-  min-height: 100vh;
+  height: calc(100vh - 50px);
+  position: relative;
+  background-color: #f0f0f0;
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 50px;
+  width: 65px;
+  height: calc(100vh - 50px);
+  background-color: white;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 10px;
+  padding-bottom: 20px;
+  transition: width 0.3s ease;
+  z-index: 10;
+}
+
+.sidebar-expanded {
+  width: 200px;
+}
+
+.sidebar-collapsed {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.sidebar-expanded-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 15px;
+}
+
+.sidebar-header {
+  margin-bottom: 20px;
+}
+
+.sidebar-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #004b5f;
+  margin: 0;
+}
+
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e8f0fe;
+  color: #4285f4;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.new-chat-btn:hover {
+  background-color: #d2e3fc;
+}
+
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.time-group {
+  margin-bottom: 15px;
+}
+
+.time-label {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.chat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.chat-item:hover {
+  background-color: #e5e5e5;
+}
+
+.chat-title {
+  font-size: 14px;
+  color: #333;
+}
+
+.chat-menu {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.chat-menu:hover {
+  background-color: #ddd;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 10px;
+}
+
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  background-color: #004b5f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-logo {
+  width: 16px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+.profile-text {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.sidebar-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.sidebar-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.sidebar-icon:hover {
+  background-color: #f5f5f5;
+}
+
+.sidebar-bottom {
+  display: flex;
+  justify-content: center;
+}
+
+.bottom-icon {
+  width: 45px;
+  height: 45px;
+  background-color: #004b5f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.bottom-logo {
+  width: 20px;
+  height: 25px;
+  filter: brightness(0) invert(1);
+}
+
+.main-content {
+  width: 100%;
+  padding-left: 65px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  background-color: #f0f0f0;
 }
 
 .header-section {
