@@ -1,5 +1,6 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue';
+import ReportFrame from './ReportFrame.vue';
 
 const message = ref('');
 const messageContainer = ref(null);
@@ -213,7 +214,22 @@ onMounted(() => {
       <!-- 右侧面板 -->
       <div class="right-panel">
         <div class="report-area">
-          <h2>报告生成区域</h2>
+          <ReportFrame />
+        </div>
+        <!-- 按键区域 -->
+        <div class="button-area">
+          <div class="button-left">
+            <!-- 左侧可以放置其他按钮 -->
+          </div>
+          <div class="button-right">
+            <button class="preview-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Preview
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -230,6 +246,7 @@ onMounted(() => {
   margin-left: auto;
   margin-right: 0;
   padding-bottom: 30px;
+  z-index: 1000;
 }
 
 .header-title {
@@ -536,12 +553,41 @@ onMounted(() => {
   flex: 1;
   background-color: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   border: 2px solid #2d5a45;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.report-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  width: 100%;
+}
+
+/* 报告区域滚动条样式 */
+.report-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.report-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.report-area::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.report-area::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .report-area h2 {
@@ -550,6 +596,63 @@ onMounted(() => {
   font-weight: 400;
   margin: 0;
   text-align: center;
+}
+
+/* 按键区域样式 */
+.button-area {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.preview-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #2d5a45;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+
+.preview-btn:hover {
+  background-color: #1e3d30;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(45, 90, 69, 0.3);
+}
+
+.preview-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+
+.preview-btn svg {
+  flex-shrink: 0;
+}
+
+.button-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.button-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .chat-input-area {
