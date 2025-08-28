@@ -1,0 +1,884 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntraEU分析报告</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 30px 30px;
+        }
+        .header h1 {
+            position: relative;
+            z-index: 2;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            position: relative;
+            z-index: 2;
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .report-section {
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
+        }
+        .section-title {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
+            color: white;
+            padding: 20px 25px;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .section-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 20px 20px;
+        }
+        .section-content {
+            padding: 25px;
+            background: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 15px 12px;
+            border: 1px solid #e8e8e8;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        tbody tr:hover {
+            background: #fff5f0;
+            transition: background-color 0.3s ease;
+        }
+        .total-row {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%) !important;
+            color: white;
+        }
+        .total-row td {
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .savings-amount {
+            color: #FF6B35;
+            font-weight: 700;
+            text-align: right;
+            font-size: 16px;
+        }
+        .total-row .savings-amount {
+            color: white;
+        }
+        .excel-table th {
+            text-align: center;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+        .excel-table td {
+            text-align: center;
+            white-space: nowrap;
+        }
+        .excel-table .row-label {
+            text-align: left;
+            background: #f8f9fa;
+            font-weight: 500;
+        }
+        .excel-table .mcid-label {
+            background: #fff5f0;
+            color: #FF6B35;
+            font-weight: bold;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe8e1 100%);
+            border: 2px solid #FF6B35;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
+            border-radius: 8px;
+            z-index: -1;
+        }
+        .subsection-header {
+            background: linear-gradient(135deg, #FF8C00 0%, #FF6B35 100%);
+            color: white;
+            padding: 12px 20px;
+            margin: 20px 0 0 0;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 6px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .content-block {
+            background: white;
+            margin: 0 0 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #333 0%, #666 100%);
+            color: white;
+            font-size: 14px;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 IntraEU 分析报告</h1>
+            <p>生成时间: 2025/8/26 11:03:52</p>
+        </div>
+
+        <div class="content-block">
+            <h3 class="section-title">1 欧洲站点拓展评估</h3>
+            <div class="section-content">
+            <!-- 欧洲站点拓展解决方案对比表格 -->
+            <div style="margin: 20px 0;">
+                <h4 style="color: #333; font-size: 16px; margin: 10px 0;">2.欧洲站点拓展解决方案</h4>
+                <h5 style="color: #666; font-size: 14px; margin: 10px 0;">2.1欧盟内部物流方案</h5>
+                
+                <!-- 欧盟内部方案介绍与对比标题 -->
+                <div style="display: flex; align-items: center; margin: 15px 0; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 4px; border-left: 4px solid #FF8C00;">
+                    <span style="color: #FF8C00; font-size: 16px; font-weight: bold;">▶</span>
+                    <h4 style="color: #333; font-size: 16px; font-weight: 600; margin: 0; line-height: 1.4;">欧盟内部方案介绍与对比</h4>
+                </div>
+                
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px; border: 2px solid #ddd; margin-bottom: 15px;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="background: linear-gradient(135deg, #333 0%, #666 100%); color: white; padding: 12px 8px; border: 1px solid #ddd; text-align: center; width: 80px;">方案类型</th>
+                            <th style="background: linear-gradient(135deg, #FF8C00 0%, #FF8C00 100%); color: white; padding: 12px 8px; border: 1px solid #ddd; text-align: center; width: 25%;">欧盟 FBA 的物流模式</th>
+                            <th style="background: linear-gradient(135deg, #FF8C00 0%, #FF8C00 100%); color: white; padding: 12px 8px; border: 1px solid #ddd; text-align: center; width: 35%;">欧盟之间的远程配送网络<br/>European Fulfillment Network (EFN)</th>
+                            <th style="background: linear-gradient(135deg, #FF8C00 0%, #FF8C00 100%); color: white; padding: 12px 8px; border: 1px solid #ddd; text-align: center; width: 35%;">⭐亚马逊物流欧洲整合服务<br/>Pan European (PanEU)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="background: #f8f9fa; color: #333; font-weight: 600; padding: 10px 8px; border: 1px solid #ddd; text-align: center;">简介</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; font-size: 10px;">卖家入仓至欧盟任一国家后，即可由此国的仓库远程配送到其他欧盟国家</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; font-size: 10px;">卖家入仓至欧盟任一国家后，亚马逊将货存储在卖家启用了存储服务的国家/地区的欧盟运营中心内，并自主在这些卖家地区之间分配存储，不额外收取费用</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; font-size: 10px; background: #fff9e6; border-left: 3px solid #FF8C00;">卖家入仓至欧盟任一国家后，亚马逊将货存储在卖家启用了存储服务的国家/地区的欧盟运营中心内，并自主在这些卖家地区之间分配存储，不额外收取费用</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" style="background: #f8f9fa; color: #333; font-weight: 600; padding: 10px 8px; border: 1px solid #ddd; text-align: center;">加入条件</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;"><div style="font-weight: 600; margin-bottom: 5px; font-size: 10px;">ASIN 设置</div><div style="font-size: 9px;">需使用相同 ASIN/FNSKU#</div></td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;"><div style="font-weight: 600; margin-bottom: 5px; font-size: 10px;">ASIN 设置</div><div style="font-size: 9px;">需使用相同 ASIN/FNSKU#</div></td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;"><div style="font-weight: 600; margin-bottom: 5px; font-size: 10px;">ASIN 设置</div><div style="font-size: 9px; background: #fff9e6; padding: 4px; border-radius: 3px; border: 1px solid #FF8C00;">德法意西需使用相同 ASIN/FNSKU#</div></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;"><div style="font-weight: 600; margin-bottom: 5px; font-size: 10px;">仓储国要求*</div><div style="font-size: 9px;">仅开启一国仓储<br/>(需要1个 VAT)</div></td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;"><div style="font-weight: 600; margin-bottom: 5px; font-size: 10px;">仓储国要求*</div><div style="font-size: 9px;">仅开启一国仓储<br/>(需要1个 VAT)</div></td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;"><div style="font-weight: 600; margin-bottom: 5px; font-size: 10px;">仓储国要求*</div><div style="font-size: 9px; background: #fff9e6; padding: 4px; border-radius: 3px; border: 1px solid #FF8C00;">需要德法意西中，至少开启2国仓储（至少2个 VAT），<br/>启用仓储的国家为PanEU，未启用国家为 EFN</div></td>
+                        </tr>
+                        <tr>
+                            <td style="background: #f8f9fa; color: #333; font-weight: 600; padding: 10px 8px; border: 1px solid #ddd; text-align: center;">头程物流<br/>(CN->EU FBA CC)</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 10px;">需发货至欧盟某1个国家，成本低</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 10px;">需发货至欧盟某1个国家，成本低</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 10px;">需发货至欧盟某1个国家，成本低</td>
+                        </tr>
+                        <tr>
+                            <td style="background: #f8f9fa; color: #333; font-weight: 600; padding: 10px 8px; border: 1px solid #ddd; text-align: center;">尾程配送<br/>(FBA)</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 10px;"><span style="background: #fff2e8; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">跨境配送</span>：费用高，3-5天送达</td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 10px;"><span style="background: #fff5f0; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">本地配送</span>：费用节约高达53%，1-2天送达<br/><span style="background: #fff2e8; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">跨境配送</span>+<span style="background: #fff2e8; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">跨境配送</span></td>
+                            <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 10px;"><span style="background: #fff5f0; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">本地配送</span>+<span style="background: #fff2e8; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">跨境配送</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; border-left: 4px solid #FF8C00; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #666; font-size: 10px;">注：开启仓储后会触发VAT义务，您需注册该国VAT（或欧盟增值税登记号和本土VAT号）。</p>
+                </div>
+                
+                <!-- PanEU商品资格说明 -->
+                <div style="margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #ddd; border-radius: 6px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px; gap: 8px;">
+                        <span style="color: #FF8C00; font-size: 16px; font-weight: bold;">▶</span>
+                        <h4 style="color: #333; font-size: 16px; font-weight: 600; margin: 0;">PanEU商品资格 <span style="color: #666; font-size: 12px; font-weight: 400;">(卖家后台操作页面)</span></h4>
+                    </div>
+                    
+                    <p style="color: #333; font-size: 13px; line-height: 1.5; margin: 0 0 15px 0;">
+                        商品必须符合在欧洲各国之间运输流转的要求，以下列出不符合PanEU的商品种类：
+                    </p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; background: #ffffff; border: 1px solid #ddd;">
+                        <thead>
+                            <tr>
+                                <th style="background: #333; color: white; font-weight: 600; padding: 12px 10px; text-align: center; border-right: 1px solid #555; width: 15%;">类目</th>
+                                <th style="background: #333; color: white; font-weight: 600; padding: 12px 10px; text-align: center; border-right: 1px solid #555; width: 35%;">禁售</th>
+                                <th style="background: #333; color: white; font-weight: 600; padding: 12px 10px; text-align: center; width: 50%;">限制</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px; border: 1px solid #ddd;">酒类<br/>Food</td>
+                                <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd;">一般人烹调类、春节小杂、篱笆看台</td>
+                                <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd;">除非获得EU的相关食品安全认证，否则无法在欧盟销售；<br/>如果注册EU的相关认证，存在专业工厂专业生产线认证，运输总价29周的，<br/>总价值限制为2000欧元，上述限制内商品可在全欧盟内销售。</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px; border: 1px solid #ddd;">汽车零件<br/>Auto motive</td>
+                                <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd;">电子产品、车外后视镜(WK连接)、安规气外后电器、高正压(WK连接)、门锁(WK连接)、连接线(WK连接)、汽车工具(WK连接)、高压、安规线(WK连接)、咖啡工、基础润滑(WK连接)、门连线、下滑、工程主体</td>
+                                <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd;">汽车零件需要，手动制与当地的实验室认证，生产过程注册统一认证标识，各国最新认证文件一致性登录认证平台数据</td>
+                            </tr>
+                            <tr>
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px; border: 1px solid #ddd;">玩具<br/>Toys</td>
+                                <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd;">儿童用品、蒙古用、灯具、安规、轮胎、室内娱乐等</td>
+                                <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd;">玩具大类产品都需要REACH/LVD等认证，包括各类成套塑料等的测试</td>
+                            </tr>
+                            <tr style="background: #f8f9fa;">
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px; border: 1px solid #ddd;">喷雾类<br/>Sprays</td>
+                                <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd;">喷雾类化学、化妆品、清洁类、定制类</td>
+                                <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd;">空气方面的危险品认定REACH/LVD认证，包括各类专业技术条件销售数据</td>
+                            </tr>
+                            <tr>
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px; border: 1px solid #ddd;">磁铁类型类<br/>带磁性元器件</td>
+                                <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd;">消磁类功能、化感类、高灵件工厂</td>
+                                <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd;">需要达际到商务认证和相关证书，标识要符号等于产品功效现实定义，带磁类物<br/>受限，商关和欧盟等经营产品功等期效期平<300克，高度<360mm</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 启用PanEU国家仓储获得配送费用节约 -->
+                <div style="margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #ddd; border-radius: 6px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px; gap: 8px;">
+                        <span style="color: #FF8C00; font-size: 16px; font-weight: bold;">▶</span>
+                        <h4 style="color: #333; font-size: 16px; font-weight: 600; margin: 0;">启用PanEU国家仓储获得配送费用节约</h4>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 4px; border-left: 4px solid #FF8C00;">
+                        <p style="color: #333; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
+                            <strong>仓储：</strong>在亚马逊物流欧洲整合服务（PanEU）项目中，本月开启仓储设置的商城，未法享受PanEU权利，即在该国所储商品，均收取EFN跨境配送费用。
+                        </p>
+                        <p style="color: #666; font-size: 11px; line-height: 1.4; margin: 0; font-style: italic;">
+                            注：开启仓储设置的商城，需要买家或卖家直接向该国缴纳增值税，即可享受PanEU权利。
+                        </p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px; padding: 12px; background: #fff8e1; border-radius: 4px; border-left: 4px solid #FF8C00;">
+                        <p style="color: #333; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
+                            <strong>如何查看：</strong>点击：卖家后台 → 菜单 → 库存 → 亚马逊物流欧洲整合服务库存 → 高级注册
+                        </p>
+                        <p style="color: #FF4500; font-size: 11px; line-height: 1.4; margin: 8px 0; font-weight: 500;">
+                            如果存放更具成本的方，不注册库存权益，您在该城纳税未享受PanEU权利。
+                        </p>
+                        <p style="color: #666; font-size: 11px; line-height: 1.4; margin: 0; font-style: italic;">
+                            注：您可以查司上纳税巨纳税固税信，含查司可适应含城，以享受PanEU权利。
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <h5 style="color: #333; font-size: 14px; font-weight: 600; margin: 0 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #FF8C00;">成本节约计算</h5>
+                        
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; background: #ffffff; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+                            <thead>
+                                <tr>
+                                    <th style="background: #333; color: white; font-weight: 600; padding: 10px 8px; text-align: center; border-right: 1px solid #555; font-size: 9px;">跨境配送国家</th>
+                                    <th style="background: #333; color: white; font-weight: 600; padding: 10px 8px; text-align: center; border-right: 1px solid #555; font-size: 9px;">预计可节约费用(RMB)</th>
+                                    <th style="background: #333; color: white; font-weight: 600; padding: 10px 8px; text-align: center; border-right: 1px solid #555; font-size: 9px;">预计节约配送费(RMB)</th>
+                                    <th style="background: #333; color: white; font-weight: 600; padding: 10px 8px; text-align: center; border-right: 1px solid #555; font-size: 9px;">申请VAT所需费用(RMB)**</th>
+                                    <th style="background: #333; color: white; font-weight: 600; padding: 10px 8px; text-align: center; font-size: 9px;">申请VAT所需时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="background: #f8f9fa; color: #333; font-weight: 600; padding: 8px; border: 1px solid #ddd; text-align: center;">FR</td>
+                                    <td style="color: #333; font-weight: 500; padding: 8px; border: 1px solid #ddd; text-align: center;">6,914.51</td>
+                                    <td style="color: #333; font-weight: 500; padding: 8px; border: 1px solid #ddd; text-align: center;">8,291.46</td>
+                                    <td style="color: #333; font-weight: 500; padding: 8px; border: 1px solid #ddd; text-align: center;">1,376.95</td>
+                                    <td style="color: #333; font-size: 9px; padding: 8px; border: 1px solid #ddd; text-align: center;">8-13 weeks</td>
+                                </tr>
+                                <tr style="background: #f8f9fa;">
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                </tr>
+                                <tr style="background: #f8f9fa;">
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                    <td style="color: #999; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                </tr>
+                                <tr style="background: #333;">
+                                    <td style="background: #333; color: white; font-weight: 600; font-size: 11px; padding: 8px; border: 1px solid #ddd; text-align: center;">总额</td>
+                                    <td style="background: #333; color: white; font-weight: 600; font-size: 11px; padding: 8px; border: 1px solid #ddd; text-align: center;">6,914.51</td>
+                                    <td style="background: #333; color: white; font-weight: 600; font-size: 11px; padding: 8px; border: 1px solid #ddd; text-align: center;">8,291.46</td>
+                                    <td style="background: #333; color: white; font-weight: 600; font-size: 11px; padding: 8px; border: 1px solid #ddd; text-align: center;">1,376.95</td>
+                                    <td style="background: #333; color: white; font-weight: 600; font-size: 11px; padding: 8px; border: 1px solid #ddd; text-align: center;">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 10px; padding: 8px 12px; background: #f8f9fa; border-radius: 4px;">
+                            <p style="color: #666; font-size: 9px; line-height: 1.3; margin: 0 0 4px 0;">*预估本地配送费可以减低统一普通跨费成本</p>
+                            <p style="color: #666; font-size: 9px; line-height: 1.3; margin: 0;">**申请VAT所需费用及时间参考第二方信息</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 英国和欧盟物流方案 -->
+                <div style="margin-top: 30px; padding: 20px; background: #ffffff; border: 1px solid #ddd; border-radius: 6px;">
+                    <h4 style="color: #333; font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">2.2英国和欧盟物流方案</h4>
+                    <h5 style="color: #666; font-size: 16px; font-weight: 500; margin: 0 0 4px 0;">1 英国和欧盟物流方案的对比和建议</h5>
+                    <p style="color: #999; font-size: 12px; margin: 0 0 20px 0; font-style: italic;">P12</p>
+                    
+                    <!-- 英国和欧盟间物流方案对比标题 -->
+                    <div style="display: flex; align-items: center; margin: 20px 0 15px 0; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 4px; border-left: 4px solid #FF8C00;">
+                        <span style="color: #FF8C00; font-size: 16px; font-weight: bold;">▶</span>
+                        <h4 style="color: #333; font-size: 16px; font-weight: 600; margin: 0; line-height: 1.4;">英国和欧盟间物流方案的对比和建议</h4>
+                    </div>
+                    
+                    <!-- 英欧双向双入驻标签 -->
+                    <div style="background: linear-gradient(135deg, #FF8C00 0%, #FF8C00 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-align: center; margin: 15px auto 20px auto; width: fit-content; box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);">
+                        英欧双向双入驻 vs. 英国单收取2个间配送跨境运
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; background: #ffffff; border: 2px solid #FF8C00; border-radius: 6px; margin-top: 15px;">
+                        <thead>
+                            <tr>
+                                <th style="background: #e67e22; color: white; font-weight: 600; padding: 12px 10px; text-align: center; border-right: 1px solid #fff; font-size: 11px; width: 25%;">UK<->EU FBA 物流模式</th>
+                                <th style="background: linear-gradient(135deg, #FF8C00 0%, #FF8C00 100%); color: white; font-weight: 600; padding: 12px 10px; text-align: center; border-right: 1px solid #fff; font-size: 11px; width: 37.5%;">英国收获双选入驻<br/>Dual Inbound (DI)</th>
+                                <th style="background: linear-gradient(135deg, #FF8C00 0%, #FF8C00 100%); color: white; font-weight: 600; padding: 12px 10px; text-align: center; font-size: 11px; width: 37.5%;">英国与欧盟2个间的远程配送<br/>Remote Fulfillment between the UK and EU (EURF)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #f8f9fa;">
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px 8px; border: 1px solid #ddd; border-right: 2px solid #ddd;">介绍</td>
+                                <td style="background: #f8f9fa; color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">卖家能够将货物入列,选至英国EU配送链运营</td>
+                                <td style="background: #f8f9fa; color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">卖家入驻合欧盟欧选收后任一成本国。<br/>即可以欧盟侧位者定者向任和到联欧洲盟通过当当和和</td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px 8px; border: 1px solid #ddd; border-right: 2px solid #ddd;">头程物流 (CN->EU FBA FCs)</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">需要保齐英国/EU仓都要发送成本高, 成本偏对应</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">需要保齐英国/EU仓都要发送成本高, 成本偏对应</td>
+                            </tr>
+                            <tr>
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px 8px; border: 1px solid #ddd; border-right: 2px solid #ddd;">尾程配送 (FBA)</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">需即到及优缺费见卖水电配送选供下优程收商品. 1-2天送达</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">有销运费, 客期间, 5-7天送达</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background: #e9ecef; color: #495057; font-weight: 600; text-align: center; padding: 8px; font-size: 12px; border: 1px solid #ddd;">加入条件</td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px 8px; border: 1px solid #ddd; border-right: 2px solid #ddd;">ASIN 设置</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">应收收市已的英国DI，以设收下及环费欧提综收都配配配，具其优可<br/>可可可该中欧中是最在的优</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">需要配重设网英国/欧盟的DI的配配配. 部分 ASIN 无法除以设在欧应有或</td>
+                            </tr>
+                            <tr>
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px 8px; border: 1px solid #ddd; border-right: 2px solid #ddd;">VAT 要求</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">需要配置2个VAT<br/>或申请提调及者收欧盟的 VAT</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">仅设置1个VAT<br/>或申请提调及者收欧盟VAT</td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td colspan="3" style="background: #e9ecef; color: #495057; font-weight: 600; text-align: center; padding: 8px; font-size: 12px; border: 1px solid #ddd;">仓库</td>
+                            </tr>
+                            <tr>
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px 8px; border: 1px solid #ddd; border-right: 2px solid #ddd;">理论使用情状</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">可卖达仓, 金银从此实际, 善的成本</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">门批销货, 善消在卖小</td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td style="background: #f8f9fa; color: #333; font-weight: 600; text-align: center; padding: 10px 8px; border: 1px solid #ddd; border-right: 2px solid #ddd;">建议使用情况</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">卖家优送高配道品<br/>高订/高速 (MPG/GSI recommended)</td>
+                                <td style="color: #333; text-align: left; padding: 10px 12px; border: 1px solid #ddd; font-size: 10px;">其他各速, 新卖家除收道, 善送建议品抖卖商卖总</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <table class="excel-table">
+
+            </table>
+            </div>
+        </div>
+        
+        <div class="content-block">
+            <h3 class="section-title">卖家应用: 同步PanEU ASIN获得配送节约及销售机会</h3>
+            <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">机会类别</th>
+                        <th style="width: 10%; text-align: center;">数量</th>
+                        <th style="width: 35%;">详细描述</th>
+                        <th style="width: 20%;">行动建议</th>
+                        <th style="width: 15%; text-align: right;">预计节省费用(€/年)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="total-row">
+                        <td>总计</td>
+                        <td style="text-align: center; font-weight: bold;">147</td>
+                        <td>
+                            因缺少部分国家活跃offer，面临失去泛欧资格风险。<br/><br/>
+                            (泛欧资格中断后有14天宽限期，需在期限内恢复四国销售状态)
+                        </td>
+                        <td>
+                            尽快恢复德法意西四国失效offer，通过LOSG/BIL工具快速实现ASIN同步
+                        </td>
+                        <td style="text-align: right; color: #FF4500; font-weight: bold; font-size: 16px;">€3,313,102.44</td>
+                    </tr>
+                    <tr>
+                        <td>可以加入PanEU的Asin</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">134</td>
+                        <td>
+                            134个Asin 没有同步四国选品，导致：<br/>
+                            1. 未同步选品的国家产生远程配送费，不能享受本地配送费<br/>
+                            2. 转化率低于本地配送Asin
+                        </td>
+                        <td>在德法意西四国同步选品，以获取PanEU福利（本地配送费）</td>
+                        <td style="text-align: right; color: #FF6B35; font-weight: bold;">€2,943,634.00</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td>缺少1-2个国家的选品同步</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">52</td>
+                        <td></td>
+                        <td>仅需同步1-2国选品</td>
+                        <td style="text-align: right; color: #FF6B35; font-weight: bold;">€773.14</td>
+                    </tr>
+                    <tr>
+                        <td>缺少3个国家的选品同步（仅在德国销售）</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">82</td>
+                        <td></td>
+                        <td>需同步3国选品</td>
+                        <td style="text-align: right; color: #FF6B35; font-weight: bold;">€368,563.34</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td>PanEU福利失效的Asin</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">13</td>
+                        <td>
+                            13个Asin 部分国家offer失效，面临失去泛欧福利的风险。<br/><br/>
+                            (泛欧资格中断后有14天宽限期，需在期限内恢复四国销售状态)
+                        </td>
+                        <td>
+                            尽快恢复德法意西四国失效offer，通过LOSG/BIL工具快速实现ASIN同步
+                        </td>
+                        <td style="text-align: right; color: #FF6B35; font-weight: bold;">€131.96</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+        
+        <div class="content-block">
+            <h3 class="section-title">dashboard文件预览</h3>
+            <div class="section-content">
+            <table class="excel-table">
+<thead><tr><th></th><th></th><th></th><th>0.英国和欧盟间物流</th><th colspan="3">1.EU5欧盟内物流</th></tr></thead><tbody><tr class="mcid-row"><td class="row-label mcid-label">MCID</td><td>账户名称</td><td></td><td>英国</td><td>德国</td><td>意大利</td><td>法国</td><td>西班牙</td></tr><tr><td class="row-label">157076946612</td><td>Sinuolong Lighting</td><td>账户健康情况</td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td></tr><tr><td class="row-label"></td><td></td><td>FBA选品数量</td><td>116</td><td>46</td><td>24</td><td>19</td><td>12</td></tr><tr><td class="row-label"></td><td></td><td>FBA潜在销售机会 (数量)*</td><td>46</td><td>116</td><td>138</td><td>143</td><td>150</td></tr><tr><td class="row-label"></td><td></td><td>持有有效增值税号国家</td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td></tr><tr><td class="row-label"></td><td></td><td>授权仓储国家</td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td></tr><tr><td class="row-label"></td><td></td><td>是否启用亚马逊物流欧洲整合服务(PanEU)</td><td></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #FF6B35; font-size: 18px; font-weight: bold;">✓</span></td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td></tr><tr><td class="row-label"></td><td></td><td>是否使用英国和欧盟之间的远程配送服务</td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td><td><span style="color: #333; font-size: 18px; font-weight: bold;">✗</span></td></tr></tbody></table>
+            </div>
+        </div>
+        
+        <div class="content-block">
+            <h3 class="section-title">2 双边入库机会</h3>
+            <div class="section-content">
+            <h4 class="subsection-header">2.1: 高潜力选品</h4>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #FF8C00; margin: 20px 0;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <span style="color: #FF8C00; font-size: 16px; font-weight: bold;">▶</span>
+                    <h5 style="color: #333; font-size: 16px; font-weight: 600; margin: 0;">双边入库机会1: 高潜力选品</h5>
+                </div>
+                
+                <div style="color: #555; line-height: 1.6;">
+                    <p style="margin: 0 0 12px 0;">通过选品指导针(MPG)了解英国和欧盟之间的跨站点选品同步机会。</p>
+                    <p style="margin: 0 0 12px 0;">选品指南针基于实际来源国网域销售情况、及目标商城需求，提供ASIN推荐、及销售预测，类似商品价格/评价/排名/搜索量/点击量等关键信息。</p>
+                    <div style="font-size: 14px; background: #fff5f0; padding: 8px 12px; border-radius: 4px; margin: 12px 0; border-left: 3px solid #FF8C00;">
+                        <strong>路径:</strong> 卖家平台 → 菜单 → 增长 → 选品指导针
+                    </div>
+                    <p style="font-size: 14px; color: #666; font-weight: 500; margin: 0;"><strong>在线查看:</strong></p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; background: #ffffff; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; margin: 20px 0;">
+                <img src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALMRmisdZ3a3gjCH-HTprxq4Sv2b_UPAAKTHQACNL5gVd_hRV3BtaG-NgQ.png" 
+                     alt="选品指导针(MPG)界面截图" 
+                     style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);" />
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 13px; font-style: italic;">选品指导针(MPG)界面 - 高潜力选品分析工具</p>
+            </div>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3 class="section-title">卖家应用: 同步PanEU ASIN获得配送节约及销售机会</h3>
+            <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">机会类别</th>
+                        <th style="width: 10%; text-align: center;">数量</th>
+                        <th style="width: 35%;">详细描述</th>
+                        <th style="width: 20%;">行动建议</th>
+                        <th style="width: 15%; text-align: right;">预计节省费用(€/年)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="total-row">
+                        <td>总计</td>
+                        <td style="text-align: center;">147</td>
+                        <td>因缺少部分国家活跃offer，面临失去泛欧资格风险。<br><br>(泛欧资格中断后有14天宽限期，需在期限内恢复四国销售状态)</td>
+                        <td>尽快恢复德法意西四国失效offer，通过LOSG/BIL工具快速实现ASIN同步</td>
+                        <td class="savings-amount">€3,313,102.44</td>
+                    </tr>
+                    <tr>
+                        <td>可以加入PanEU的Asin</td>
+                        <td style="text-align: center;">134</td>
+                        <td>134个Asin 没有同步四国选品，导致：<br>1. 未同步选品的国家产生远程配送费，不能享受本地配送费<br>2. 转化率低于本地配送Asin</td>
+                        <td>在德法意西四国同步选品，以获取PanEU福利（本地配送费）</td>
+                        <td class="savings-amount">€2,943,634.00</td>
+                    </tr>
+                    <tr>
+                        <td>缺少1-2个国家的选品同步</td>
+                        <td style="text-align: center;">52</td>
+                        <td></td>
+                        <td>仅需同步1-2国选品</td>
+                        <td class="savings-amount">€773.14</td>
+                    </tr>
+                    <tr>
+                        <td>缺少3个国家的选品同步（仅在德国销售）</td>
+                        <td style="text-align: center;">82</td>
+                        <td></td>
+                        <td>需同步3国选品</td>
+                        <td class="savings-amount">€368,563.34</td>
+                    </tr>
+                    <tr>
+                        <td>PanEU福利失效的Asin</td>
+                        <td style="text-align: center;">13</td>
+                        <td>13个Asin 部分国家offer失效，面临失去泛欧福利的风险。<br><br>(泛欧资格中断后有14天宽限期，需在期限内恢复四国销售状态)</td>
+                        <td>尽快恢复德法意西四国失效offer，通过LOSG/BIL工具快速实现ASIN同步</td>
+                        <td class="savings-amount">€131.96</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <div class="content-block">
+            <h3 class="section-title">DI 双向分析报告</h3>
+            <div class="section-content">
+            
+            <!-- 机会分析文字描述 -->
+            <div style="background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px; margin: 20px 0; padding: 25px;">
+                <div style="margin-bottom: 20px; border-bottom: 2px solid #f0f8ff; padding-bottom: 15px;">
+                    <h3 style="color: #333; font-size: 20px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">🎯 主要机会点分析</h3>
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="color: #FF6B35; font-weight: bold; font-size: 16px;">•</span>
+                            <strong style="color: #333; font-size: 14px; font-weight: 600;">高销售潜力ASIN:</strong>
+                        </div>
+                        <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 24px;">
+                            UK>EU方向有37个ASIN在欧盟市场具有高销售潜力，预计销售额€242k；EU>UK方向有45个ASIN在英国市场具有高销售潜力，预计销售额£59k
+                        </p>
+                    </div>
+                    
+                    <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="color: #FF6B35; font-weight: bold; font-size: 16px;">•</span>
+                            <strong style="color: #333; font-size: 14px; font-weight: 600;">全球拓展大礼包激励资源:</strong>
+                        </div>
+                        <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 24px;">
+                            UK>EU方向有159个ASIN可获得最高€714k代金券；EU>UK方向有51个ASIN可获得最高£181k代金券
+                        </p>
+                    </div>
+                    
+                    <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="color: #FF6B35; font-weight: bold; font-size: 16px;">•</span>
+                            <strong style="color: #333; font-size: 14px; font-weight: 600;">远程配送优化:</strong>
+                        </div>
+                        <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 24px;">
+                            目前有11个ASIN开启远程配送，其中1个达到高销售量，预计可节省配送费
+                        </p>
+                    </div>
+                    
+                    <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="color: #FF6B35; font-weight: bold; font-size: 16px;">•</span>
+                            <strong style="color: #333; font-size: 14px; font-weight: 600;">市场扩展潜力:</strong>
+                        </div>
+                        <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 24px;">
+                            225个UK>EU ASIN和230个EU>UK ASIN尚未开启远程配送，存在巨大扩展空间
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e8e8e8;">
+                    <h4 style="color: #333; font-size: 18px; font-weight: 600; margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px;">📋 建议行动优先级</h4>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+                            <div style="background: linear-gradient(135deg, #FF6B35 0%, #ff8c00 100%); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0;">1</div>
+                            <div style="flex: 1;">
+                                <h5 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">优先本地入库</h5>
+                                <p style="color: #555; font-size: 13px; line-height: 1.5; margin: 0 0 8px 0;">对37个EU高销售潜力ASIN和45个UK高销售潜力ASIN进行本地入库</p>
+                                <div style="color: #FF6B35; font-size: 12px; font-weight: 600; background: #fff5f0; padding: 4px 8px; border-radius: 4px; display: inline-block;">预计总销售额€242k + £59k</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+                            <div style="background: linear-gradient(135deg, #FF6B35 0%, #ff8c00 100%); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0;">2</div>
+                            <div style="flex: 1;">
+                                <h5 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">激励资源利用</h5>
+                                <p style="color: #555; font-size: 13px; line-height: 1.5; margin: 0 0 8px 0;">充分利用全球拓展大礼包激励资源</p>
+                                <div style="color: #FF6B35; font-size: 12px; font-weight: 600; background: #fff5f0; padding: 4px 8px; border-radius: 4px; display: inline-block;">总计€714k + £181k代金券</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+                            <div style="background: linear-gradient(135deg, #FF6B35 0%, #ff8c00 100%); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0;">3</div>
+                            <div style="flex: 1;">
+                                <h5 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">远程配送开启</h5>
+                                <p style="color: #555; font-size: 13px; line-height: 1.5; margin: 0 0 8px 0;">为455个未开启远程配送的ASIN开启远程配送功能</p>
+                                <div style="color: #FF6B35; font-size: 12px; font-weight: 600; background: #fff5f0; padding: 4px 8px; border-radius: 4px; display: inline-block;">扩大市场覆盖</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+                            <div style="background: linear-gradient(135deg, #FF6B35 0%, #ff8c00 100%); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0;">4</div>
+                            <div style="flex: 1;">
+                                <h5 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">成本优化</h5>
+                                <p style="color: #555; font-size: 13px; line-height: 1.5; margin: 0 0 8px 0;">对已开启远程配送且销售额>€100的1个ASIN考虑本地入库</p>
+                                <div style="color: #FF6B35; font-size: 12px; font-weight: 600; background: #fff5f0; padding: 4px 8px; border-radius: 4px; display: inline-block;">节省配送成本</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 双边入库机会3: 远程配送升级为本地入库 -->
+            <div style="margin: 20px 0 30px 0; padding: 20px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; border-left: 4px solid #FF8C00;">
+                <h4 style="color: #333; font-size: 18px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid #FF8C00;">双边入库机会3: 远程配送升级为本地入库</h4>
+                
+                <div style="color: #555; line-height: 1.6;">
+                    <p style="margin: 0 0 15px 0; font-size: 14px;">
+                        若卖家已开通<strong style="color: #FF6B35; font-weight: 600;">英国和欧盟之间的远程配送</strong>，且产生一定订单，则证明商品在<strong style="color: #FF6B35; font-weight: 600;">目标商域存在销售潜力</strong>，可以通过本地入库节省配送费，优化配送时效，提升转化率。
+                    </p>
+                    
+                    <p style="margin: 0 0 20px 0; font-size: 14px; color: #666;">
+                        可在卖家后台下载远程配送订单报告，查看广告订单的选品，评估本地入库机会。
+                    </p>
+                    
+                    <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 1px solid #d9d9d9; margin: 20px 0;">
+                        <h5 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 10px 0;">卖家应用:</h5>
+                        <p style="margin: 0; font-size: 14px; color: #555;">
+                            卖家有<strong style="color: #FF6B35; font-weight: 600;">4个ASIN</strong>在过去<strong style="color: #FF6B35; font-weight: 600;">30天</strong>产生远程配送订单，若转为本地配送，<strong style="color: #FF6B35; font-weight: 600;">预计节省€243配送费</strong>，且可利用<strong style="color: #FF6B35; font-weight: 600;">本地配送的效提升转化率</strong>。
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h6 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 15px 0; text-align: center;">亚马逊物流远程配送</h6>
+                        <div style="text-align: center; background: #ffffff; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px;">
+                            <img src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAALMRmisdZ3a3gjCH-HTprxq4Sv2b_UPAAKTHQACNL5gVd_hRV3BtaG-NgQ.png" 
+                                 alt="亚马逊物流远程配送界面" 
+                                 style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DI分析报告标题 -->
+            <h4 class="subsection-header">DI 双向分析数据表</h4>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%; text-align: center;">#</th>
+                        <th style="width: 35%;">UK<=>EU ASIN</th>
+                        <th style="width: 10%; text-align: center;">数量</th>
+                        <th style="width: 20%; text-align: center;">来源总销售额(30D)</th>
+                        <th style="width: 30%;">机会点及操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td style="text-align: center;">1</td>
+                        <td>仅在英国本地入库的选品</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">229</td>
+                        <td style="text-align: center;">€147967</td>
+                        <td>-</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">2</td>
+                        <td>在欧盟有高销售潜力</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">37</td>
+                        <td style="text-align: center;">€37933</td>
+                        <td>本地入库至欧盟,预计销售额€242k (12M)</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">3</td>
+                        <td>在欧盟有全球拓展大礼包</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">159</td>
+                        <td style="text-align: center;">€124242</td>
+                        <td>本地入库至欧盟, 获取最高€714k代金券</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">4</td>
+                        <td>未在欧盟远程销售</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">225</td>
+                        <td style="text-align: center;">€142307</td>
+                        <td>开启英国至欧盟的远程配送</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">5</td>
+                        <td>已在欧盟远程销售</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">4</td>
+                        <td style="text-align: center;">€5660</td>
+                        <td>-</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">6</td>
+                        <td>远程销售额>€100</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">1</td>
+                        <td style="text-align: center;">€3292</td>
+                        <td>本地入库至欧盟, 预计节省配送费</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">7</td>
+                        <td>仅在欧盟本地入库的选品</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">230</td>
+                        <td style="text-align: center;">€199381</td>
+                        <td>-</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">8</td>
+                        <td>在英国有高销售潜力</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">45</td>
+                        <td style="text-align: center;">€65497</td>
+                        <td>本地入库至英国,预计销售额£59k (12M)</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">9</td>
+                        <td>在英国有全球拓展大礼包</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">51</td>
+                        <td style="text-align: center;">€18638</td>
+                        <td>本地入库至英国, 获取最高£181k代金券</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">10</td>
+                        <td>未在英国远程销售</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">230</td>
+                        <td style="text-align: center;">€199381</td>
+                        <td>开启欧盟至英国的远程配送</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">11</td>
+                        <td>已在英国远程销售</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">0</td>
+                        <td style="text-align: center;">-</td>
+                        <td>-</td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center;">12</td>
+                        <td>远程销售额>£100</td>
+                        <td style="text-align: center; color: #FF6B35; font-weight: bold;">0</td>
+                        <td style="text-align: center;">-</td>
+                        <td>-</td>
+                    </tr>
+
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>本报告由 IntraEU.AI 自动生成</p>
+        </div>
+    </div>
+</body>
+</html>
