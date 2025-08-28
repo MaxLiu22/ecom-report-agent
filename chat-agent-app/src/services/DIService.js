@@ -1,23 +1,21 @@
 /**
  * DIService - UK <> EU 双向拓展机会分析
  * --------------------------------------
- * 输入: 10 个文件 (File / Blob / URL)，对应 DI_input 目录中的文件：
- *   1. Cost saving model.xlsx                       (必需)
- *   2. eligibleASINs-DE_FR_IT_ES-Credits-GSINSP.csv (UK>EU 激励 可选)
- *   3. eligibleASINs-UK-Credits-GSINSP.csv          (EU>UK 激励 可选)
- *   4. List_of_recommendations_from_United Kingdom_to_Germany.xlsx
- *   5. List_of_recommendations_from_United Kingdom_to_France.xlsx
- *   6. List_of_recommendations_from_United Kingdom_to_Italy.xlsx
- *   7. List_of_recommendations_from_United Kingdom_to_Spain.xlsx
- *   8. List_of_recommendations_from_Germany_to_United Kingdom.xlsx
- *   9. Remote_Fulfillment_ASIN_Status_Report.xlsx   (远程配送状态 可选, 当前逻辑未严格使用)
- *  10. Remote_Fulfillment_Order_Report.xlsx         (远程配送订单 可选)
- *
- * 输出: 符合用户示例的 JSON 结构 (title / report_title / key_opportunity_analysis / recommended_actions / data_table)
- * 计算逻辑参考 `DI分析报告.html` 中嵌入的 JS 脚本, 并做轻量封装。
- *
- * 注意: 浏览器环境无法直接读取本地路径, 需通过 <input type="file" multiple> 获取 File 对象后传入。
- * 若文件缺失, 对应统计将为 0, 服务不会抛错 (除非缺主文件 Cost saving model)。
+ * 原始功能: 通过文件名正则匹配 10 个输入。
+ * 需求扩展: 支持 (1) 文件名不规范; (2) Excel / CSV 混合; (3) 每种角色存在 2 种列头格式的可能。
+ * 解决方案: 新增 analyzeDIOpportunitiesAuto(inputs) 自动识别函数 (无序文件数组/对象)。
+ * 识别逻辑(启发式, 多命中取第一个, 冲突加入 warnings):
+ *   cost_saving: 需同时含有工作表 (或列) 关键词: 'Asin_List' & 'SKU report' / 列含 'DI_type','EU5_gms_t30d'
+ *   incentive_eu: CSV/Sheet 包含列: '资格值','可获得的福利代金券（最高）' 且 金额列中含 'EUR'
+ *   incentive_uk: 同上但 金额列含 'GBP'
+ *   rec_uk_de : 行/列头包含 'Germany' 或 '德国' 且包含 'recommend'
+ *   rec_uk_fr : 'France' / '法国'
+ *   rec_uk_it : 'Italy' / '意大利'
+ *   rec_uk_es : 'Spain' / '西班牙'
+ *   rec_de_uk : 表头含 'United' & 'Kingdom' 与 'recommend' 且含 'Germany' to UK 方向 (或含 '英国')
+ *   rf_status : Sheet 名或列含 'Remote' & 'Status'
+ *   rf_order  : Sheet 名或列含 'Remote' & 'Order'
+ * 若文件名良好仍可使用 analyzeDIOpportunities 保持向后兼容。
  */
 
 import * as XLSX from 'xlsx';
@@ -50,6 +48,61 @@ async function fetchArrayBuffer(input) {
 
 function detectRole(fileName) {
 	return FILE_ROLE_PATTERNS.find(p => p.regex.test(fileName))?.role || null;
+}
+
+// ----------------------------- Auto Detection Helpers ----------------------------- //
+function normalizeHeader(h) { return (h || '').toString().trim().toLowerCase(); }
+
+function detectRoleByContent(workbookOrRows) {
+	// workbookOrRows: if object with SheetNames treat as workbook; else array rows (csv parsed)
+	try {
+		if (!workbookOrRows) return null;
+		if (workbookOrRows.SheetNames) {
+			// Excel workbook path
+			const wb = workbookOrRows;
+			const sheetNamesLower = wb.SheetNames.map(s => s.toLowerCase());
+			const hasSheet = (kw) => sheetNamesLower.some(n => n.includes(kw));
+			// cost_saving
+			if ((hasSheet('asin_list') || hasSheet('asin') || hasSheet('asins')) && sheetNamesLower.some(n => n.includes('sku report'))) return 'cost_saving';
+			// remote status / order
+			if (sheetNamesLower.some(n => n.includes('remote') && n.includes('status'))) return 'rf_status';
+			if (sheetNamesLower.some(n => n.includes('remote') && n.includes('order'))) return 'rf_order';
+			// recommendations: read first sheet header row to look for language
+			for (const sn of wb.SheetNames.slice(0,3)) {
+				const rows = sheetToJson(wb, sn, { header:1 }).slice(0,5);
+				const flatText = rows.flat().filter(Boolean).join(' ').toLowerCase();
+				if (/recommend/.test(flatText)) {
+					if (/(german|germany|德国)/.test(flatText) && /(united|kingdom|英国)/.test(flatText)) {
+						// 方向： 若包含 from united kingdom to germany -> uk_de; 若包含 from germany to united kingdom -> de_uk
+						if (/from.*united.*kingdom.*to.*german/.test(flatText)) return 'rec_uk_de';
+						if (/from.*german.*to.*united.*kingdom/.test(flatText)) return 'rec_de_uk';
+						// fallback: 如果有 germany 和 united kingdom 但没有明确方向, 根据出现顺序判断
+						const ukIdx = flatText.indexOf('united'); const deIdx = flatText.indexOf('german');
+						if (ukIdx !== -1 && deIdx !== -1) return ukIdx < deIdx ? 'rec_uk_de' : 'rec_de_uk';
+					}
+					if (/(france|french|法国)/.test(flatText)) return 'rec_uk_fr';
+					if (/(italy|italian|意大利)/.test(flatText)) return 'rec_uk_it';
+					if (/(spain|spanish|西班牙)/.test(flatText)) return 'rec_uk_es';
+				}
+			}
+			// Fallback: inspect first sheet columns for DI_type to cost_saving
+			const firstRows = sheetToJson(wb, wb.SheetNames[0]).slice(0,3);
+			if (firstRows.some(r => Object.keys(r).some(k => /di_type/i.test(k))) && firstRows.some(r => Object.keys(r).some(k => /eu5_gms_t30d/i.test(k)))) return 'cost_saving';
+		} else if (Array.isArray(workbookOrRows)) {
+			// CSV rows
+			const rows = workbookOrRows;
+			if (!rows.length) return null;
+			const headers = Object.keys(rows[0]).map(normalizeHeader);
+			const hasHeaders = (...names) => names.every(n => headers.includes(n));
+			if (hasHeaders('资格值','可获得的福利代金券（最高）')) {
+				// Distinguish currency by row values
+				const joined = rows.slice(0,10).map(r => Object.values(r).join(' ')).join(' ');
+				if (/eur/i.test(joined)) return 'incentive_eu';
+				if (/gbp/i.test(joined)) return 'incentive_uk';
+			}
+		}
+	} catch { /* ignore */ }
+	return null;
 }
 
 function parseCSV(buffer) {
@@ -103,16 +156,16 @@ async function parseInputs(fileListOrMap) {
 		rf_order: null
 	};
 
-	if (Array.isArray(fileListOrMap)) {
-		for (const f of fileListOrMap) {
-			const role = detectRole(f.name || '');
-			if (role && !roleMap[role]) roleMap[role] = f;
-		}
-	} else {
-		for (const [k, v] of Object.entries(fileListOrMap)) {
-			if (roleMap.hasOwnProperty(k) && v) roleMap[k] = v;
-		}
-	}
+    if (Array.isArray(fileListOrMap)) {
+        for (const f of fileListOrMap) {
+            const role = detectRole(f.name || '');
+            if (role && !roleMap[role]) roleMap[role] = f;
+        }
+    } else {
+        for (const [k, v] of Object.entries(fileListOrMap)) {
+            if (roleMap.hasOwnProperty(k) && v) roleMap[k] = v;
+        }
+    }
 
 	if (!roleMap.cost_saving) throw new Error('缺少必需文件: Cost saving model');
 
@@ -402,5 +455,58 @@ export async function analyzeDIOpportunities(inputFiles) {
 	return buildReport(raw, stats);
 }
 
-export default { analyzeDIOpportunities };
+// ----------------------------- Auto Detection Public API ----------------------------- //
+/**
+ * 自动识别版本: 接受无序文件 (Array | Object values)，对每个文件尝试
+ *  1. 文件名正则 (与旧逻辑兼容)
+ *  2. 内容列头 / Sheet 名启发式 detectRoleByContent
+ * 若重复命中同一角色，仅保留第一个，其余加入 warnings。
+ * @param {Array|Object} inputs
+ */
+export async function analyzeDIOpportunitiesAuto(inputs){
+	const files = Array.isArray(inputs)? inputs : Object.values(inputs||{});
+	if(!files.length) throw new Error('未提供任何文件');
+	const roleMap = { cost_saving:null,incentive_eu:null,incentive_uk:null,rec_uk_de:null,rec_uk_fr:null,rec_uk_it:null,rec_uk_es:null,rec_de_uk:null,rf_status:null,rf_order:null };
+	const warnings=[];
+
+	// First pass: filename regex
+	for(const f of files){
+		const role = detectRole(f.name||'');
+		if(role){ if(!roleMap[role]) roleMap[role]=f; else warnings.push(`重复文件角色(文件名匹配) ${role}, 已忽略 ${f.name}`);}    
+	}
+
+	// Second pass: content detection for unresolved roles
+	const unresolved = files.filter(f=> !Object.values(roleMap).includes(f));
+	for(const f of unresolved){
+		try {
+			const buf = await fetchArrayBuffer(f);
+			let workbookOrRows = null;
+			const name = f.name || '';
+			if (/\.csv$/i.test(name)) {
+				// parse quick csv to rows (reuse parseCSV)
+				workbookOrRows = parseCSV(buf);
+			} else {
+				workbookOrRows = XLSX.read(buf, { type:'array' });
+			}
+			const detected = detectRoleByContent(workbookOrRows);
+			if(detected){
+				if(!roleMap[detected]) roleMap[detected]=f; else warnings.push(`重复文件角色(内容检测) ${detected}, 已忽略 ${name}`);
+			} else {
+				warnings.push(`无法识别文件角色: ${name}`);
+			}
+		} catch(e){
+			warnings.push(`读取失败: ${(f.name||'unknown')} -> ${e.message}`);
+		}
+	}
+
+	if(!roleMap.cost_saving) throw new Error('缺少必需文件: Cost saving model (无法通过文件名或内容识别)');
+
+	const report = await analyzeDIOpportunities(roleMap);
+	report.meta = report.meta || {}; 
+	report.meta.detection = Object.fromEntries(Object.entries(roleMap).map(([k,v])=>[k, !!v]));
+	if(warnings.length) report.meta.warnings = warnings;
+	return report;
+}
+
+export default { analyzeDIOpportunities, analyzeDIOpportunitiesAuto };
 
