@@ -5,6 +5,16 @@ import ReportFrame from './ReportFrame.vue';
 const message = ref('');
 const messageContainer = ref(null);
 
+// 反馈表单数据
+const showFeedbackForm = ref(false);
+const feedbackForm = ref({
+  sellerId: '',
+  meetingTime: '',
+  amFeedback: '',
+  sellerFeedback: '',
+  sellerConcerns: []
+});
+
 const scrollToBottom = () => {
   if (messageContainer.value) {
     nextTick(() => {
@@ -26,6 +36,26 @@ const submitCEEForm = () => {
   console.log('提交CEE表单');
   // 模拟提交后的滚动
   scrollToBottom();
+};
+
+// 反馈表单相关方法
+const toggleFeedbackForm = () => {
+  showFeedbackForm.value = !showFeedbackForm.value;
+};
+
+const submitFeedbackForm = () => {
+  console.log('提交反馈表单:', feedbackForm.value);
+  // 这里可以添加表单验证和提交逻辑
+  alert('反馈已提交！');
+  showFeedbackForm.value = false;
+  // 重置表单
+  feedbackForm.value = {
+    sellerId: '',
+    meetingTime: '',
+    amFeedback: '',
+    sellerFeedback: '',
+    sellerConcerns: []
+  };
 };
 
 // 组件挂载后滚动到底部
@@ -213,13 +243,91 @@ onMounted(() => {
 
       <!-- 右侧面板 -->
       <div class="right-panel">
+        <!-- 反馈表单遮罩层 -->
+        <div class="feedback-overlay" v-if="showFeedbackForm" @click="toggleFeedbackForm"></div>
+        
+        <!-- 反馈表单区域 -->
+        <div class="feedback-form-container" v-if="showFeedbackForm" @click.stop>
+          <div class="feedback-form-header">
+            <h3>📋 客户反馈收集表</h3>
+            <button class="close-btn" @click="toggleFeedbackForm">×</button>
+          </div>
+          <div class="feedback-form-content">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">卖家CID：</label>
+                <input type="text" v-model="feedbackForm.sellerId" class="form-input" placeholder="请填写卖家CID" />
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">会议时间：</label>
+                <input type="text" v-model="feedbackForm.meetingTime" class="form-input" placeholder="请填写会议时间" />
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label class="form-label">AM反馈：</label>
+                <textarea v-model="feedbackForm.amFeedback" class="form-textarea" placeholder="请填写AM反馈内容" rows="3"></textarea>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label class="form-label">卖家反馈：</label>
+                <textarea v-model="feedbackForm.sellerFeedback" class="form-textarea" placeholder="请填写卖家反馈内容" rows="3"></textarea>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label class="form-label">卖家最关心的问题：</label>
+                <div class="concern-options">
+                  <label class="checkbox-label">
+                    <input type="checkbox" value="新政策指导" v-model="feedbackForm.sellerConcerns" />
+                    新政策指导（ New policy guidence ）
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" value="成本节约" v-model="feedbackForm.sellerConcerns" />
+                    成本节约 （ cost saving ）
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" value="EUX扩展" v-model="feedbackForm.sellerConcerns" />
+                    EUX扩展 （ EUX expansion）
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" value="故障排除" v-model="feedbackForm.sellerConcerns" />
+                    故障排除 （ trouble shooting ）
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" value="选品预测" v-model="feedbackForm.sellerConcerns" />
+                    选品预测 （ selection forcast ）
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button class="submit-btn" @click="submitFeedbackForm">提交反馈</button>
+              <button class="cancel-btn" @click="toggleFeedbackForm">取消</button>
+            </div>
+          </div>
+        </div>
+        
         <div class="report-area">
           <ReportFrame />
         </div>
         <!-- 按键区域 -->
         <div class="button-area">
           <div class="button-left">
-            <!-- 左侧可以放置其他按钮 -->
+            <button class="feedback-btn" @click="toggleFeedbackForm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              反馈收集
+            </button>
           </div>
           <div class="button-right">
             <button class="preview-btn">
@@ -612,7 +720,7 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.preview-btn {
+.preview-btn, .feedback-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -628,18 +736,18 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
 }
 
-.preview-btn:hover {
+.preview-btn:hover, .feedback-btn:hover {
   background-color: #1e3d30;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(45, 90, 69, 0.3);
 }
 
-.preview-btn:active {
+.preview-btn:active, .feedback-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
 }
 
-.preview-btn svg {
+.preview-btn svg, .feedback-btn svg {
   flex-shrink: 0;
 }
 
@@ -710,6 +818,219 @@ onMounted(() => {
   background-color: #f5f5f5;
 }
 
+/* 反馈表单遮罩层 */
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  cursor: pointer;
+}
+
+/* 反馈表单样式 */
+.feedback-form-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 2px solid #2d5a45;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.feedback-form-header {
+  background-color: #2d5a45;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.feedback-form-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.feedback-form-content {
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  flex: 1 1 100%;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d5a45;
+  margin-bottom: 5px;
+}
+
+.form-input, .form-textarea {
+  padding: 8px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 13px;
+  background-color: #f6f8fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #2d5a45;
+  box-shadow: 0 0 0 2px rgba(45, 90, 69, 0.1);
+  background-color: white;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.concern-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #2d5a45;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.checkbox-label:hover {
+  background-color: #f6f8fa;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-right: 6px;
+  transform: scale(0.9);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.submit-btn, .cancel-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submit-btn {
+  background-color: #2d5a45;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #1e3d30;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.3);
+}
+
+.cancel-btn {
+  background-color: #f6f8fa;
+  color: #656d76;
+  border: 1px solid #d0d7de;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* 滚动条样式 */
+.feedback-form-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.feedback-form-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.feedback-form-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.feedback-form-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;
@@ -721,6 +1042,19 @@ onMounted(() => {
   
   .report-container {
     padding: 15px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .concern-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
   }
 }
 </style>
