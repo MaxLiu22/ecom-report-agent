@@ -329,6 +329,7 @@ const switchTab = (tabId) => {
   width: 100%;
   max-width: none;
   margin: 0;
+  height: 80vh;
   padding: 20px;
   animation: fadeIn 0.4s ease-in;
   box-sizing: border-box;
