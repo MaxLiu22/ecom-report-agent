@@ -477,146 +477,142 @@ onMounted(() => {
 
       <!-- 右侧面板 -->
       <div class="right-panel">
-        <div class="report-area">
-          <div v-if="!reportGenerated" class="aws-style-placeholder">
-            <div class="aws-header-section">
-              <h1 class="aws-main-title">CEE 中欧拓展分析报告</h1>
-              <div class="aws-publication-date">
-                生成日期: <strong>{{ new Date().toLocaleDateString('zh-CN') }}</strong>
-              </div>
-            </div>
-            
-            <div class="aws-content-section">
-              <p class="aws-intro-text">
-                本系统提供全面的中东欧 (CEE) 市场拓展分析服务，包括 PanEU 机会分析、DI 双向配送评估以及成本效益计算。通过上传相关文件并配置参数，您可以快速获得详细的市场拓展建议和数据驱动的决策支持。
-              </p>
-              
-              <div class="aws-getting-started">
-                <h2 class="aws-section-title">开始使用</h2>
-                <p class="aws-description">
-                  请按照左侧面板的指示上传必要的文件，然后填写 CEE 参数表单以生成您的个性化分析报告。系统支持多种文件格式，并提供智能文件识别功能。
-                </p>
-                
-                <div class="aws-steps-container">
-                  <div class="aws-step-item">
-                    <span class="aws-step-number">1</span>
-                    <span class="aws-step-text">上传分析所需的数据文件</span>
-                  </div>
-                  <div class="aws-step-item">
-                    <span class="aws-step-number">2</span>
-                    <span class="aws-step-text">填写 CEE 中欧计划分析参数</span>
-                  </div>
-                  <div class="aws-step-item">
-                    <span class="aws-step-number">3</span>
-                    <span class="aws-step-text">点击生成报告并查看结果</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="aws-benefits-section">
-                <h2 class="aws-section-title">主要功能</h2>
-                <ul class="aws-benefits-list">
-                  <li>🌍 <strong>PanEU 机会分析</strong> - 识别欧盟内部物流优化机会</li>
-                  <li>🔄 <strong>DI 双向配送评估</strong> - 英国与欧盟间的配送策略分析</li>
-                  <li>💰 <strong>CEE 成本计算</strong> - 中东欧市场拓展的成本效益评估</li>
-                  <li>📊 <strong>数据驱动决策</strong> - 基于实际业务数据的精准分析</li>
-                </ul>
+        <div class="report-frame">
+          <!-- Tab 导航栏 -->
+          <div class="tab-navigation">
+            <div class="tab-container">
+              <div
+                class="tab-item active"
+              >
+                <span class="tab-title">分析报告</span>
+                <div class="tab-indicator"></div>
               </div>
             </div>
           </div>
-          
-          <!-- 报告生成完成后显示结果 -->
-          <div v-else class="report-results">
-            <h2>📊 CEE 分析报告</h2>
-            
-            <!-- PanEU 分析结果 -->
-            <div v-if="panEUResult" class="result-section">
-              <h3>🌍 PanEU 分析结果</h3>
-              <div class="result-content">
-                <h4>{{ panEUResult.report_title }}</h4>
-                <p>{{ panEUResult.report_subtitle }}</p>
-                
-                <!-- PanEU 表格 -->
-                <div v-if="panEUResult.excel_data" class="table-container">
-                  <h5>PanEU ASIN 机会概览</h5>
-                  <table class="result-table">
-                    <thead>
-                      <tr>
-                        <th v-for="header in panEUResult.excel_data.headers" :key="header">{{ header }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
-                        <td>{{ row.metric }}</td>
-                        <td><strong>{{ row.count }}</strong></td>
-                        <td>{{ row.description }}</td>
-                        <td>{{ row.formula }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                
-                <!-- Meta 信息 -->
+
+          <!-- Tab 内容区域 -->
+          <div class="tab-content">
+            <div class="content-panel">
+              <div v-if="!reportGenerated" class="content-header">
+                <h2> 物流分析报告 </h2>
               </div>
-            </div>
-            
-            <!-- DI 分析结果 -->
-            <div v-if="diResult" class="result-section">
-              <h3>🔄 DI 分析结果</h3>
-              <div class="result-content">
-                <h4>{{ diResult.report_title }}</h4>
-                
-                <!-- 关键机会分析 -->
-                <div v-if="diResult.key_opportunity_analysis" class="opportunity-analysis">
-                  <h5>{{ diResult.key_opportunity_analysis.title }}</h5>
-                  <p>{{ diResult.key_opportunity_analysis.subtitle }}</p>
-                  <ul>
-                    <li v-for="point in diResult.key_opportunity_analysis.points" :key="point.title">
-                      <strong>{{ point.title }}:</strong> {{ point.description }}
-                    </li>
-                  </ul>
+              
+              <div class="content-body">
+                <div v-if="!reportGenerated">
+                  <div style="margin-top: 30px;">
+                    <h3 style="color: #333; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">📋 使用步骤</h3>
+                    <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
+                      <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <span style="background: #FF8C00; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">1</span>
+                        <span style="color: #333; font-size: 14px;">上传分析所需的数据文件</span>
+                      </div>
+                      <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <span style="background: #FF8C00; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">2</span>
+                        <span style="color: #333; font-size: 14px;">填写 CEE 中欧计划分析参数</span>
+                      </div>
+                      <div style="display: flex; align-items: center;">
+                        <span style="background: #FF8C00; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">3</span>
+                        <span style="color: #333; font-size: 14px;">点击生成报告并查看结果</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
-                <!-- 推荐行动 -->
-                <div v-if="diResult.recommended_actions" class="recommended-actions">
-                  <h5>{{ diResult.recommended_actions.title }}</h5>
-                  <ol>
-                    <li v-for="action in diResult.recommended_actions.actions" :key="action.priority">
-                      <span class="priority">P{{ action.priority }}</span> {{ action.recommendation }}
-                    </li>
-                  </ol>
+                <!-- 报告生成完成后显示结果 -->
+                <div v-else>
+                  <div class="content-header">
+                    <h2>📊 CEE 分析报告</h2>
+                    <p class="content-description">基于您的数据生成的详细分析结果</p>
+                  </div>
+                  
+                  <!-- PanEU 分析结果 -->
+                  <div v-if="panEUResult" style="margin: 20px 0; padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px;">
+                    <h3 style="color: #333; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">🌍 PanEU 分析结果</h3>
+                    <h4 style="color: #333; font-size: 16px; margin: 10px 0;">{{ panEUResult.report_title }}</h4>
+                    <p style="color: #666; font-size: 14px; margin: 10px 0;">{{ panEUResult.report_subtitle }}</p>
+                    
+                    <!-- PanEU 表格 -->
+                    <div v-if="panEUResult.excel_data" style="margin: 20px 0;">
+                      <h5 style="color: #333; font-size: 14px; margin-bottom: 15px;">PanEU ASIN 机会概览</h5>
+                      <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border: 1px solid #ddd; border-radius: 4px;">
+                          <thead>
+                            <tr>
+                              <th v-for="header in panEUResult.excel_data.headers" :key="header" style="background: #333; color: white; padding: 12px 8px; text-align: center; border-right: 1px solid #555;">{{ header }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
+                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row.metric }}</td>
+                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #FF6B35;">{{ row.count }}</td>
+                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row.description }}</td>
+                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row.formula }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- DI 分析结果 -->
+                  <div v-if="diResult" style="margin: 20px 0; padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px;">
+                    <h3 style="color: #333; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">🔄 DI 分析结果</h3>
+                    <h4 style="color: #333; font-size: 16px; margin: 10px 0;">{{ diResult.report_title }}</h4>
+                    
+                    <!-- 关键机会分析 -->
+                    <div v-if="diResult.key_opportunity_analysis" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+                      <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.title }}</h5>
+                      <p style="color: #666; font-size: 13px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.subtitle }}</p>
+                      <ul style="margin: 0; padding-left: 20px;">
+                        <li v-for="point in diResult.key_opportunity_analysis.points" :key="point.title" style="color: #555; font-size: 13px; margin: 5px 0;">
+                          <strong>{{ point.title }}:</strong> {{ point.description }}
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <!-- 推荐行动 -->
+                    <div v-if="diResult.recommended_actions" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+                      <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.recommended_actions.title }}</h5>
+                      <ol style="margin: 0; padding-left: 20px;">
+                        <li v-for="action in diResult.recommended_actions.actions" :key="action.priority" style="color: #555; font-size: 13px; margin: 8px 0;">
+                          <span style="background: #FF6B35; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P{{ action.priority }}</span>
+                          {{ action.recommendation }}
+                        </li>
+                      </ol>
+                    </div>
+                    
+                    <!-- 数据表 -->
+                    <div v-if="diResult.data_table" style="margin: 20px 0;">
+                      <h5 style="color: #333; font-size: 14px; margin-bottom: 15px;">数据表</h5>
+                      <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border: 1px solid #ddd; border-radius: 4px;">
+                          <thead>
+                            <tr>
+                              <th v-for="header in diResult.data_table.headers" :key="header" style="background: #333; color: white; padding: 12px 8px; text-align: center; border-right: 1px solid #555;">{{ header }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="row in diResult.data_table.rows" :key="row['#']">
+                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['#'] }}</td>
+                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['UK<>EU ASIN'] }}</td>
+                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #FF6B35;">{{ row['数量'] }}</td>
+                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['来源商城销售额(T30D)'] }}</td>
+                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['机会点及操作'] }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- CEE 成本分析结果 -->
+                  <div v-if="ceeResult" style="margin: 20px 0; padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px;">
+                    <h3 style="color: #333; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">💰 CEE 成本分析结果</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                      <pre style="font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 11px; line-height: 1.4; color: #333; white-space: pre-wrap; word-wrap: break-word; margin: 0;">{{ JSON.stringify(ceeResult, null, 2) }}</pre>
+                    </div>
+                  </div>
                 </div>
-                
-                <!-- 数据表 -->
-                <div v-if="diResult.data_table" class="table-container">
-                  <h5>数据表</h5>
-                  <table class="result-table">
-                    <thead>
-                      <tr>
-                        <th v-for="header in diResult.data_table.headers" :key="header">{{ header }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="row in diResult.data_table.rows" :key="row['#']">
-                        <td>{{ row['#'] }}</td>
-                        <td>{{ row['UK<>EU ASIN'] }}</td>
-                        <td>{{ row['数量'] }}</td>
-                        <td>{{ row['来源商城销售额(T30D)'] }}</td>
-                        <td>{{ row['机会点及操作'] }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                
-                <!-- Meta 信息 -->
-              </div>
-            </div>
-            
-            <!-- CEE 成本分析结果 -->
-            <div v-if="ceeResult" class="result-section">
-              <h3>💰 CEE 成本分析结果</h3>
-              <div class="result-content">
-                <pre>{{ JSON.stringify(ceeResult, null, 2) }}</pre>
               </div>
             </div>
           </div>
@@ -984,6 +980,134 @@ onMounted(() => {
   border: 2px solid #2d5a45;
   overflow: hidden;
   min-width: 0;
+}
+
+/* ReportFrame 样式 */
+.report-frame {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Tab 导航栏样式 */
+.tab-navigation {
+  background-color: #232f3e;
+  border-bottom: none;
+  padding: 0 20px;
+  box-shadow: 0 2px 8px rgba(35, 47, 62, 0.15);
+}
+
+.tab-container {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+}
+
+.tab-item {
+  position: relative;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.tab-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tab-item.active {
+  color: #ff9900;
+  border-bottom-color: #ff9900;
+  background-color: rgba(255, 153, 0, 0.1);
+}
+
+.tab-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.tab-item.active .tab-title {
+  color: #ff9900;
+  font-weight: 600;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #ff9900;
+  border-radius: 2px 2px 0 0;
+}
+
+/* 内容区域样式 */
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  background-color: #fafafa;
+}
+
+.content-panel {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  height: 80vh;
+  padding: 20px;
+  animation: fadeIn 0.4s ease-in;
+  box-sizing: border-box;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.content-header h2 {
+  font-size: 32px;
+  color: #232f3e;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.content-description {
+  font-size: 18px;
+  color: #5a6c7d;
+  margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.content-body {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1e8ed;
+  box-sizing: border-box;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .report-area {
@@ -1359,292 +1483,41 @@ onMounted(() => {
   padding: 20px !important;
 }
 
-/* 报告结果样式 */
-.report-results {
-  padding: 20px;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.report-results h2 {
-  margin: 0 0 20px 0;
-  font-size: 24px;
-  color: #333;
-  text-align: center;
-}
-
-.result-section {
-  margin-bottom: 30px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.result-section h3 {
-  background: #f8f9fa;
-  margin: 0;
-  padding: 15px 20px;
-  font-size: 18px;
-  color: #333;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.result-content {
-  padding: 20px;
-}
-
-.result-content h4 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  color: #333;
-}
-
-.result-content h5 {
-  margin: 20px 0 10px 0;
-  font-size: 14px;
-  color: #666;
-  font-weight: 600;
-}
-
-.result-content p {
-  margin: 0 0 15px 0;
-  color: #666;
-  line-height: 1.5;
-}
-
-.table-container {
-  margin: 20px 0;
-  overflow-x: auto;
-}
-
-.result-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.result-table th,
-.result-table td {
-  border: 1px solid #e0e0e0;
-  padding: 8px 12px;
-  text-align: left;
-}
-
-.result-table th {
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #333;
-}
-
-.result-table tbody tr:nth-child(even) {
-  background: #f8f9fa;
-}
-
-.meta-info {
-  margin-top: 20px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.meta-info pre {
-  margin: 0;
-  padding: 15px;
-  font-size: 11px;
-  background: #f1f3f4;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.opportunity-analysis ul,
-.recommended-actions ol {
-  padding-left: 20px;
-}
-
-.opportunity-analysis li,
-.recommended-actions li {
-  margin: 8px 0;
-  line-height: 1.5;
-}
-
-.priority {
-  background: #007bff;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: bold;
-  margin-right: 8px;
-}
-
-/* AWS 文档风格样式 */
-.aws-style-placeholder {
-  padding: 32px 40px;
-  background: #ffffff;
-  font-family: 'Amazon Ember', 'Helvetica Neue', Roboto, Arial, sans-serif;
-  color: #232f3e;
-  line-height: 1.6;
-  max-width: none;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.aws-header-section {
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 24px;
-  margin-bottom: 32px;
-}
-
-.aws-main-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #232f3e;
-  margin: 0 0 12px 0;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
-}
-
-.aws-publication-date {
-  font-size: 14px;
-  color: #5a6c7d;
-  margin: 0;
-}
-
-.aws-publication-date strong {
-  color: #232f3e;
-  font-weight: 600;
-}
-
-.aws-content-section {
-  max-width: 800px;
-}
-
-.aws-intro-text {
-  font-size: 16px;
-  color: #232f3e;
-  line-height: 1.7;
-  margin: 0 0 32px 0;
-  font-weight: 400;
-}
-
-.aws-getting-started {
-  margin-bottom: 40px;
-}
-
-.aws-section-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #232f3e;
-  margin: 0 0 16px 0;
-  line-height: 1.3;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 8px;
-}
-
-.aws-description {
-  font-size: 16px;
-  color: #5a6c7d;
-  line-height: 1.6;
-  margin: 0 0 24px 0;
-}
-
-.aws-steps-container {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 24px;
-  margin: 24px 0;
-}
-
-.aws-step-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-  font-size: 16px;
-}
-
-.aws-step-item:last-child {
-  margin-bottom: 0;
-}
-
-.aws-step-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: #ff9900;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 14px;
-  border-radius: 50%;
-  margin-right: 16px;
-  flex-shrink: 0;
-}
-
-.aws-step-text {
-  color: #232f3e;
-  font-weight: 500;
-}
-
-.aws-benefits-section {
-  background: #f8f9fa;
-  border-left: 4px solid #ff9900;
-  padding: 24px;
-  margin: 32px 0;
-  border-radius: 0 8px 8px 0;
-}
-
-.aws-benefits-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.aws-benefits-list li {
-  font-size: 16px;
-  color: #232f3e;
-  margin-bottom: 12px;
-  padding-left: 0;
-  line-height: 1.5;
-}
-
-.aws-benefits-list li:last-child {
-  margin-bottom: 0;
-}
-
-.aws-benefits-list strong {
-  color: #232f3e;
-  font-weight: 600;
-}
-
-/* AWS 文档响应式设计 */
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .aws-style-placeholder {
-    padding: 24px 20px;
+  .report-frame {
+    font-size: 14px;
   }
   
-  .aws-main-title {
+  .tab-navigation {
+    padding: 0 12px;
+  }
+  
+  .tab-container {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .tab-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: 6px 6px 0 0;
+  }
+  
+  .content-panel {
+    padding: 16px 12px;
+  }
+  
+  .content-header h2 {
     font-size: 28px;
   }
   
-  .aws-section-title {
-    font-size: 20px;
+  .content-description {
+    font-size: 16px;
   }
   
-  .aws-intro-text,
-  .aws-description,
-  .aws-benefits-list li {
-    font-size: 15px;
-  }
-  
-  .aws-steps-container {
-    padding: 20px;
-  }
-  
-  .aws-step-item {
-    font-size: 15px;
+  .content-body {
+    padding: 16px 12px;
   }
 }
 
