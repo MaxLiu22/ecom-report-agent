@@ -349,6 +349,14 @@ const switchSubSection = (subId) => {
                       </tbody>
                     </table>
                   </div>
+
+                  <!-- 合规风险图片 -->
+                  <div style="margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #ddd; border-radius: 6px;">
+                    <div style="text-align: center;">
+                      <img src="/src/assets/合规风险.jpg" alt="合规风险" style="width: 100%; max-width: 1200px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+                    </div>
+                  </div>
+                  
                 </div>
               </div>
             </div>
