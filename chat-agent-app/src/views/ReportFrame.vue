@@ -566,7 +566,9 @@ const switchSubSection = (subId) => {
           <!-- 政策更新图片 -->
           <div class="policy-updates" style="margin-top: 30px;">
             <div style="text-align: center; padding: 20px; background: #ffffff; border-radius: 8px; border: 1px solid #e8e8e8; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <img src="/src/assets/政策更新.png" alt="政策更新" style="width: 100%; max-width: 1200px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+              <a href="https://mp.weixin.qq.com/s?__biz=MzkxNzI4NjI5OQ==&mid=2247619861&idx=1&sn=817af8fb84f74681699dc32d95cd6f30&chksm=c0faaf330e446a2765b87002bde225f90919cd3ce9a9cebcc32ddbddfa2a48421e1c89592081&from=industrynews&version=4.1.7.6056&platform=win#rd" target="_blank" rel="noopener noreferrer" style="display: inline-block; cursor: pointer; transition: transform 0.2s ease;">
+                <img src="/src/assets/政策更新.png" alt="政策更新" style="width: 100%; max-width: 1200px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" />
+              </a>
             </div>
           </div>
         </div>
