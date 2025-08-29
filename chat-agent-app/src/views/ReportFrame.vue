@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 const activeTab = ref(0);
+const activeSubSection = ref('2.1');
 
 const tabs = [
   { id: 0, title: '欧洲站点拓展评估', key: 'evaluation' },
@@ -10,8 +11,22 @@ const tabs = [
   { id: 3, title: '行动计划', key: 'action' }
 ];
 
+const subSections = [
+  { id: '2.1', title: '2.1 欧盟内部物流方案' },
+  { id: '2.2', title: '2.2 英国和欧盟间物流方案' },
+  { id: '2.3', title: '2.3 PanEU机会分析' },
+  { id: '2.4', title: '2.4 双边入库机会' }
+];
+
 const switchTab = (tabId) => {
   activeTab.value = tabId;
+  if (tabId === 1) {
+    activeSubSection.value = '2.1'; // 重置到第一个子选项
+  }
+};
+
+const switchSubSection = (subId) => {
+  activeSubSection.value = subId;
 };
 </script>
 
@@ -174,9 +189,28 @@ const switchTab = (tabId) => {
           <h2>🛠️ 欧洲站拓展解决方案定制</h2>
           <p class="content-description">为您量身定制的欧洲市场拓展解决方案</p>
         </div>
+        
+        <!-- 下拉菜单 -->
+        <div class="sub-section-dropdown">
+          <select 
+            v-model="activeSubSection" 
+            @change="switchSubSection(activeSubSection)"
+            class="dropdown-select"
+          >
+            <option 
+              v-for="section in subSections" 
+              :key="section.id" 
+              :value="section.id"
+            >
+              {{ section.title }}
+            </option>
+          </select>
+        </div>
+        
         <div class="content-body">
           <div class="solution-sections">
-            <div class="solution-section">
+            <!-- 2.1 欧盟内部物流方案 -->
+            <div v-if="activeSubSection === '2.1'" class="solution-section">
               <h3>2.1 欧盟内部物流方案</h3>
               <div class="solution-details">
                 <!-- 欧盟内部方案介绍与对比 -->
@@ -318,7 +352,8 @@ const switchTab = (tabId) => {
               </div>
             </div>
             
-            <div class="solution-section">
+            <!-- 2.2 英国和欧盟间物流方案 -->
+            <div v-if="activeSubSection === '2.2'" class="solution-section">
               <h3>2.2 英国和欧盟间物流方案</h3>
               <div class="solution-details">
                 <!-- 英国和欧盟间物流方案对比 -->
@@ -378,7 +413,8 @@ const switchTab = (tabId) => {
               </div>
             </div>
 
-            <div class="solution-section">
+            <!-- 2.3 PanEU机会分析 -->
+            <div v-if="activeSubSection === '2.3'" class="solution-section">
               <h3>2.3 PanEU机会分析</h3>
               <div class="solution-details">
                 <!-- PanEU ASIN同步机会表格 -->
@@ -450,7 +486,8 @@ const switchTab = (tabId) => {
               </div>
             </div>
 
-            <div class="solution-section">
+            <!-- 2.4 双边入库机会 -->
+            <div v-if="activeSubSection === '2.4'" class="solution-section">
               <h3>2.4 双边入库机会</h3>
               <div class="solution-details">
                 <!-- DI双向分析数据表 -->
@@ -884,6 +921,84 @@ const switchTab = (tabId) => {
   width: 100%;
 }
 
+/* Amazon风格下拉菜单样式 */
+.sub-section-dropdown {
+  padding: 16px 20px;
+  margin-bottom: 0;
+  background-color: #f7f8fa;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sub-section-dropdown::before {
+  content: "选择章节:";
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f1111;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.dropdown-select {
+  min-width: 280px;
+  max-width: 400px;
+  padding: 8px 32px 8px 12px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #0f1111;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23565959' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6,9 12,15 18,9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  border: 1px solid #d5d9d9;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  line-height: 20px;
+}
+
+.dropdown-select:hover {
+  border-color: #ff9900;
+  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.3);
+}
+
+.dropdown-select:focus {
+  border-color: #ff9900;
+  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.5), inset 0 1px 2px rgba(15, 17, 17, 0.15);
+}
+
+.dropdown-select:active {
+  background-color: #f7f8fa;
+  border-color: #ff9900;
+}
+
+.dropdown-select option {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #0f1111;
+  background-color: #ffffff;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  line-height: 20px;
+}
+
+.dropdown-select option:hover {
+  background-color: #f3f3f3;
+}
+
+.dropdown-select option:checked {
+  background-color: #ff9900;
+  color: #ffffff;
+  font-weight: 700;
+}
+
 /* 评估卡片样式 */
 .evaluation-cards {
   display: grid;
@@ -1213,6 +1328,27 @@ const switchTab = (tabId) => {
   
   .timeline-content {
     padding: 20px;
+  }
+  
+  /* 移动端下拉菜单调整 */
+  .sub-section-dropdown {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .sub-section-dropdown::before {
+    font-size: 12px;
+  }
+  
+  .dropdown-select {
+    min-width: 100%;
+    max-width: 100%;
+    font-size: 12px;
+    padding: 6px 28px 6px 10px;
+    background-size: 10px;
+    background-position: right 8px center;
   }
 }
 </style>
