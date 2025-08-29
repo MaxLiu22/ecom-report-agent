@@ -1,12 +1,22 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue';
 import ReportFrame from './ReportFrame.vue';
+import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
+import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
+import CeeService from '@/services/CeeService.js';
 
 const message = ref('');
 const messageContainer = ref(null);
 const fileInputRef = ref(null);
 const uploadedFiles = ref([]);
 const messages = ref([]);
+
+// 报告生成相关状态
+const isGeneratingReport = ref(false);
+const panEUResult = ref(null);
+const diResult = ref(null);
+const ceeResult = ref(null);
+const reportGenerated = ref(false);
 
 // 打字机效果相关
 const displayedText = ref('');
@@ -158,10 +168,74 @@ const addCEEFormMessage = () => {
   nextTick(() => scrollToBottom());
 };
 
-const submitCEEForm = () => {
+const submitCEEForm = async () => {
   console.log('提交CEE表单');
-  // 模拟提交后的滚动
-  scrollToBottom();
+  
+  if (isGeneratingReport.value) return; // 防止重复提交
+  
+  isGeneratingReport.value = true;
+  panEUResult.value = null;
+  diResult.value = null;
+  ceeResult.value = null;
+  reportGenerated.value = false;
+  
+  try {
+    // 添加生成报告开始的消息
+    addAgentMessage('开始生成报告，请稍候...');
+    
+    // 1. 调用 analyzePanEU
+    console.log('开始 PanEU 分析...');
+    addAgentMessage('正在进行 PanEU 分析...');
+    
+    // 使用上传的文件进行自动分析
+    // 需要从消息中获取最近发送的文件
+    const recentFileMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'files');
+    const panEUFiles = recentFileMessage ? 
+      recentFileMessage.content.map(f => f.file) : 
+      []; // 如果没有文件，使用空数组
+    
+    if (panEUFiles.length >= 2) {
+      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles);
+      addAgentMessage('PanEU 分析完成 ✓');
+    } else {
+      addAgentMessage('PanEU 分析跳过（文件不足）');
+    }
+    
+    // 2. 调用 analyzeDI
+    console.log('开始 DI 分析...');
+    addAgentMessage('正在进行 DI 分析...');
+    
+    if (panEUFiles.length >= 1) {
+      diResult.value = await analyzeDIOpportunitiesAuto(panEUFiles);
+      addAgentMessage('DI 分析完成 ✓');
+    } else {
+      addAgentMessage('DI 分析跳过（文件不足）');
+    }
+    
+    // 3. 调用 calculateCEECosts
+    console.log('开始 CEE 成本计算...');
+    addAgentMessage('正在计算 CEE 成本...');
+    
+    // 从最后一个CEE表单消息中获取参数
+    const lastCEEMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'cee-form');
+    const soldCount = lastCEEMessage?.content?.germanSales || 10000;
+    const hasPolishVAT = lastCEEMessage?.content?.polandTax || false;
+    const hasCzechVAT = lastCEEMessage?.content?.czechTax || true;
+    
+    ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
+    addAgentMessage('CEE 成本计算完成 ✓');
+    
+    // 4. 标记报告生成完成
+    reportGenerated.value = true;
+    addAgentMessage('📊 报告生成完成！请查看右侧报告区域。');
+    
+  } catch (error) {
+    console.error('报告生成失败:', error);
+    addAgentMessage(`报告生成失败: ${error.message}`);
+  } finally {
+    isGeneratingReport.value = false;
+    scrollToBottom();
+  }
 };
 
 // 文件上传相关函数
@@ -312,7 +386,13 @@ onMounted(() => {
                   <p class="form-note">* 备案信息：来源信息→卖家信息上传到各国税务局→业务规模→建议至少12个月的销售周期→已计入商品数量</p>
                 </div>
 
-                <button class="cee-submit-btn" @click="submitCEEForm">开始生成报告</button>
+                <button 
+                  class="cee-submit-btn" 
+                  @click="submitCEEForm"
+                  :disabled="isGeneratingReport"
+                >
+                  {{ isGeneratingReport ? '生成中...' : '开始生成报告' }}
+                </button>
               </div>
               
               <!-- 文本消息 -->
@@ -398,7 +478,113 @@ onMounted(() => {
       <!-- 右侧面板 -->
       <div class="right-panel">
         <div class="report-area">
-          请根据左边的指示上传文件后，生成报告。
+          <div v-if="!reportGenerated">
+            请根据左边的指示上传文件后，生成报告。
+          </div>
+          
+          <!-- 报告生成完成后显示结果 -->
+          <div v-else class="report-results">
+            <h2>📊 CEE 分析报告</h2>
+            
+            <!-- PanEU 分析结果 -->
+            <div v-if="panEUResult" class="result-section">
+              <h3>🌍 PanEU 分析结果</h3>
+              <div class="result-content">
+                <h4>{{ panEUResult.report_title }}</h4>
+                <p>{{ panEUResult.report_subtitle }}</p>
+                
+                <!-- PanEU 表格 -->
+                <div v-if="panEUResult.excel_data" class="table-container">
+                  <h5>PanEU ASIN 机会概览</h5>
+                  <table class="result-table">
+                    <thead>
+                      <tr>
+                        <th v-for="header in panEUResult.excel_data.headers" :key="header">{{ header }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
+                        <td>{{ row.metric }}</td>
+                        <td><strong>{{ row.count }}</strong></td>
+                        <td>{{ row.description }}</td>
+                        <td>{{ row.formula }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <!-- Meta 信息 -->
+                <div v-if="panEUResult.meta" class="meta-info">
+                  <h5>分析详情</h5>
+                  <pre>{{ JSON.stringify(panEUResult.meta, null, 2) }}</pre>
+                </div>
+              </div>
+            </div>
+            
+            <!-- DI 分析结果 -->
+            <div v-if="diResult" class="result-section">
+              <h3>🔄 DI 分析结果</h3>
+              <div class="result-content">
+                <h4>{{ diResult.report_title }}</h4>
+                
+                <!-- 关键机会分析 -->
+                <div v-if="diResult.key_opportunity_analysis" class="opportunity-analysis">
+                  <h5>{{ diResult.key_opportunity_analysis.title }}</h5>
+                  <p>{{ diResult.key_opportunity_analysis.subtitle }}</p>
+                  <ul>
+                    <li v-for="point in diResult.key_opportunity_analysis.points" :key="point.title">
+                      <strong>{{ point.title }}:</strong> {{ point.description }}
+                    </li>
+                  </ul>
+                </div>
+                
+                <!-- 推荐行动 -->
+                <div v-if="diResult.recommended_actions" class="recommended-actions">
+                  <h5>{{ diResult.recommended_actions.title }}</h5>
+                  <ol>
+                    <li v-for="action in diResult.recommended_actions.actions" :key="action.priority">
+                      <span class="priority">P{{ action.priority }}</span> {{ action.recommendation }}
+                    </li>
+                  </ol>
+                </div>
+                
+                <!-- 数据表 -->
+                <div v-if="diResult.data_table" class="table-container">
+                  <h5>数据表</h5>
+                  <table class="result-table">
+                    <thead>
+                      <tr>
+                        <th v-for="header in diResult.data_table.headers" :key="header">{{ header }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="row in diResult.data_table.rows" :key="row['#']">
+                        <td>{{ row['#'] }}</td>
+                        <td>{{ row['UK<>EU ASIN'] }}</td>
+                        <td>{{ row['数量'] }}</td>
+                        <td>{{ row['来源商城销售额(T30D)'] }}</td>
+                        <td>{{ row['机会点及操作'] }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <!-- Meta 信息 -->
+                <div v-if="diResult.meta" class="meta-info">
+                  <h5>分析详情</h5>
+                  <pre>{{ JSON.stringify(diResult.meta, null, 2) }}</pre>
+                </div>
+              </div>
+            </div>
+            
+            <!-- CEE 成本分析结果 -->
+            <div v-if="ceeResult" class="result-section">
+              <h3>💰 CEE 成本分析结果</h3>
+              <div class="result-content">
+                <pre>{{ JSON.stringify(ceeResult, null, 2) }}</pre>
+              </div>
+            </div>
+          </div>
         </div>
         <!-- 按键区域 -->
         <div class="button-area">
@@ -1136,6 +1322,125 @@ onMounted(() => {
   background-color: #e8f4f0 !important;
   border: 1px solid #d1e7dd !important;
   padding: 20px !important;
+}
+
+/* 报告结果样式 */
+.report-results {
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.report-results h2 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  color: #333;
+  text-align: center;
+}
+
+.result-section {
+  margin-bottom: 30px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.result-section h3 {
+  background: #f8f9fa;
+  margin: 0;
+  padding: 15px 20px;
+  font-size: 18px;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.result-content {
+  padding: 20px;
+}
+
+.result-content h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.result-content h5 {
+  margin: 20px 0 10px 0;
+  font-size: 14px;
+  color: #666;
+  font-weight: 600;
+}
+
+.result-content p {
+  margin: 0 0 15px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.table-container {
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.result-table th,
+.result-table td {
+  border: 1px solid #e0e0e0;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.result-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.result-table tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.meta-info {
+  margin-top: 20px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.meta-info pre {
+  margin: 0;
+  padding: 15px;
+  font-size: 11px;
+  background: #f1f3f4;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.opportunity-analysis ul,
+.recommended-actions ol {
+  padding-left: 20px;
+}
+
+.opportunity-analysis li,
+.recommended-actions li {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.priority {
+  background: #007bff;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-right: 8px;
 }
 
 @media (max-width: 768px) {
