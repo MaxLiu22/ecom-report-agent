@@ -4,68 +4,15 @@ import ReportFrame from './ReportFrame.vue';
 
 const message = ref('');
 const messageContainer = ref(null);
+const fileInputRef = ref(null);
+const uploadedFiles = ref([]);
+const messages = ref([]);
 
-const scrollToBottom = () => {
-  if (messageContainer.value) {
-    nextTick(() => {
-      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
-    });
-  }
-};
+// 打字机效果相关
+const displayedText = ref('');
+const isTyping = ref(false);
 
-const sendMessage = () => {
-  if (message.value.trim()) {
-    console.log('发送消息:', message.value);
-    message.value = '';
-    // 发送消息后滚动到底部
-    scrollToBottom();
-  }
-};
-
-const submitCEEForm = () => {
-  console.log('提交CEE表单');
-  // 模拟提交后的滚动
-  scrollToBottom();
-};
-
-// 组件挂载后滚动到底部
-onMounted(() => {
-  scrollToBottom();
-  
-  // 监听DOM变化，自动滚动到底部
-  if (messageContainer.value) {
-    const observer = new MutationObserver(() => {
-      scrollToBottom();
-    });
-    
-    observer.observe(messageContainer.value, {
-      childList: true,
-      subtree: true,
-      attributes: true
-    });
-  }
-});
-</script>
-
-<template>
-  <div class="report-container">
-
-    <!-- 主要内容区域 -->
-    <div class="main-content">
-      <!-- 左侧面板 -->
-      <div class="left-panel">
-        <div class="message-container" ref="messageContainer">
-          <!-- 用户消息 (右侧) -->
-          <div class="message-item user-message">
-            <div class="message-content">
-              <p>请帮我生成一个 IntraEU 卖家分析报告</p>
-            </div>
-          </div>
-          
-          <!-- Agent 消息 (左侧) -->
-          <div class="message-item agent-message">
-            <div class="message-content">
-              <pre class="file-paths-text">这是你需要上传的文件路径：
+const fullText = `这是你需要上传的文件路径：
 
 【必须下载文件】
 1. 体检表 ✓
@@ -108,15 +55,305 @@ onMounted(() => {
     备注：卖家若未开启远程配送，则无下载页面
 
 11. NL ASIN list ◯
-    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list</pre>
+    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list`;
+
+// 打字机效果函数
+const typeWriter = async () => {
+  isTyping.value = true;
+  displayedText.value = '';
+  
+  for (let i = 0; i < fullText.length; i++) {
+    displayedText.value += fullText[i];
+    // 每个字符显示间隔50毫秒，你可以调整这个速度
+    await new Promise(resolve => setTimeout(resolve, 1));
+    
+    // 在添加字符后滚动到底部
+    scrollToBottom();
+  }
+  
+  isTyping.value = false;
+};
+
+const scrollToBottom = () => {
+  if (messageContainer.value) {
+    nextTick(() => {
+      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+    });
+  }
+};
+
+const sendMessage = () => {
+  const messageText = message.value.trim();
+  
+  // 检查是否有上传的文件且没有文本消息（纯文件发送）
+  if (!messageText && uploadedFiles.value.length > 0) {
+    // 添加用户文件消息
+    addUserMessage('files', uploadedFiles.value);
+    
+    // 延迟显示agent回复
+    setTimeout(() => {
+      addAgentMessage('已收到所有文件，接下来请输入 CEE 参数：');
+      
+      // 再延迟显示CEE表单
+      setTimeout(() => {
+        addCEEFormMessage();
+      }, 800);
+    }, 500);
+    
+    // 清空文件列表
+    uploadedFiles.value = [];
+    
+  } else if (messageText) {
+    // 普通文本消息
+    addUserMessage('text', messageText);
+    message.value = '';
+    
+    // 如果有文件一起发送
+    if (uploadedFiles.value.length > 0) {
+      setTimeout(() => {
+        addAgentMessage('已收到您的消息和文件，接下来请输入 CEE 参数：');
+        uploadedFiles.value = [];
+      }, 500);
+    }
+  }
+  
+  // 发送消息后滚动到底部
+  scrollToBottom();
+};
+
+const addUserMessage = (type, content) => {
+  messages.value.push({
+    id: Date.now(),
+    type: 'user',
+    messageType: type,
+    content: content,
+    timestamp: new Date().toLocaleTimeString()
+  });
+  nextTick(() => scrollToBottom());
+};
+
+const addAgentMessage = (text) => {
+  messages.value.push({
+    id: Date.now(),
+    type: 'agent',
+    messageType: 'text',
+    content: text,
+    timestamp: new Date().toLocaleTimeString()
+  });
+  nextTick(() => scrollToBottom());
+};
+
+const addCEEFormMessage = () => {
+  messages.value.push({
+    id: Date.now(),
+    type: 'agent',
+    messageType: 'cee-form',
+    content: {
+      germanSales: 10000,
+      polandTax: false,
+      czechTax: true
+    },
+    timestamp: new Date().toLocaleTimeString()
+  });
+  nextTick(() => scrollToBottom());
+};
+
+const submitCEEForm = () => {
+  console.log('提交CEE表单');
+  // 模拟提交后的滚动
+  scrollToBottom();
+};
+
+// 文件上传相关函数
+const triggerFileUpload = () => {
+  fileInputRef.value?.click();
+};
+
+const handleFileUpload = (event) => {
+  const files = Array.from(event.target.files);
+  if (files.length > 0) {
+    // 添加文件到上传列表
+    const newFiles = files.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file: file,
+      uploadTime: new Date().toLocaleString()
+    }));
+    
+    uploadedFiles.value.push(...newFiles);
+    
+    // 添加上传成功的消息到聊天
+    addUploadMessage(newFiles);
+    
+    // 清空文件输入
+    event.target.value = '';
+    
+    // 滚动到底部
+    scrollToBottom();
+  }
+};
+
+const addUploadMessage = (files) => {
+  // 这里可以添加一个上传成功的消息到聊天界面
+  console.log('上传文件:', files.map(f => f.name));
+};
+
+const removeFile = (fileId) => {
+  uploadedFiles.value = uploadedFiles.value.filter(file => file.id !== fileId);
+};
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// 组件挂载后启动打字机效果
+onMounted(() => {
+  scrollToBottom();
+  
+  // 监听DOM变化，自动滚动到底部
+  if (messageContainer.value) {
+    const observer = new MutationObserver(() => {
+      scrollToBottom();
+    });
+    
+    observer.observe(messageContainer.value, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+  }
+  
+  // 延迟1秒后开始打字机效果
+  setTimeout(() => {
+    typeWriter();
+  }, 1000);
+});
+</script>
+
+<template>
+  <div class="report-container">
+
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+      <!-- 左侧面板 -->
+      <div class="left-panel">
+        <div class="message-container" ref="messageContainer">
+          <!-- 初始用户消息 (右侧) -->
+          <div class="message-item user-message">
+            <div class="message-content">
+              <p>请帮我生成一个 IntraEU 卖家分析报告</p>
             </div>
           </div>
-        
-
-           
-
+          
+          <!-- 初始Agent 消息 (左侧) -->
+          <div class="message-item agent-message">
+            <div class="message-content">
+              <pre class="file-paths-text">{{ displayedText }}<span v-if="isTyping" class="typing-cursor">|</span></pre>
+            </div>
           </div>
+
+          <!-- 动态消息列表 -->
+          <div v-for="msg in messages" :key="msg.id" class="message-item" :class="msg.type === 'user' ? 'user-message' : 'agent-message'">
+            <div class="message-content" :class="{ 
+              'file-message': msg.messageType === 'files',
+              'cee-form-message': msg.messageType === 'cee-form'
+            }">
+              <!-- 文件消息 -->
+              <div v-if="msg.messageType === 'files'" class="files-message">
+                <div class="files-message-header">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>已发送 {{ msg.content.length }} 个文件</span>
+                </div>
+                <div class="files-preview">
+                  <div v-for="file in msg.content.slice(0, 3)" :key="file.id" class="file-preview-item">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>{{ file.name }}</span>
+                  </div>
+                  <div v-if="msg.content.length > 3" class="more-files">
+                    +{{ msg.content.length - 3 }} 更多文件
+                  </div>
+                </div>
+              </div>
+
+              <!-- CEE表单消息 -->
+              <div v-else-if="msg.messageType === 'cee-form'" class="cee-form-container">
+                <div class="cee-header">
+                  <h4>📊 CEE 中欧计划分析</h4>
+                </div>
+                
+                <div class="form-section">
+                  <label class="form-label">德国商城过去12个月已售商品数量</label>
+                  <input type="number" class="form-input" placeholder="10000" :value="msg.content.germanSales">
+                </div>
+
+                <div class="form-section">
+                  <label class="form-label">税号状态</label>
+                  <div class="checkbox-group">
+                    <div class="checkbox-item">
+                      <input type="checkbox" id="poland-tax" class="form-checkbox" :checked="msg.content.polandTax">
+                      <label for="poland-tax">波兰税号 ✓</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input type="checkbox" id="czech-tax" class="form-checkbox" :checked="msg.content.czechTax">
+                      <label for="czech-tax">捷克税号 ✓</label>
+                    </div>
+                  </div>
+                  <p class="form-note">* 备案信息：来源信息→卖家信息上传到各国税务局→业务规模→建议至少12个月的销售周期→已计入商品数量</p>
+                </div>
+
+                <button class="cee-submit-btn" @click="submitCEEForm">开始生成报告</button>
+              </div>
+              
+              <!-- 文本消息 -->
+              <p v-else>{{ msg.content }}</p>
+            </div>
+          </div>
+        </div>
         
+        <!-- 上传文件列表 -->
+        <div v-if="uploadedFiles.length > 0" class="uploaded-files-area">
+          <div class="files-header">
+            <h4>已上传文件 ({{ uploadedFiles.length }})</h4>
+            <button class="clear-all-btn" @click="uploadedFiles = []" title="清空所有文件">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="files-list">
+            <div v-for="file in uploadedFiles" :key="file.id" class="file-item">
+              <div class="file-info">
+                <div class="file-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="file-details">
+                  <div class="file-name" :title="file.name">{{ file.name }}</div>
+                  <div class="file-meta">{{ formatFileSize(file.size) }} • {{ file.uploadTime }}</div>
+                </div>
+              </div>
+              <button class="remove-file-btn" @click="removeFile(file.id)" title="删除文件">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- 聊天输入区域 -->
         <div class="chat-input-area">
           <div class="input-container">
@@ -128,18 +365,32 @@ onMounted(() => {
               @keyup.enter="sendMessage"
             />
             <div class="button-group">
-              <button class="attachment-btn">
+              <button class="attachment-btn" @click="triggerFileUpload" title="上传文件">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </button>
-              <button class="send-btn" @click="sendMessage">
+              <button 
+                class="send-btn" 
+                @click="sendMessage"
+                :disabled="!message.trim() && uploadedFiles.length === 0"
+                :class="{ 'has-content': message.trim() || uploadedFiles.length > 0 }"
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 2L11 13" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </button>
             </div>
+            <!-- 隐藏的文件输入 -->
+            <input 
+              type="file" 
+              ref="fileInputRef"
+              @change="handleFileUpload"
+              multiple
+              accept=".csv,.xlsx,.xls,.pdf,.txt,.json"
+              style="display: none;"
+            />
           </div>
         </div>
       </div>
@@ -293,8 +544,8 @@ onMounted(() => {
 
 .file-paths-text {
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 11px;
+  line-height: 1.4;
   color: #333;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -302,6 +553,20 @@ onMounted(() => {
   padding: 0;
   background: none;
   border: none;
+}
+
+.typing-cursor {
+  animation: blink 1s infinite;
+  color: #333;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
 }
 
 /* 批量上传消息样式 */
@@ -646,6 +911,231 @@ onMounted(() => {
 
 .attachment-btn:hover, .send-btn:hover {
   background-color: #f5f5f5;
+}
+
+.send-btn.has-content {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.send-btn.has-content:hover {
+  background-color: #c8e6c8;
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-btn:disabled:hover {
+  background-color: transparent;
+}
+
+/* 上传文件列表样式 */
+.uploaded-files-area {
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.files-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.clear-all-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover {
+  background-color: #e9ecef;
+  color: #dc3545;
+}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.file-item:hover {
+  border-color: #adb5bd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-icon {
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.file-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.file-meta {
+  font-size: 11px;
+  color: #6c757d;
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-file-btn:hover {
+  background-color: #f8d7da;
+  color: #dc3545;
+}
+
+/* 文件列表滚动条样式 */
+.files-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.files-list::-webkit-scrollbar-track {
+  background: #f1f3f4;
+  border-radius: 2px;
+}
+
+.files-list::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 2px;
+}
+
+.files-list::-webkit-scrollbar-thumb:hover {
+  background: #bdc1c6;
+}
+
+/* 文件消息样式 */
+.file-message {
+  background-color: #e3f2fd !important;
+  border: 1px solid #bbdefb !important;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.files-message {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.files-message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 13px;
+}
+
+.files-message-header svg {
+  color: #1976d2;
+}
+
+.files-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #424242;
+  padding: 2px 0;
+}
+
+.file-preview-item svg {
+  color: #757575;
+  flex-shrink: 0;
+}
+
+.file-preview-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.more-files {
+  font-size: 11px;
+  color: #757575;
+  font-style: italic;
+  padding: 2px 0;
+  margin-left: 18px;
+}
+
+/* CEE表单容器样式 */
+.cee-form-container {
+  width: 100%;
+}
+
+/* CEE表单消息特殊样式覆盖 */
+.message-content.cee-form-message {
+  max-width: 400px !important;
+  background-color: #e8f4f0 !important;
+  border: 1px solid #d1e7dd !important;
+  padding: 20px !important;
 }
 
 @media (max-width: 768px) {
