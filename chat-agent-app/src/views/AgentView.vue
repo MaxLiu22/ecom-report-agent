@@ -1,15 +1,32 @@
 <script setup>
 import { ref } from 'vue';
 import Yesterday from '@/views/Yesterday.vue';
+import NewChat from '@/views/NewChat.vue';
 
 const message = ref('');
 const sidebarExpanded = ref(true);
+const showDefaultContent = ref(true);
 const showReportContent = ref(false);
+const showNewChat = ref(false);
 
 const sendMessage = () => {
+  console.log('sendMessage 被调用了');
+  console.log('当前消息内容:', message.value);
+  console.log('消息是否为空:', !message.value.trim());
+  
   if (message.value.trim()) {
     console.log('发送消息:', message.value);
     message.value = '';
+    // 发送消息后隐藏默认内容，显示报告内容
+    showDefaultContent.value = false;
+    showReportContent.value = false;
+    showNewChat.value = false;
+    console.log('showReportContent 设置为:', showReportContent.value);
+  } else {
+    console.log('消息为空，不发送');
+    showNewChat.value = true;
+    showDefaultContent.value = false;
+    showReportContent.value = false;
   }
 };
 
@@ -19,9 +36,19 @@ const toggleSidebar = () => {
 
 const showReport = () => {
   showReportContent.value = true;
+  showDefaultContent.value = false;
+  showNewChat.value = false;
 };
 
 const startNewChat = () => {
+  showDefaultContent.value = true;
+  showNewChat.value = false;
+  showReportContent.value = false;
+};
+
+const startChat = () => {
+  showNewChat.value = true;
+  showDefaultContent.value = false;
   showReportContent.value = false;
 };
 </script>
@@ -108,7 +135,7 @@ const startNewChat = () => {
     <!-- 主内容区域 -->
     <div class="main-content">
       <!-- 默认内容 -->
-      <div v-if="!showReportContent" class="default-content">
+      <div v-if="showDefaultContent" class="default-content">
         <!-- Logo 和标题 -->
         <div class="header-section">
           <div class="logo-container">
@@ -133,7 +160,7 @@ const startNewChat = () => {
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </button>
-              <button class="send-btn" @click="sendMessage">
+              <button class="send-btn" @click="startChat">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22 2L11 13" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -147,6 +174,10 @@ const startNewChat = () => {
       <!-- 报告内容 -->
       <div v-if="showReportContent" class="report-content-wrapper">
         <Yesterday />
+      </div>
+
+      <div v-if="showNewChat" class="new-chat-content-wrapper">
+        <NewChat />
       </div>
     </div>
   </div>
