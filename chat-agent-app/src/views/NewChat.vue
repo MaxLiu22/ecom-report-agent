@@ -102,12 +102,7 @@ const sendMessage = () => {
     
     // 延迟显示agent回复
     setTimeout(() => {
-      addAgentMessage('已收到所有文件，接下来请输入 CEE 参数：');
-      
-      // 再延迟显示CEE表单
-      setTimeout(() => {
-        addCEEFormMessage();
-      }, 800);
+      addCEEStatusMessage();
     }, 500);
     
     // 清空文件列表
@@ -153,6 +148,17 @@ const addAgentMessage = (text) => {
   nextTick(() => scrollToBottom());
 };
 
+const addCEEStatusMessage = () => {
+  messages.value.push({
+    id: Date.now(),
+    type: 'agent',
+    messageType: 'cee-status',
+    content: '已收到所有文件。\n请问您是否已加入 CEE？',
+    timestamp: new Date().toLocaleTimeString()
+  });
+  nextTick(() => scrollToBottom());
+};
+
 const addCEEFormMessage = () => {
   messages.value.push({
     id: Date.now(),
@@ -166,6 +172,88 @@ const addCEEFormMessage = () => {
     timestamp: new Date().toLocaleTimeString()
   });
   nextTick(() => scrollToBottom());
+};
+
+const handleCEEStatusChoice = (hasJoined) => {
+  if (hasJoined) {
+    // 用户已加入CEE，直接开始生成报告
+    addAgentMessage('您已加入 CEE，开始生成全套报告...');
+    setTimeout(() => {
+      startReportGeneration();
+    }, 500);
+  } else {
+    // 用户未加入CEE，显示CEE表单
+    addAgentMessage('请输入 CEE 参数：');
+    setTimeout(() => {
+      addCEEFormMessage();
+    }, 500);
+  }
+};
+
+const startReportGeneration = async () => {
+  if (isGeneratingReport.value) return; // 防止重复提交
+  
+  isGeneratingReport.value = true;
+  panEUResult.value = null;
+  diResult.value = null;
+  ceeResult.value = null;
+  reportGenerated.value = false;
+  
+  try {
+    // 添加生成报告开始的消息
+    addAgentMessage('开始生成报告，请稍候...');
+    
+    // 1. 调用 analyzePanEU
+    console.log('开始 PanEU 分析...');
+    addAgentMessage('正在进行 PanEU 分析...');
+    
+    // 使用上传的文件进行自动分析
+    const recentFileMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'files');
+    const panEUFiles = recentFileMessage ? 
+      recentFileMessage.content.map(f => f.file) : 
+      []; // 如果没有文件，使用空数组
+    
+    if (panEUFiles.length >= 2) {
+      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles);
+      addAgentMessage('PanEU 分析完成 ✓');
+    } else {
+      addAgentMessage('PanEU 分析跳过（文件不足）');
+    }
+    
+    // 2. 调用 analyzeDI
+    console.log('开始 DI 分析...');
+    addAgentMessage('正在进行 DI 分析...');
+    
+    if (panEUFiles.length >= 1) {
+      diResult.value = await analyzeDIOpportunitiesAuto(panEUFiles);
+      addAgentMessage('DI 分析完成 ✓');
+    } else {
+      addAgentMessage('DI 分析跳过（文件不足）');
+    }
+    
+    // 3. 对于已加入CEE的用户，使用默认参数计算CEE成本
+    console.log('开始 CEE 成本计算...');
+    addAgentMessage('正在计算 CEE 成本...');
+    
+    // 使用默认参数
+    const soldCount = 10000;
+    const hasPolishVAT = false;
+    const hasCzechVAT = true;
+    
+    ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
+    addAgentMessage('CEE 成本计算完成 ✓');
+    
+    // 4. 标记报告生成完成
+    reportGenerated.value = true;
+    addAgentMessage('📊 报告生成完成！请查看右侧报告区域。');
+    
+  } catch (error) {
+    console.error('报告生成失败:', error);
+    addAgentMessage(`报告生成失败: ${error.message}`);
+  } finally {
+    isGeneratingReport.value = false;
+    scrollToBottom();
+  }
 };
 
 const submitCEEForm = async () => {
@@ -336,10 +424,30 @@ onMounted(() => {
           <div v-for="msg in messages" :key="msg.id" class="message-item" :class="msg.type === 'user' ? 'user-message' : 'agent-message'">
             <div class="message-content" :class="{ 
               'file-message': msg.messageType === 'files',
-              'cee-form-message': msg.messageType === 'cee-form'
+              'cee-form-message': msg.messageType === 'cee-form',
+              'cee-status-message': msg.messageType === 'cee-status'
             }">
+              <!-- CEE状态选择消息 -->
+              <div v-if="msg.messageType === 'cee-status'" class="cee-status-container">
+                <div class="cee-status-text">{{ msg.content }}</div>
+                <div class="cee-status-options">
+                  <button 
+                    class="cee-status-btn cee-status-joined" 
+                    @click="handleCEEStatusChoice(true)"
+                  >
+                    已加入
+                  </button>
+                  <button 
+                    class="cee-status-btn cee-status-not-joined" 
+                    @click="handleCEEStatusChoice(false)"
+                  >
+                    未加入
+                  </button>
+                </div>
+              </div>
+
               <!-- 文件消息 -->
-              <div v-if="msg.messageType === 'files'" class="files-message">
+              <div v-else-if="msg.messageType === 'files'" class="files-message">
                 <div class="files-message-header">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -851,6 +959,77 @@ onMounted(() => {
 .upload-list::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 2px;
+}
+
+/* CEE状态选择样式 */
+.cee-status-message {
+  max-width: 350px !important;
+  background-color: #e8f4f0 !important;
+  border: 1px solid #d1e7dd;
+  padding: 20px;
+}
+
+.cee-status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cee-status-text {
+  color: #1e5233;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-line;
+  text-align: center;
+  font-weight: 500;
+}
+
+.cee-status-options {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.cee-status-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid #9dd3a8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f8fdf9;
+  color: #1e5233;
+}
+
+.cee-status-btn:hover {
+  border-color: #7cc48a;
+  background-color: #e8f4f0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+
+.cee-status-joined {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+.cee-status-joined:hover {
+  background-color: #1e7e34;
+  border-color: #1e7e34;
+}
+
+.cee-status-not-joined {
+  background-color: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+
+.cee-status-not-joined:hover {
+  background-color: #5a6268;
+  border-color: #5a6268;
 }
 
 /* CEE表单样式 */
