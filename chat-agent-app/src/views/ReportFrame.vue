@@ -563,33 +563,10 @@ const switchSubSection = (subId) => {
           <p class="content-description">最新的欧盟政策变化和影响分析</p>
         </div>
         <div class="content-body">
-          <!-- 政策更新时间线 -->
+          <!-- 政策更新图片 -->
           <div class="policy-updates" style="margin-top: 30px;">
-            <div class="update-item" style="display: flex; gap: 20px; padding: 20px; background: #ffffff; border-radius: 8px; border-left: 4px solid #ff9900; border: 1px solid #e1e8ed; margin-bottom: 20px;">
-              <div class="update-date" style="font-size: 14px; font-weight: 600; color: #ff9900; white-space: nowrap; min-width: 80px;">2025年1月</div>
-              <div class="update-content" style="flex: 1;">
-                <h4 style="font-size: 20px; color: #232f3e; margin: 0 0 8px 0; font-weight: 600;">VAT申请流程优化</h4>
-                <p style="font-size: 15px; color: #5a6c7d; margin: 0 0 12px 0; line-height: 1.6;">欧盟简化了VAT申请流程，预计申请时间从8-13周缩短至6-10周</p>
-                <span class="impact-tag medium" style="display: inline-block; padding: 6px 16px; border-radius: 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #ff9900; color: white;">中等影响</span>
-              </div>
-            </div>
-
-            <div class="update-item" style="display: flex; gap: 20px; padding: 20px; background: #ffffff; border-radius: 8px; border-left: 4px solid #ff9900; border: 1px solid #e1e8ed; margin-bottom: 20px;">
-              <div class="update-date" style="font-size: 14px; font-weight: 600; color: #ff9900; white-space: nowrap; min-width: 80px;">2024年12月</div>
-              <div class="update-content" style="flex: 1;">
-                <h4 style="font-size: 20px; color: #232f3e; margin: 0 0 8px 0; font-weight: 600;">PanEU资格审核加严</h4>
-                <p style="font-size: 15px; color: #5a6c7d; margin: 0 0 12px 0; line-height: 1.6;">亚马逊加强了PanEU资格审核，要求四国同时活跃销售的时间延长至30天</p>
-                <span class="impact-tag high" style="display: inline-block; padding: 6px 16px; border-radius: 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #d73027; color: white;">高影响</span>
-              </div>
-            </div>
-
-            <div class="update-item" style="display: flex; gap: 20px; padding: 20px; background: #ffffff; border-radius: 8px; border-left: 4px solid #ff9900; border: 1px solid #e1e8ed;">
-              <div class="update-date" style="font-size: 14px; font-weight: 600; color: #ff9900; white-space: nowrap; min-width: 80px;">2024年11月</div>
-              <div class="update-content" style="flex: 1;">
-                <h4 style="font-size: 20px; color: #232f3e; margin: 0 0 8px 0; font-weight: 600;">远程配送费用调整</h4>
-                <p style="font-size: 15px; color: #5a6c7d; margin: 0 0 12px 0; line-height: 1.6;">英国-欧盟远程配送费用平均上涨8%，本地配送优势进一步凸显</p>
-                <span class="impact-tag low" style="display: inline-block; padding: 6px 16px; border-radius: 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: #146eb4; color: white;">低影响</span>
-              </div>
+            <div style="text-align: center; padding: 20px; background: #ffffff; border-radius: 8px; border: 1px solid #e8e8e8; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <img src="/src/assets/政策更新.png" alt="政策更新" style="width: 100%; max-width: 1200px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
             </div>
           </div>
         </div>
