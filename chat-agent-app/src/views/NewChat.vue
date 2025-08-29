@@ -478,8 +478,51 @@ onMounted(() => {
       <!-- 右侧面板 -->
       <div class="right-panel">
         <div class="report-area">
-          <div v-if="!reportGenerated">
-            请根据左边的指示上传文件后，生成报告。
+          <div v-if="!reportGenerated" class="aws-style-placeholder">
+            <div class="aws-header-section">
+              <h1 class="aws-main-title">CEE 中欧拓展分析报告</h1>
+              <div class="aws-publication-date">
+                生成日期: <strong>{{ new Date().toLocaleDateString('zh-CN') }}</strong>
+              </div>
+            </div>
+            
+            <div class="aws-content-section">
+              <p class="aws-intro-text">
+                本系统提供全面的中东欧 (CEE) 市场拓展分析服务，包括 PanEU 机会分析、DI 双向配送评估以及成本效益计算。通过上传相关文件并配置参数，您可以快速获得详细的市场拓展建议和数据驱动的决策支持。
+              </p>
+              
+              <div class="aws-getting-started">
+                <h2 class="aws-section-title">开始使用</h2>
+                <p class="aws-description">
+                  请按照左侧面板的指示上传必要的文件，然后填写 CEE 参数表单以生成您的个性化分析报告。系统支持多种文件格式，并提供智能文件识别功能。
+                </p>
+                
+                <div class="aws-steps-container">
+                  <div class="aws-step-item">
+                    <span class="aws-step-number">1</span>
+                    <span class="aws-step-text">上传分析所需的数据文件</span>
+                  </div>
+                  <div class="aws-step-item">
+                    <span class="aws-step-number">2</span>
+                    <span class="aws-step-text">填写 CEE 中欧计划分析参数</span>
+                  </div>
+                  <div class="aws-step-item">
+                    <span class="aws-step-number">3</span>
+                    <span class="aws-step-text">点击生成报告并查看结果</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="aws-benefits-section">
+                <h2 class="aws-section-title">主要功能</h2>
+                <ul class="aws-benefits-list">
+                  <li>🌍 <strong>PanEU 机会分析</strong> - 识别欧盟内部物流优化机会</li>
+                  <li>🔄 <strong>DI 双向配送评估</strong> - 英国与欧盟间的配送策略分析</li>
+                  <li>💰 <strong>CEE 成本计算</strong> - 中东欧市场拓展的成本效益评估</li>
+                  <li>📊 <strong>数据驱动决策</strong> - 基于实际业务数据的精准分析</li>
+                </ul>
+              </div>
+            </div>
           </div>
           
           <!-- 报告生成完成后显示结果 -->
@@ -514,10 +557,6 @@ onMounted(() => {
                 </div>
                 
                 <!-- Meta 信息 -->
-                <div v-if="panEUResult.meta" class="meta-info">
-                  <h5>分析详情</h5>
-                  <pre>{{ JSON.stringify(panEUResult.meta, null, 2) }}</pre>
-                </div>
               </div>
             </div>
             
@@ -570,10 +609,6 @@ onMounted(() => {
                 </div>
                 
                 <!-- Meta 信息 -->
-                <div v-if="diResult.meta" class="meta-info">
-                  <h5>分析详情</h5>
-                  <pre>{{ JSON.stringify(diResult.meta, null, 2) }}</pre>
-                </div>
               </div>
             </div>
             
@@ -1441,6 +1476,176 @@ onMounted(() => {
   font-size: 10px;
   font-weight: bold;
   margin-right: 8px;
+}
+
+/* AWS 文档风格样式 */
+.aws-style-placeholder {
+  padding: 32px 40px;
+  background: #ffffff;
+  font-family: 'Amazon Ember', 'Helvetica Neue', Roboto, Arial, sans-serif;
+  color: #232f3e;
+  line-height: 1.6;
+  max-width: none;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.aws-header-section {
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.aws-main-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #232f3e;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.aws-publication-date {
+  font-size: 14px;
+  color: #5a6c7d;
+  margin: 0;
+}
+
+.aws-publication-date strong {
+  color: #232f3e;
+  font-weight: 600;
+}
+
+.aws-content-section {
+  max-width: 800px;
+}
+
+.aws-intro-text {
+  font-size: 16px;
+  color: #232f3e;
+  line-height: 1.7;
+  margin: 0 0 32px 0;
+  font-weight: 400;
+}
+
+.aws-getting-started {
+  margin-bottom: 40px;
+}
+
+.aws-section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #232f3e;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 8px;
+}
+
+.aws-description {
+  font-size: 16px;
+  color: #5a6c7d;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.aws-steps-container {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.aws-step-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.aws-step-item:last-child {
+  margin-bottom: 0;
+}
+
+.aws-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #ff9900;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 50%;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.aws-step-text {
+  color: #232f3e;
+  font-weight: 500;
+}
+
+.aws-benefits-section {
+  background: #f8f9fa;
+  border-left: 4px solid #ff9900;
+  padding: 24px;
+  margin: 32px 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.aws-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.aws-benefits-list li {
+  font-size: 16px;
+  color: #232f3e;
+  margin-bottom: 12px;
+  padding-left: 0;
+  line-height: 1.5;
+}
+
+.aws-benefits-list li:last-child {
+  margin-bottom: 0;
+}
+
+.aws-benefits-list strong {
+  color: #232f3e;
+  font-weight: 600;
+}
+
+/* AWS 文档响应式设计 */
+@media (max-width: 768px) {
+  .aws-style-placeholder {
+    padding: 24px 20px;
+  }
+  
+  .aws-main-title {
+    font-size: 28px;
+  }
+  
+  .aws-section-title {
+    font-size: 20px;
+  }
+  
+  .aws-intro-text,
+  .aws-description,
+  .aws-benefits-list li {
+    font-size: 15px;
+  }
+  
+  .aws-steps-container {
+    padding: 20px;
+  }
+  
+  .aws-step-item {
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 768px) {

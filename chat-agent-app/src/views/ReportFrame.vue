@@ -705,7 +705,7 @@ const switchTab = (tabId) => {
                   <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;">3</td>
                   <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">cost saving - pan-EU placement</td>
                   <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">3个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;">用净胜值排序</td>
+                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;"></td>
                 </tr>
                 <tr>
                   <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;"></td>
