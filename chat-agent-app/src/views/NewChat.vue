@@ -4,6 +4,7 @@ import ReportFrame from './ReportFrame.vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
 import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
 import CeeService from '@/services/CeeService.js';
+import DifyService from '@/services/DifyService.js';
 
 const message = ref('');
 const messageContainer = ref(null);
@@ -36,7 +37,7 @@ const fullText = `这是你需要上传的文件路径：
 
 【必须下载文件】
 1. 体检表 ✓
-   路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV
+   路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV 
 
 2. ASIN list ✓
    路径：CN Paid Service EU Expansion Dashboard → part2.ASIN list → export to CSV
@@ -102,7 +103,7 @@ const scrollToBottom = () => {
   }
 };
 
-const sendMessage = () => {
+const sendMessage = async () => {
   const messageText = message.value.trim();
   
   // 检查是否有上传的文件且没有文本消息（纯文件发送）
@@ -121,6 +122,59 @@ const sendMessage = () => {
   } else if (messageText) {
     // 普通文本消息
     addUserMessage('text', messageText);
+
+    if (messageText.includes("卖家报告") || messageText.includes("分析报告")) {
+      console.log("包含关键词");
+      const tempMessageId = Date.now();
+      addAgentMessage(fullText, tempMessageId)
+
+      // // 延迟1秒后开始打字机效果
+      // setTimeout(() => {
+      //   typeWriter();
+      // }, 1000);
+
+    // 执行相关逻辑
+    } else {
+      try {
+        // 使用流式响应模式
+        const stream = await DifyService.sendChatMessage(messageText);
+        
+        // 创建一个临时消息ID用于更新
+        const tempMessageId = Date.now();
+        let fullResponse = '';
+        
+        // 添加一个空的Agent消息，后续会更新内容
+        addAgentMessage('', tempMessageId);
+        
+        // 处理流式响应
+        await DifyService.processStream(
+          stream,
+          (data) => {
+            // 处理每个数据块
+            if (data.answer) {
+              fullResponse += data.answer;
+              // 更新消息内容
+              updateAgentMessage(tempMessageId, fullResponse);
+              // 滚动到底部
+              scrollToBottom();
+            }
+          },
+          () => {
+            // 完成时的处理
+            console.log('Stream completed');
+          },
+          (error) => {
+            // 错误处理
+            console.error('Stream error:', error);
+            addAgentMessage('抱歉，处理您的请求时出现了错误。');
+          }
+        );
+      } catch (error) {
+        console.error('Error sending message:', error);
+        addAgentMessage('抱歉，发送消息时出现了错误。');
+      }
+    }
+    
     message.value = '';
     
     // 如果有文件一起发送
@@ -156,6 +210,14 @@ const addAgentMessage = (text) => {
     timestamp: new Date().toLocaleTimeString()
   });
   nextTick(() => scrollToBottom());
+};
+
+// 更新Agent消息内容
+const updateAgentMessage = (id, newContent) => {
+  const messageIndex = messages.value.findIndex(msg => msg.id === id);
+  if (messageIndex !== -1) {
+    messages.value[messageIndex].content = newContent;
+  }
 };
 
 const addCEEStatusMessage = () => {
@@ -223,7 +285,7 @@ const startReportGeneration = async () => {
       recentFileMessage.content.map(f => f.file) : 
       []; // 如果没有文件，使用空数组
     
-    if (panEUFiles.length >= 2) {
+    if (panEUFiles.length >= 4) {
       panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles);
       addAgentMessage('PanEU 分析完成 ✓');
     } else {
@@ -234,7 +296,7 @@ const startReportGeneration = async () => {
     console.log('开始 DI 分析...');
     addAgentMessage('正在进行 DI 分析...');
     
-    if (panEUFiles.length >= 1) {
+    if (panEUFiles.length >= 6) {
       diResult.value = await analyzeDIOpportunitiesAuto(panEUFiles);
       addAgentMessage('DI 分析完成 ✓');
     } else {
@@ -420,11 +482,7 @@ onMounted(() => {
       attributes: true
     });
   }
-  
-  // 延迟1秒后开始打字机效果
-  setTimeout(() => {
-    typeWriter();
-  }, 1000);
+
 });
 </script>
 
@@ -439,16 +497,17 @@ onMounted(() => {
           <!-- 初始用户消息 (右侧) -->
           <div class="message-item user-message">
             <div class="message-content">
-              <p>请帮我生成一个 IntraEU 卖家分析报告</p>
+              <!-- <p>请帮我生成一个 IntraEU 卖家分析报告</p> -->
+              <p></p>
             </div>
           </div>
           
           <!-- 初始Agent 消息 (左侧) -->
-          <div class="message-item agent-message">
+          <!-- <div class="message-item agent-message">
             <div class="message-content">
               <pre class="file-paths-text">{{ displayedText }}<span v-if="isTyping" class="typing-cursor">|</span></pre>
             </div>
-          </div>
+          </div> -->
 
           <!-- 动态消息列表 -->
           <div v-for="msg in messages" :key="msg.id" class="message-item" :class="msg.type === 'user' ? 'user-message' : 'agent-message'">
@@ -457,6 +516,9 @@ onMounted(() => {
               'cee-form-message': msg.messageType === 'cee-form',
               'cee-status-message': msg.messageType === 'cee-status'
             }">
+              <!-- 普通文本消息 - 使用pre标签保留格式 -->
+              <pre v-if="msg.messageType === 'text'" class="text-message">{{ msg.content }}</pre>
+
               <!-- CEE状态选择消息 -->
               <div v-if="msg.messageType === 'cee-status'" class="cee-status-container">
                 <div class="cee-status-text">{{ msg.content }}</div>
@@ -534,7 +596,7 @@ onMounted(() => {
               </div>
               
               <!-- 文本消息 -->
-              <p v-else>{{ msg.content }}</p>
+              <!-- <p v-else>{{ msg.content }}</p> -->
             </div>
           </div>
         </div>
