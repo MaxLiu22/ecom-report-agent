@@ -8,7 +8,8 @@ const tabs = [
   { id: 0, title: '欧洲站点拓展评估', key: 'evaluation' },
   { id: 1, title: '欧洲站拓展解决方案定制', key: 'solutions' },
   { id: 2, title: '政策更新', key: 'policy' },
-  { id: 3, title: '行动计划', key: 'action' }
+  { id: 3, title: '行动计划', key: 'action' },
+  { id: 4, title: '其他', key: 'other' }
 ];
 
 const subSections = [
@@ -622,169 +623,30 @@ const switchSubSection = (subId) => {
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                   <span style="color: #FF6B35; font-weight: bold; font-size: 16px;">•</span>
                   <strong style="color: #333; font-size: 14px; font-weight: 600;">全球拓展大礼包激励资源:</strong>
-        </div>
+                </div>
                 <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 24px;">
                   UK>EU方向有159个ASIN可获得最高€714k代金券；EU>UK方向有51个ASIN可获得最高£181k代金券
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-              
-              <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                  <span style="color: #FF6B35; font-weight: bold; font-size: 16px;">•</span>
-                  <strong style="color: #333; font-size: 14px; font-weight: 600;">远程配送优化:</strong>
-                </div>
-                <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 24px;">
-                  目前有11个ASIN开启远程配送，其中1个达到高销售量，预计可节省配送费
-                </p>
-              </div>
-              
-              <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                  <span style="color: #FF6B35; font-weight: bold; font-size: 16px;">•</span>
-                  <strong style="color: #333; font-size: 14px; font-weight: 600;">市场扩展潜力:</strong>
-                </div>
-                <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 24px;">
-                  225个UK>EU ASIN和230个EU>UK ASIN尚未开启远程配送，存在巨大扩展空间
-                </p>
-              </div>
-            </div>
-          </div>
 
-          <!-- 行动计划时间线 -->
-          <div class="action-timeline" style="position: relative; padding-left: 40px;">
-            <div style="content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #232f3e, #ff9900);"></div>
+      <!-- Tab 5: 其他-->
+      <div v-if="activeTab === 4" class="content-panel">
+        <div class="content-header">
+          <h2>🎯 其他</h2>
+          <p class="content-description">其他相关信息</p>
+        </div>
+        <div class="content-body">
+          <!-- 话术章节 -->
+          <div class="script-section" style="margin-bottom: 40px;">
+            话术
             
-            <div class="timeline-item" style="position: relative; margin-bottom: 40px; padding-left: 40px;">
-              <div class="timeline-marker phase1" style="position: absolute; left: -28px; top: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: white; z-index: 1; border: 3px solid white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); background-color: #232f3e;">1</div>
-              <div class="timeline-content" style="background-color: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-                <h3 style="font-size: 22px; color: #232f3e; margin: 0 0 16px 0; font-weight: 600;">优先本地入库</h3>
-                <ul class="action-list" style="margin: 0; padding-left: 20px;">
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">对37个EU高销售潜力ASIN和45个UK高销售潜力ASIN进行本地入库</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">预计总销售额€242k + £59k</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">优先级：高 - 直接影响销售收入</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="timeline-item" style="position: relative; margin-bottom: 40px; padding-left: 40px;">
-              <div class="timeline-marker phase2" style="position: absolute; left: -28px; top: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: white; z-index: 1; border: 3px solid white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); background-color: #146eb4;">2</div>
-              <div class="timeline-content" style="background-color: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-                <h3 style="font-size: 22px; color: #232f3e; margin: 0 0 16px 0; font-weight: 600;">激励资源利用</h3>
-                <ul class="action-list" style="margin: 0; padding-left: 20px;">
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">充分利用全球拓展大礼包激励资源</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">总计€714k + £181k代金券</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">降低初期投入成本，提高ROI</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="timeline-item" style="position: relative; margin-bottom: 40px; padding-left: 40px;">
-              <div class="timeline-marker phase3" style="position: absolute; left: -28px; top: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: white; z-index: 1; border: 3px solid white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); background-color: #ff9900;">3</div>
-              <div class="timeline-content" style="background-color: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-                <h3 style="font-size: 22px; color: #232f3e; margin: 0 0 16px 0; font-weight: 600;">远程配送开启</h3>
-                <ul class="action-list" style="margin: 0; padding-left: 20px;">
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">为455个未开启远程配送的ASIN开启远程配送功能</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">扩大市场覆盖，测试市场反应</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">为后续本地入库决策提供数据支撑</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="timeline-item" style="position: relative; margin-bottom: 40px; padding-left: 40px;">
-              <div class="timeline-marker phase4" style="position: absolute; left: -28px; top: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: white; z-index: 1; border: 3px solid white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); background-color: #d73027;">4</div>
-              <div class="timeline-content" style="background-color: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-                <h3 style="font-size: 22px; color: #232f3e; margin: 0 0 16px 0; font-weight: 600;">成本优化</h3>
-                <ul class="action-list" style="margin: 0; padding-left: 20px;">
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">对已开启远程配送且销售额>€100的1个ASIN考虑本地入库</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">节省配送成本，提升配送时效</li>
-                  <li style="font-size: 15px; color: #5a6c7d; margin-bottom: 10px; line-height: 1.6;">持续监控和优化物流成本结构</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- 行动排序表格 -->
-          <div style="margin-top: 30px; padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px;">
-            <h3 style="color: #333; font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-              <span style="color: #FF6B35;">📋</span>
-              行动排序与时间安排
-            </h3>
-            
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <thead>
-                <tr>
-                  <th style="width: 10%; text-align: center; background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%); color: white; padding: 15px 12px;">排名</th>
-                  <th style="width: 25%; background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%); color: white; padding: 15px 12px;">行动</th>
-                  <th style="width: 15%; text-align: center; background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%); color: white; padding: 15px 12px;">时间</th>
-                  <th style="width: 50%; background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%); color: white; padding: 15px 12px;">读取判断逻辑 (from 上面生成好的table的data)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="background: #fff5f0;">
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;">1</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">合规 - new policy (NL/IT)</td>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">1个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;">意大利税号需注意</td>
-                </tr>
-                <tr>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;">2</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">合规 - 开了仓储没开税号</td>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">3个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;">
-                    在意大利，您已经合规开启了PanEU所有的仓储，无需额外操作。<br/>
-                    在英国，您已经合规开启了PanEU所有的仓储，无需额外操作。<br/>
-                    在德国，您已经合规开启了PanEU所有的仓储，无需额外操作。<br/>
-                    在法国，您已经合规开启了PanEU所有的仓储，无需额外操作。<br/>
-                    对于西班牙，需上传过应税号，可以开启西班牙国家仓储享受本地配送费。
-                  </td>
-                </tr>
-                <tr style="background: #f8f9fa;">
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;">3</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">cost saving - pan-EU placement</td>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">3个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;"></td>
-                </tr>
-                <tr>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;"></td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">cost saving - pan-EU ASIN parity</td>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">1个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;"></td>
-                </tr>
-                <tr style="background: #f8f9fa;">
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;"></td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">cost saving - CEE</td>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">3个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;"></td>
-                </tr>
-                <tr>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;">4</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">incentive - DI (GSI)</td>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">1个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;"></td>
-                </tr>
-                <tr style="background: #f8f9fa;">
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: bold; color: #FF6B35;">5</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 600;">sales uplift - DI (MPG)</td>
-                  <td style="text-align: center; padding: 15px 12px; border: 1px solid #e8e8e8; font-weight: 500;">3个月</td>
-                  <td style="padding: 15px 12px; border: 1px solid #e8e8e8; color: #555;"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- PanEU同步行动建议 -->
-          <div style="margin-top: 30px; padding: 20px; background: #fff5f0; border: 2px solid #FF6B35; border-radius: 8px;">
-            <h3 style="color: #333; font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-              <span style="color: #FF6B35;">⚡</span>
-              紧急行动：PanEU资格保护
-            </h3>
-            <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-              <h4 style="color: #FF6B35; font-size: 16px; margin: 0 0 10px 0;">立即执行（14天内）：</h4>
-              <ul style="margin: 0; padding-left: 20px; color: #555;">
-                <li style="margin-bottom: 8px;">恢复13个失效ASIN的德法意西四国销售状态</li>
-                <li style="margin-bottom: 8px;">使用LOSG/BIL工具快速实现134个ASIN的四国同步</li>
-                <li style="margin-bottom: 8px;">预计节省费用：€3,313,102.44/年</li>
-              </ul>
+            <!-- 话术内容区域 -->
+            <div style="padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 6px; margin: 20px 0;">
+              <img src="/src/assets/话术.png" alt="话术内容" style="width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
             </div>
           </div>
         </div>
