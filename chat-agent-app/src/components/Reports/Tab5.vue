@@ -6,7 +6,54 @@
     </div>
     
     <div class="content-body">
-      <!-- PanEU 分析部分 -->
+      <!-- 新增的欧洲站点评估表格 -->
+      <div class="europe-expansion-table">
+        <table>
+          <thead>
+            <tr>
+              <th colspan="3"></th>
+              <th colspan="1" class="region-header">
+                {{ regions[0] }}
+              </th>
+              <th colspan="4" class="region-header_1">
+                {{ regions[1] }}
+              </th>
+            </tr>
+            <tr class="sub-header">
+              <th>MCID</th>
+              <th>账户名称</th>
+              <th>指标名称</th>
+              <th v-for="country in countries" :key="country">{{ country }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in EUExpansionCheckli" :key="item.指标">
+                
+              <!-- 只在第一行显示MCID和账户名称，并设置rowspan -->
+              <td v-if="index === 0" :rowspan="EUExpansionCheckli.length" class="mcid-cell">
+                {{ MCID }}
+              </td>
+              <td v-if="index === 0" :rowspan="EUExpansionCheckli.length" class="account-cell">
+                {{ accountTitle }}
+              </td>
+              
+              <!-- 指标名称 -->
+              <td class="metric-name">{{ item.指标 }}</td>
+              
+              <!-- 国家数据 -->
+              <td v-for="country in countries" :key="country" class="value-cell">
+                <span v-if="item[country] === 1" class="checkmark">✓</span>
+                <span v-else-if="item[country] === 0" class="cross">✗</span>
+                <span v-else-if="item[country] === null" class="null-value">-</span>
+                <span v-else>{{ item[country] }}</span>
+              </td>
+            
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 原有的 PanEU、DI、CEE 分析部分保持不变 -->
       <div class="analysis-section">
         <div class="section-header">
           <h3>🌍 PanEU 分析结果</h3>
@@ -131,23 +178,41 @@
 </template>
 
 <script>
+import { defaultEUExpansionCheckli } from '@/services/actionService';
+
 export default {
   name: 'Tab5',
   props: {
-    // PanEU 分析结果
-    panEUResult: {
-      type: Object,
+    // defaultEUExpansionCheckli结果
+    EUExpansionCheckli: {
+      type: Array,
+      default: () => defaultEUExpansionCheckli
+    },
+    region: {
+      type: Array,
       default: null
     },
-    // DI 分析结果
-    diResult: {
-      type: Object,
-      default: null
+    MCID: {
+      type: String,
+      default: "157076946612"
     },
-    // CEE 成本分析结果
-    ceeResult: {
-      type: Object,
-      default: null
+    accountTitle: {
+      type: String,
+      default: "Sinuolong Lighting"
+    }
+  },
+  computed: {
+    regions() {
+      return this.region || ["0.英国和欧盟间物流", "1.EU5欧盟内物流"];
+    },
+    countries() {
+      return ["英国", "德国", "意大利", "法国", "西班牙"];
+    },
+    hasUKData() {
+      // 检查是否有英国数据
+      return this.EUExpansionCheckli.some(item => 
+        item.hasOwnProperty("英国") && item["英国"] !== null
+      );
     }
   }
 }
@@ -183,6 +248,89 @@ export default {
 
 .content-body {
   color: #333333;
+}
+
+/* 欧洲站点评估表格样式 */
+.europe-expansion-table {
+  margin-bottom: 40px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.europe-expansion-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: white;
+}
+
+.europe-expansion-table th {
+  background-color: #232f3e;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 8px;
+  border: 1px solid #444;
+}
+
+.region-header {
+  background-color: #37475a !important;
+  font-size: 16px;
+  padding: 16px 8px;
+}
+
+.region-header_1 {
+  background-color: #223a57 !important;
+  font-size: 16px;
+  padding: 16px 8px;
+}
+
+.sub-header {
+  background-color: #485769 !important;
+}
+
+.europe-expansion-table td {
+  padding: 12px 8px;
+  border: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.mcid-cell, .account-cell {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #232f3e;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.metric-name {
+  text-align: left;
+  font-weight: 500;
+  color: #232f3e;
+  background-color: #f8f9fa;
+  padding-left: 16px !important;
+}
+
+.value-cell {
+  font-weight: 500;
+}
+
+.checkmark {
+  color: #00a650;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.cross {
+  color: #ff4d4f;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.null-value {
+  color: #999;
+  font-style: italic;
 }
 
 /* 分析部分样式 */
@@ -238,6 +386,62 @@ export default {
   
   .content-header h2 {
     font-size: 20px;
+  }
+  
+  .europe-expansion-table {
+    font-size: 12px;
+  }
+  
+  .europe-expansion-table th,
+  .europe-expansion-table td {
+    padding: 8px 4px;
+  }
+  
+  .metric-name {
+    padding-left: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .europe-expansion-table {
+    display: block;
+  }
+  
+  .europe-expansion-table thead {
+    display: none;
+  }
+  
+  .europe-expansion-table tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
+  }
+  
+  .europe-expansion-table td {
+    display: block;
+    border-bottom: none;
+    padding: 8px 0;
+    position: relative;
+    padding-left: 120px;
+    text-align: left;
+  }
+  
+  .europe-expansion-table td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 110px;
+    padding-right: 10px;
+    font-weight: bold;
+    color: #232f3e;
+    text-align: right;
+  }
+  
+  .mcid-cell, .account-cell {
+    text-align: left;
+    padding-left: 120px;
   }
 }
 </style>
