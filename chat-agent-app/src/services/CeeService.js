@@ -17,7 +17,7 @@ class CeeService {
       const vatCount = [hasPolishVAT, hasCzechVAT].filter(Boolean).length
       
       // 计算 VAT 注册成本
-      const vatRegistrationCost = 600 - (vatCount * 300)
+      const vatRegistrationCost = vatCount * 300
       
       // 计算最终节约费用
       const finalSaving = estimatedSaving - vatRegistrationCost
@@ -25,7 +25,7 @@ class CeeService {
       return {
         soldCount: Number(soldCount),
         estimatedSaving: Number(estimatedSaving.toFixed(2)),
-        vatRegistrationCost,
+        vatRegistrationCost: Number(vatRegistrationCost.toFixed(2)),
         finalSaving: Number(finalSaving.toFixed(2))
       }
     }

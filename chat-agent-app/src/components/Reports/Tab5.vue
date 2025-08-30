@@ -246,6 +246,44 @@ export default {
   padding: 24px;
 }
 
+/* CEE 分析表格样式 */
+.cee-analysis-table {
+  margin-top: 20px;
+}
+
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.analysis-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.analysis-table tr:last-child td {
+  border-bottom: none;
+}
+
+.label-cell {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333333;
+  width: 60%;
+  border-right: 1px solid #e0e0e0;
+}
+
+.value-cell {
+  background-color: #ffffff;
+  color: #232f3e;
+  font-weight: 500;
+  text-align: right;
+}
+
 /* 无数据状态 */
 .no-data {
   text-align: center;

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, computed } from 'vue';
 import ReportFrame from './ReportFrame.vue';
 import ReportTab from '@/components/Reports/ReportTab.vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
@@ -10,6 +10,8 @@ import DifyService from '@/services/DifyService.js';
 const message = ref('');
 const messageContainer = ref(null);
 const fileInputRef = ref(null);
+const panEUFileInputRef = ref(null);
+const diFileInputRef = ref(null);
 const uploadedFiles = ref([]);
 const messages = ref([]);
 
@@ -33,67 +35,72 @@ const feedbackForm = ref({
 // 打字机效果相关
 const displayedText = ref('');
 const isTyping = ref(false);
+const showInitialPrompts = ref(true);
 
-const fullText = `这是你需要上传的文件路径：
+// 文件上传状态跟踪
+const panEUFilesUploaded = ref(false);
+const diFilesUploaded = ref(false);
+const allFilesUploaded = computed(() => panEUFilesUploaded.value && diFilesUploaded.value);
 
-【必须下载文件】
-1. 体检表 ✓
-   路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV 
+// 文件验证错误状态
+const panEUValidationError = ref('');
+const diValidationError = ref('');
 
-2. ASIN list ✓
+// PanEU 报告文件上传提示
+const panEUText = `请上传以下文件以生成 PanEU 报告：
+
+【PanEU 报告必需文件】
+1. ASIN list ✓
    路径：CN Paid Service EU Expansion Dashboard → part2.ASIN list → export to CSV
 
-3. SKU report ✓
+2. SKU report ✓
    路径：卖家欧洲站后台 → 菜单 → 报告 → 销售成本和费用 → SKU成本报告
    → 商城选择英德法意西五国，数据汇总级别保持MSKU，日期范围设定义（建议选择过去365天）
    → 勾选"生成报告" → 在"库存基础费用和附加费"配送基础费用和附加费" → 生成报告 → 下载
 
-4. Pan-EU report ✓
+3. Pan-EU report ✓
    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 报告
    → 下载欧洲整合服务ASIN清单（第一个，此报告包含符合亚马逊物流欧洲整合服务注册条件的亚马逊物流 ASIN）
 
-5. 多国库存报告 ✓
+4. 多国库存报告 ✓
    路径：卖家欧洲站后台 → 报告 → 配送 → 在库存列表中点击"显示更多" → 多国库存 → 生成最新报告并下载
 
-6. MPG report ✓
+【PanEU 报告可选文件】
+5. NL ASIN list ◯
+   路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list`;
+
+// DI 分析文件上传提示
+const diText = `请上传以下文件以生成 DI 分析报告：
+
+【DI 分析必需文件】
+1. 体检表 ✓
+   路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV 
+
+2. MPG report ✓
    路径：卖家欧洲后台 → 菜单 → 增长 → 选品指南针 → 下载推荐 → 商品列表
    → 下载全部（分别下载UK→DE/FR/IT/ES, DE→UK共5份报告）
 
-【可选下载文件】
-7. GSI Credit report (福利列表) ◯
+【DI 分析可选文件】
+3. GSI Credit report (福利列表) ◯
    路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载福利列表
    备注：卖家若无GSI则无下载页面
 
-8. GSI Credit report (代金券明细) ◯
+4. GSI Credit report (代金券明细) ◯
    路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载代金券明细
    备注：卖家若无GSI则无下载页面
 
-9. Remote_Fulfillment_ASIN_Status_Report ◯
+5. Remote_Fulfillment_ASIN_Status_Report ◯
    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载ASIN资质报告
    备注：卖家若未开启远程配送，则无下载页面
 
-10. Remote_Fulfillment_Order_Report ◯
-    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载订单报告
-    备注：卖家若未开启远程配送，则无下载页面
+6. Remote_Fulfillment_Order_Report ◯
+   路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载订单报告
+   备注：卖家若未开启远程配送，则无下载页面`;
 
-11. NL ASIN list ◯
-    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list`;
-
-// 打字机效果函数
-const typeWriter = async () => {
-  isTyping.value = true;
-  displayedText.value = '';
-  
-  for (let i = 0; i < fullText.length; i++) {
-    displayedText.value += fullText[i];
-    // 每个字符显示间隔50毫秒，你可以调整这个速度
-    await new Promise(resolve => setTimeout(resolve, 1));
-    
-    // 在添加字符后滚动到底部
-    scrollToBottom();
-  }
-  
-  isTyping.value = false;
+// 初始化显示提示
+const initializePrompts = () => {
+  showInitialPrompts.value = true;
+  scrollToBottom();
 };
 
 const scrollToBottom = () => {
@@ -202,9 +209,9 @@ const addUserMessage = (type, content) => {
   nextTick(() => scrollToBottom());
 };
 
-const addAgentMessage = (text) => {
+const addAgentMessage = (text, id = null) => {
   messages.value.push({
-    id: Date.now(),
+    id: id || Date.now(),
     type: 'agent',
     messageType: 'text',
     content: text,
@@ -281,10 +288,14 @@ const startReportGeneration = async () => {
     addAgentMessage('正在进行 PanEU 分析...');
     
     // 使用上传的文件进行自动分析
-    const recentFileMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'files');
-    const panEUFiles = recentFileMessage ? 
-      recentFileMessage.content.map(f => f.file) : 
-      []; // 如果没有文件，使用空数组
+    // 收集所有上传的文件（包括PanEU和DI文件）
+    const allFileMessages = messages.value.filter(msg => msg.messageType === 'files');
+    const allFiles = [];
+    allFileMessages.forEach(msg => {
+      allFiles.push(...msg.content.map(f => f.file));
+    });
+    
+    const panEUFiles = allFiles; // 传递所有文件给分析函数
     
     if (panEUFiles.length >= 4) {
       panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles);
@@ -304,14 +315,15 @@ const startReportGeneration = async () => {
       addAgentMessage('DI 分析跳过（文件不足）');
     }
     
-    // 3. 对于已加入CEE的用户，使用默认参数计算CEE成本
+    // 3. 调用 calculateCEECosts
     console.log('开始 CEE 成本计算...');
     addAgentMessage('正在计算 CEE 成本...');
     
-    // 使用默认参数
-    const soldCount = 10000;
-    const hasPolishVAT = false;
-    const hasCzechVAT = true;
+    // 从最后一个CEE表单消息中获取参数
+    const lastCEEMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'cee-form');
+    const soldCount = lastCEEMessage?.content?.germanSales || 10000;
+    const hasPolishVAT = lastCEEMessage?.content?.polandTax || false;
+    const hasCzechVAT = lastCEEMessage?.content?.czechTax || true;
     
     ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
     addAgentMessage('CEE 成本计算完成 ✓');
@@ -349,11 +361,14 @@ const submitCEEForm = async () => {
     addAgentMessage('正在进行 PanEU 分析...');
     
     // 使用上传的文件进行自动分析
-    // 需要从消息中获取最近发送的文件
-    const recentFileMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'files');
-    const panEUFiles = recentFileMessage ? 
-      recentFileMessage.content.map(f => f.file) : 
-      []; // 如果没有文件，使用空数组
+    // 收集所有上传的文件（包括PanEU和DI文件）
+    const allFileMessages = messages.value.filter(msg => msg.messageType === 'files');
+    const allFiles = [];
+    allFileMessages.forEach(msg => {
+      allFiles.push(...msg.content.map(f => f.file));
+    });
+    
+    const panEUFiles = allFiles; // 传递所有文件给分析函数
     
     if (panEUFiles.length >= 2) {
       panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles);
@@ -404,6 +419,89 @@ const triggerFileUpload = () => {
   fileInputRef.value?.click();
 };
 
+const triggerPanEUFileUpload = () => {
+  panEUFileInputRef.value?.click();
+};
+
+const triggerDIFileUpload = () => {
+  diFileInputRef.value?.click();
+};
+
+// 文件验证函数
+const validatePanEUFiles = (files) => {
+  const errors = [];
+  const requiredFiles = {
+    asin: { keywords: ['asin', 'list'], found: false },
+    sku: { keywords: ['sku', 'cost', '成本'], found: false },
+    paneu: { keywords: ['pan-eu', 'paneu', '欧洲整合', 'inventory'], found: false },
+    multicountry: { keywords: ['多国库存', 'multicountry', 'inventory'], found: false }
+  };
+  
+  // 检查文件格式
+  const validExtensions = ['.csv', '.xlsx', '.xls'];
+  const invalidFiles = files.filter(file => {
+    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    return !validExtensions.includes(extension);
+  });
+  
+  if (invalidFiles.length > 0) {
+    errors.push(`不支持的文件格式: ${invalidFiles.map(f => f.name).join(', ')}。请上传 CSV 或 Excel 文件。`);
+  }
+  
+  // 检查必需文件类型
+  files.forEach(file => {
+    const fileName = file.name.toLowerCase();
+    Object.keys(requiredFiles).forEach(type => {
+      if (requiredFiles[type].keywords.some(keyword => fileName.includes(keyword.toLowerCase()))) {
+        requiredFiles[type].found = true;
+      }
+    });
+  });
+  
+  const missingTypes = Object.keys(requiredFiles).filter(type => !requiredFiles[type].found);
+  if (missingTypes.length === Object.keys(requiredFiles).length) {
+    errors.push('未识别到必需的PanEU报告文件类型。请确认文件名包含关键词：ASIN list、SKU成本报告、Pan-EU报告、多国库存报告。');
+  }
+  
+  return errors;
+};
+
+const validateDIFiles = (files) => {
+  const errors = [];
+  const requiredFiles = {
+    masterSheet: { keywords: ['master', 'sheet', '体检表'], found: false },
+    mpg: { keywords: ['mpg', '选品指南针', 'marketplace'], found: false }
+  };
+  
+  // 检查文件格式
+  const validExtensions = ['.csv', '.xlsx', '.xls'];
+  const invalidFiles = files.filter(file => {
+    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    return !validExtensions.includes(extension);
+  });
+  
+  if (invalidFiles.length > 0) {
+    errors.push(`不支持的文件格式: ${invalidFiles.map(f => f.name).join(', ')}。请上传 CSV 或 Excel 文件。`);
+  }
+  
+  // 检查必需文件类型
+  files.forEach(file => {
+    const fileName = file.name.toLowerCase();
+    Object.keys(requiredFiles).forEach(type => {
+      if (requiredFiles[type].keywords.some(keyword => fileName.includes(keyword.toLowerCase()))) {
+        requiredFiles[type].found = true;
+      }
+    });
+  });
+  
+  const missingTypes = Object.keys(requiredFiles).filter(type => !requiredFiles[type].found);
+  if (missingTypes.length === Object.keys(requiredFiles).length) {
+    errors.push('未识别到必需的DI分析文件类型。请确认文件名包含关键词：体检表(master sheet)、MPG报告(选品指南针)。');
+  }
+  
+  return errors;
+};
+
 const handleFileUpload = (event) => {
   const files = Array.from(event.target.files);
   if (files.length > 0) {
@@ -430,9 +528,116 @@ const handleFileUpload = (event) => {
   }
 };
 
+const handlePanEUFileUpload = (event) => {
+  const files = Array.from(event.target.files);
+  if (files.length > 0) {
+    // 清空之前的错误信息
+    panEUValidationError.value = '';
+    
+    // 验证文件
+    const validationErrors = validatePanEUFiles(files);
+    if (validationErrors.length > 0) {
+      panEUValidationError.value = validationErrors.join('\n');
+      // 清空文件输入
+      event.target.value = '';
+      return;
+    }
+    
+    // 添加文件到上传列表，标记为PanEU类型
+    const newFiles = files.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file: file,
+      uploadTime: new Date().toLocaleString(),
+      category: 'paneu' // 标记文件类型
+    }));
+    
+    uploadedFiles.value.push(...newFiles);
+    
+    // 标记PanEU文件已上传
+    panEUFilesUploaded.value = true;
+    
+    // 添加用户文件消息
+    addUserMessage('files', newFiles);
+    
+    // 检查是否两种类型的文件都已上传
+    checkAllFilesUploaded();
+    
+    // 清空文件输入
+    event.target.value = '';
+    
+    // 滚动到底部
+    scrollToBottom();
+  }
+};
+
+const handleDIFileUpload = (event) => {
+  const files = Array.from(event.target.files);
+  if (files.length > 0) {
+    // 清空之前的错误信息
+    diValidationError.value = '';
+    
+    // 验证文件
+    const validationErrors = validateDIFiles(files);
+    if (validationErrors.length > 0) {
+      diValidationError.value = validationErrors.join('\n');
+      // 清空文件输入
+      event.target.value = '';
+      return;
+    }
+    
+    // 添加文件到上传列表，标记为DI类型
+    const newFiles = files.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file: file,
+      uploadTime: new Date().toLocaleString(),
+      category: 'di' // 标记文件类型
+    }));
+    
+    uploadedFiles.value.push(...newFiles);
+    
+    // 标记DI文件已上传
+    diFilesUploaded.value = true;
+    
+    // 添加用户文件消息
+    addUserMessage('files', newFiles);
+    
+    // 检查是否两种类型的文件都已上传
+    checkAllFilesUploaded();
+    
+    // 清空文件输入
+    event.target.value = '';
+    
+    // 滚动到底部
+    scrollToBottom();
+  }
+};
+
 const addUploadMessage = (files) => {
   // 这里可以添加一个上传成功的消息到聊天界面
   console.log('上传文件:', files.map(f => f.name));
+};
+
+// 检查所有文件是否都已上传
+const checkAllFilesUploaded = () => {
+  if (allFilesUploaded.value) {
+    // 隐藏初始提示
+    showInitialPrompts.value = false;
+    
+    // 延迟显示CEE状态询问
+    setTimeout(() => {
+      addAgentMessage('🎉 所有文件上传完成！现在开始生成报告流程。');
+      setTimeout(() => {
+        addCEEStatusMessage();
+      }, 1000);
+    }, 500);
+  }
+  // 不再生成新的气泡框提示，状态已在原有气泡框中的标题旁显示
 };
 
 const removeFile = (fileId) => {
@@ -467,7 +672,7 @@ const submitFeedbackForm = () => {
   };
 };
 
-// 组件挂载后启动打字机效果
+// 组件挂载后初始化
 onMounted(() => {
   scrollToBottom();
   
@@ -484,10 +689,10 @@ onMounted(() => {
     });
   }
 
+  // 延迟显示初始提示
   setTimeout(() => {
-    typeWriter();
-  }, 1000);
-
+    initializePrompts();
+  }, 500);
 });
 </script>
 
@@ -507,10 +712,71 @@ onMounted(() => {
             </div>
           </div>
           
-          <!-- 初始Agent 消息 (左侧) -->
-          <div class="message-item agent-message">
-            <div class="message-content">
-              <pre class="file-paths-text">{{ displayedText }}<span v-if="isTyping" class="typing-cursor">|</span></pre>
+          <!-- 初始Agent 消息 (左侧) - 文件上传提示 -->
+          <div v-if="showInitialPrompts" class="message-item agent-message">
+            <div class="message-content initial-prompts-container">
+              <!-- PanEU 报告文件上传提示 -->
+              <div class="upload-prompt-section">
+                <div class="title-button-row">
+                  <h3 class="prompt-title">
+                    📊 PanEU 报告分析
+                    <span v-if="panEUFilesUploaded" class="title-checkmark">✅</span>
+                  </h3>
+                  <button 
+                    class="upload-prompt-btn paneu-btn" 
+                    :class="{ 'uploaded': panEUFilesUploaded }"
+                    @click="triggerPanEUFileUpload"
+                    :disabled="panEUFilesUploaded"
+                  >
+                    <svg v-if="!panEUFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    {{ panEUFilesUploaded ? '已上传 PanEU' : '上传 PanEU 文件' }}
+                  </button>
+                </div>
+                <pre class="file-paths-text">{{ panEUText }}</pre>
+                <!-- PanEU 文件验证错误提示 -->
+                <div v-if="panEUValidationError" class="validation-error">
+                  <div class="error-icon">⚠️</div>
+                  <div class="error-text">{{ panEUValidationError }}</div>
+                </div>
+              </div>
+
+              <!-- 分隔线 -->
+              <div class="prompt-divider"></div>
+
+              <!-- DI 分析文件上传提示 -->
+              <div class="upload-prompt-section">
+                <div class="title-button-row">
+                  <h3 class="prompt-title">
+                    🔍 DI 分析报告
+                    <span v-if="diFilesUploaded" class="title-checkmark">✅</span>
+                  </h3>
+                  <button 
+                    class="upload-prompt-btn di-btn" 
+                    :class="{ 'uploaded': diFilesUploaded }"
+                    @click="triggerDIFileUpload"
+                    :disabled="diFilesUploaded"
+                  >
+                    <svg v-if="!diFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 715.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    {{ diFilesUploaded ? '已上传 DI' : '上传 DI 文件' }}
+                  </button>
+                </div>
+                <pre class="file-paths-text">{{ diText }}</pre>
+                <!-- DI 文件验证错误提示 -->
+                <div v-if="diValidationError" class="validation-error">
+                  <div class="error-icon">⚠️</div>
+                  <div class="error-text">{{ diValidationError }}</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -573,18 +839,18 @@ onMounted(() => {
                 
                 <div class="form-section">
                   <label class="form-label">德国商城过去12个月已售商品数量</label>
-                  <input type="number" class="form-input" placeholder="10000" :value="msg.content.germanSales">
+                  <input type="number" class="form-input" placeholder="10000" v-model="msg.content.germanSales">
                 </div>
 
                 <div class="form-section">
                   <label class="form-label">税号状态</label>
                   <div class="checkbox-group">
                     <div class="checkbox-item">
-                      <input type="checkbox" id="poland-tax" class="form-checkbox" :checked="msg.content.polandTax">
+                      <input type="checkbox" id="poland-tax" class="form-checkbox" v-model="msg.content.polandTax">
                       <label for="poland-tax">波兰税号 ✓</label>
                     </div>
                     <div class="checkbox-item">
-                      <input type="checkbox" id="czech-tax" class="form-checkbox" :checked="msg.content.czechTax">
+                      <input type="checkbox" id="czech-tax" class="form-checkbox" v-model="msg.content.czechTax">
                       <label for="czech-tax">捷克税号 ✓</label>
                     </div>
                   </div>
@@ -607,7 +873,7 @@ onMounted(() => {
         </div>
         
         <!-- 上传文件列表 -->
-        <div v-if="uploadedFiles.length > 0" class="uploaded-files-area">
+        <div v-if="uploadedFiles.length > 0 && !allFilesUploaded" class="uploaded-files-area">
           <div class="files-header">
             <h4>已上传文件 ({{ uploadedFiles.length }})</h4>
             <button class="clear-all-btn" @click="uploadedFiles = []" title="清空所有文件">
@@ -640,7 +906,7 @@ onMounted(() => {
         </div>
 
         <!-- 聊天输入区域 -->
-        <div class="chat-input-area">
+        <div class="chat-input-area" :class="{ 'disabled': showInitialPrompts }">
           <div class="input-container">
             <input 
               type="text" 
@@ -648,9 +914,15 @@ onMounted(() => {
               class="message-input" 
               placeholder="输入您的消息..."
               @keyup.enter="sendMessage"
+              :disabled="showInitialPrompts"
             />
             <div class="button-group">
-              <button class="attachment-btn" @click="triggerFileUpload" title="上传文件">
+              <button 
+                class="attachment-btn" 
+                @click="triggerFileUpload" 
+                title="上传文件"
+                :disabled="showInitialPrompts"
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -658,7 +930,7 @@ onMounted(() => {
               <button 
                 class="send-btn" 
                 @click="sendMessage"
-                :disabled="!message.trim() && uploadedFiles.length === 0"
+                :disabled="showInitialPrompts || (!message.trim() && uploadedFiles.length === 0)"
                 :class="{ 'has-content': message.trim() || uploadedFiles.length > 0 }"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -672,6 +944,24 @@ onMounted(() => {
               type="file" 
               ref="fileInputRef"
               @change="handleFileUpload"
+              multiple
+              accept=".csv,.xlsx,.xls,.pdf,.txt,.json"
+              style="display: none;"
+            />
+            <!-- PanEU 文件输入 -->
+            <input 
+              type="file" 
+              ref="panEUFileInputRef"
+              @change="handlePanEUFileUpload"
+              multiple
+              accept=".csv,.xlsx,.xls,.pdf,.txt,.json"
+              style="display: none;"
+            />
+            <!-- DI 文件输入 -->
+            <input 
+              type="file" 
+              ref="diFileInputRef"
+              @change="handleDIFileUpload"
               multiple
               accept=".csv,.xlsx,.xls,.pdf,.txt,.json"
               style="display: none;"
@@ -917,10 +1207,11 @@ onMounted(() => {
 
 .file-paths-text {
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 10px;
+  line-height: 1.3;
   color: #333;
   white-space: pre-wrap;
+  margin: 0;
   word-wrap: break-word;
   margin: 0;
   padding: 0;
@@ -1708,6 +1999,172 @@ onMounted(() => {
   background-color: #e8f4f0 !important;
   border: 1px solid #d1e7dd !important;
   padding: 20px !important;
+}
+
+/* 初始上传提示容器样式 - 与普通agent消息保持一致 */
+.initial-prompts-container {
+  background-color: #e8f4f0 !important;
+  color: #2d5a45 !important;
+  border: 1px solid #d1e7dd !important;
+  border-bottom-left-radius: 4px !important;
+  max-width: 90% !important;
+  padding: 20px !important;
+}
+
+.upload-prompt-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.upload-prompt-section:last-child {
+  margin-bottom: 0;
+}
+
+.title-button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.prompt-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e5233;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-checkmark {
+  font-size: 16px;
+  animation: checkmarkAppear 0.3s ease-in;
+}
+
+@keyframes checkmarkAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.upload-prompt-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.paneu-btn {
+  background-color: #4285f4;
+  color: white;
+  border-color: #4285f4;
+}
+
+.paneu-btn:hover {
+  background-color: #3367d6;
+  border-color: #3367d6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.di-btn {
+  background-color: #34a853;
+  color: white;
+  border-color: #34a853;
+}
+
+.di-btn:hover {
+  background-color: #2d8f47;
+  border-color: #2d8f47;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
+
+/* 已上传状态样式 */
+.upload-prompt-btn.uploaded {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.upload-prompt-btn.uploaded:hover {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.upload-prompt-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.prompt-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #9dd3a8, transparent);
+  margin: 12px 0;
+}
+
+/* 文件验证错误提示样式 */
+.validation-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-left: 4px solid #e53e3e;
+  border-radius: 6px;
+  max-width: 400px;
+}
+
+.error-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.error-text {
+  color: #c53030;
+  font-size: 13px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+
+/* 禁用状态的聊天输入区域 */
+.chat-input-area.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.chat-input-area.disabled .message-input {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.chat-input-area.disabled .attachment-btn,
+.chat-input-area.disabled .send-btn {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* 响应式设计 */
