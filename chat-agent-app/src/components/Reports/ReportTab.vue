@@ -176,18 +176,18 @@ export default {
     const selectedSubTab = ref(61)
 
     const solutionSubTabs = [
-      { id: 61, title: '欧盟内部物流方案', desc: '解决方案子页面 1 概述' },
-      { id: 62, title: '英国和欧盟间物流方案', desc: '解决方案子页面 2 概述' },
-      { id: 63, title: 'PanEU机会分析', desc: '解决方案子页面 3 概述' },
+      { id: 61, title: '欧盟内部物流方案（PanEU）', desc: '解决方案子页面 1 概述' },
+      { id: 62, title: '英国和欧盟间物流方案（DI）', desc: '解决方案子页面 2 概述' },
+      { id: 63, title: '更多成本节约（CEE）', desc: '解决方案子页面 3 概述' },
       // { id: 64, title: '页面4', desc: '解决方案子页面 4 概述' }
     ]
     
     // 完整的标签页配置
     const allTabs = [
       { id: 0, title: '概览', key: 'overview' },
-      { id: 4, title: '站点评估', key: 'europe_expansion_assessment' },
-      { id: 5, title: '解决方案', key: 'europe_expansion_solution' },
-      { id: 6, title: '合规', key: 'compliance_policy' },
+      { id: 4, title: '欧洲站点拓展评估', key: 'europe_expansion_assessment' },
+      { id: 5, title: '欧洲站拓展解决方案定制', key: 'europe_expansion_solution' },
+      { id: 6, title: '合规政策', key: 'compliance_policy' },
       { id: 7, title: '行动计划', key: 'action_plan' },
       { id: 8, title: '其他', key: 'others' }
     ]

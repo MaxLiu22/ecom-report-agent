@@ -7,12 +7,20 @@
       <div style="margin: 20px 0;">
         <h4 style="color: #333; font-size: 16px; margin: 10px 0;">欧洲站点拓展解决方案</h4>
         <h5 style="color: #666; font-size: 14px; margin: 10px 0;">欧盟内部物流方案</h5>
-        <div style="display: flex; align-items: center; margin: 15px 0; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 4px; border-left: 4px solid #FF8C00;">
-          <span style="color: #FF8C00; font-size: 16px; font-weight: bold;">▶</span>
-          <h4 style="color: #333; font-size: 16px; font-weight: 600; margin: 0; line-height: 1.4;">欧盟内部方案介绍与对比</h4>
-        </div>
-        <div class="table-container" style="overflow-x: auto; margin: 20px 0;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; border: 2px solid #ddd; margin-bottom: 15px;">
+        <div style="margin:18px 0 24px 0; background:#fff; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,0.06); position:relative; overflow:hidden;">
+          <div style="display:flex; align-items:center; gap:10px; padding:14px 18px; background:linear-gradient(135deg,#ff9d33 0%, #ff7f0e 100%); border-bottom:1px solid rgba(255,255,255,0.25);">
+            <span style="background:rgba(255,255,255,0.25); width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; font-size:18px; color:#fff; font-weight:600; box-shadow:0 2px 4px rgba(0,0,0,0.15);">▶</span>
+            <div style="display:flex; flex-direction:column;">
+              <span style="font-size:16px; font-weight:700; color:#fff; letter-spacing:.5px;">欧盟内部方案介绍与对比</span>
+              <span style="font-size:11px; color:#fff; opacity:.9;">对比 EFN 与 PanEU 关键差异，突出成本/速度与准入要求</span>
+            </div>
+          </div>
+          <div style="padding:16px 18px 6px 18px;">
+            <div style="font-size:12px; color:#555; line-height:1.5; margin-bottom:14px; background:#fff9ef; border:1px solid #ffd7b3; padding:10px 12px; border-radius:8px;">
+              <strong style="color:#c05621;">说明：</strong> 下表展示卖家在不同跨国 fulfillment 模式下的入仓策略、成本结构与配送速度差异，帮助快速判断是否升级至 PanEU。
+            </div>
+            <div class="table-container" style="overflow-x:auto; margin:0 0 16px 0;">
+              <table style="width:100%; border-collapse:collapse; font-size:11px; border:2px solid #ddd; margin-bottom:15px; background:#fff;">
             <thead>
               <tr>
                 <th rowspan="2" style="background: linear-gradient(135deg, #333 0%, #666 100%); color: white; padding: 12px 8px; border: 1px solid #ddd; text-align: center; width: 80px;">方案类型</th>
@@ -52,7 +60,20 @@
                 <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 10px;"><span style="background: #fff5f0; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">本地配送</span>+<span style="background: #fff2e8; color: #FF6B35; border: 1px solid #FF6B35; padding: 2px 6px; border-radius: 12px; font-size: 9px; margin: 2px;">跨境配送</span></td>
               </tr>
             </tbody>
-          </table>
+              </table>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:12px; margin:4px 0 10px 0;">
+              <div style="flex:1 1 240px; background:#f1f5f9; border:1px solid #d8e0e8; padding:10px 12px; border-radius:8px; font-size:11px; line-height:1.5;">
+                <strong style="color:#334155;">何时采用 EFN：</strong><br/>单一仓储早期试水阶段 / SKU 规模较少 / 资金占用需控制。
+              </div>
+              <div style="flex:1 1 240px; background:#fff1e6; border:1px solid #ffd2af; padding:10px 12px; border-radius:8px; font-size:11px; line-height:1.5;">
+                <strong style="color:#c05621;">升级 PanEU 信号：</strong><br/>多国已有自然出单 + 跨境配送费占比高 + 核心 ASIN 库存波动导致转化下滑。
+              </div>
+              <div style="flex:1 1 240px; background:#e6f7ff; border:1px solid #b3e3ff; padding:10px 12px; border-radius:8px; font-size:11px; line-height:1.5;">
+                <strong style="color:#075985;">收益结构：</strong><br/>履约费节约 + 配送时效提升 → 转化提升 + 库存分布智能化降低缺货风险。
+              </div>
+            </div>
+          </div>
         </div>
         <!-- PanEU 成本节约 -->
         <div style="margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #ddd; border-radius: 6px;">
