@@ -6,6 +6,139 @@
     </header>
 
     <div class="panel-grid">
+    <!-- EU Expansion Checklist Panel -->
+    <section class="panel">
+      <header class="panel__header">
+        <h2>EU Expansion Checklist</h2>
+        <small>上传文件名以 EU_expansion_checkli 开头的 Excel / CSV 文件</small>
+      </header>
+      <div class="panel__body">
+        <div class="uploader">
+          <input type="file" accept=".xlsx,.xls,.csv" @change="onChecklistChange" />
+          <div class="selected-summary" v-if="checklistFile">
+            已选文件: {{ checklistFile.name }}
+          </div>
+          <div class="actions-row">
+            <button class="btn" :disabled="checklistLoading || !checklistFile" @click="analyzeChecklist">{{ checklistLoading? '解析中...' : '解析 Checklist' }}</button>
+            <button class="btn btn-secondary" :disabled="checklistLoading || !checklistFile" @click="resetChecklist">重置</button>
+          </div>
+          <div class="error" v-if="checklistError">{{ checklistError }}</div>
+        </div>
+
+        <div v-if="checklistResult" class="result-block">
+          <h3>解析结果: {{ checklistResult.file_name }}</h3>
+          <p class="sub">包含 {{ checklistResult.sheet_names.length }} 个 sheet</p>
+          <!-- Matrix 显示（优先使用新版 matrix 字段，回退 parsed_matrix） -->
+          <div v-if="checklistMatrix" class="sub-block table-wrapper" style="margin-top:.4rem;">
+            <h4>指标矩阵 (matrix)</h4>
+            <table class="table compact">
+              <thead>
+                <tr>
+                  <th v-for="h in checklistMatrix.headers" :key="h">{{ h }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in checklistMatrix.rows" :key="row[0]">
+                  <td v-for="(cell,i) in row" :key="i">{{ cell }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- table_json 行对象数组展示 -->
+          <div v-if="checklistTableJson && checklistTableJson.length" class="sub-block table-wrapper" style="margin-top:.6rem;">
+            <h4>表格 JSON (table_json)</h4>
+            <table class="table compact">
+              <thead>
+                <tr>
+                  <th style="min-width:140px;">指标</th>
+                  <th v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ c }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in checklistTableJson" :key="r.指标">
+                  <td style="font-weight:600; white-space:nowrap;">{{ r.指标 }}</td>
+                  <td v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ r[c] ?? '' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- 保留旧结构化指标（parsed_metrics）作为兼容 -->
+          <div v-if="checklistResult.parsed_metrics && checklistResult.parsed_metrics.length" class="sub-block table-wrapper" style="margin-top:.6rem;">
+            <h4>结构化指标 (兼容 parsed_metrics)</h4>
+            <table class="table compact">
+              <thead>
+                <tr>
+                  <th style="min-width:140px;">指标</th>
+                  <th v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ c }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="m in checklistResult.parsed_metrics" :key="m.metric">
+                  <td style="font-weight:600; white-space:nowrap;">{{ m.metric }}</td>
+                  <td v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ m.values[c] ?? '' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="sub-block collapse">
+            <div class="collapse__header" @click="toggleChecklistSection('__sheet_list__')">
+              <span class="arrow" :class="{open: isChecklistOpen('__sheet_list__')}"></span>
+              <strong>Sheet 列表</strong>
+            </div>
+            <div class="collapse__body" v-show="isChecklistOpen('__sheet_list__')">
+              <div class="chip-wrap" style="margin-top:.5rem;">
+                <span class="chip" v-for="s in checklistResult.sheet_names" :key="s">{{ s }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-block collapse">
+            <div class="collapse__header" @click="toggleChecklistSection('__all_json__')">
+              <span class="arrow" :class="{open: isChecklistOpen('__all_json__')}"></span>
+              <strong>table_json JSON 预览</strong>
+              <span class="json-actions" v-if="isChecklistOpen('__all_json__')" @click.stop>
+                <button class="mini-btn" @click="copyChecklistJSON">复制</button>
+                <button class="mini-btn" @click="downloadChecklistJSON">下载</button>
+                <button class="mini-btn" @click="openChecklistFull">全屏</button>
+              </span>
+            </div>
+            <div class="collapse__body" v-show="isChecklistOpen('__all_json__')">
+              <pre ref="jsonOverviewEl" class="json-pre selectable" @click="selectAllJSON('overview')">{{ formattedChecklistJSON }}</pre>
+              <p class="hint-line">点击 JSON 区域可快速全选复制；或使用上方按钮。</p>
+            </div>
+          </div>
+
+          <!-- 全屏 JSON Modal -->
+          <div v-if="showChecklistJSONFull" class="json-fullscreen">
+            <div class="json-fullscreen__toolbar">
+              <span>Checklist table_json JSON</span>
+              <div class="fill"></div>
+              <button class="mini-btn" @click="copyChecklistJSON">复制</button>
+              <button class="mini-btn" @click="downloadChecklistJSON">下载</button>
+              <button class="mini-btn danger" @click="showChecklistJSONFull=false">关闭</button>
+            </div>
+            <pre ref="jsonFullscreenEl" class="json-pre fullscreen" @click="selectAllJSON('full')">{{ formattedChecklistJSON }}</pre>
+          </div>
+
+          <div class="sub-block collapse" v-for="s in checklistResult.sheet_names" :key="s">
+            <div class="collapse__header" @click="toggleChecklistSection(s)">
+              <span class="arrow" :class="{open: isChecklistOpen(s)}"></span>
+              <strong>{{ s }}</strong>
+              <span style="margin-left:auto; font-size:.55rem; color:#475569;">{{ checklistResult.sheets[s].length }} 行</span>
+            </div>
+            <div class="collapse__body" v-show="isChecklistOpen(s)">
+              <pre style="max-height:260px; overflow:auto; font-size:.55rem; background:#0f172a; color:#f8fafc; padding:.6rem .7rem; border-radius:10px;">{{ formatJSON(checklistResult.sheets[s]) }}</pre>
+            </div>
+          </div>
+          <div v-if="checklistResult.warnings.length" class="warnings">
+            <p>警告:</p>
+            <ul>
+              <li v-for="(w,i) in checklistResult.warnings" :key="i">{{ w }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
     <section class="panel">
       <header class="panel__header">
   <h2>PanEU 分析</h2>
@@ -174,6 +307,7 @@
 import { ref, computed } from 'vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
 import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
+import { analyzeEUExpansionChecklist } from '@/services/checkliService.js';
 
 // PanEU state (新版自动识别示例)
 const panEURawFiles = ref([]);            // 用户原始选择的文件
@@ -277,6 +411,75 @@ async function analyzeDI(){
     diError.value = 'DI 分析失败: ' + (err.message||String(err));
   } finally { diLoading.value=false; }
 }
+
+// Checklist state
+const checklistFile = ref(null);
+const checklistLoading = ref(false);
+const checklistError = ref('');
+const checklistResult = ref(null);
+const checklistOpen = ref({});
+
+// 新增：对新版字段做兼容聚合
+const checklistMatrix = computed(()=> checklistResult.value?.matrix || checklistResult.value?.parsed_matrix || null);
+const checklistTableJson = computed(()=> checklistResult.value?.table_json || []);
+// 仅展示 table_json 内容（用户需求）
+const formattedChecklistJSON = computed(()=> checklistResult.value?.table_json ? formatJSON(checklistResult.value.table_json) : '');
+
+// JSON 交互增强
+const showChecklistJSONFull = ref(false);
+const jsonOverviewEl = ref(null);
+const jsonFullscreenEl = ref(null);
+
+function copyChecklistJSON(){
+  if(!formattedChecklistJSON.value) return;
+  navigator.clipboard?.writeText(formattedChecklistJSON.value).then(()=>{
+    // 可选：简易提示（后续可替换成全局 toast）
+    console.log('JSON 已复制');
+  }).catch(err=> console.warn('复制失败', err));
+}
+function downloadChecklistJSON(){
+  const blob = new Blob([formattedChecklistJSON.value], { type:'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = (checklistResult.value?.file_name || 'checklist') + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function openChecklistFull(){ showChecklistJSONFull.value = true; setTimeout(()=> selectAllJSON('full'), 50); }
+function selectAllJSON(mode){
+  const el = mode==='full' ? jsonFullscreenEl.value : jsonOverviewEl.value;
+  if(!el) return; const range = document.createRange(); range.selectNodeContents(el); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+
+function onChecklistChange(e){
+  checklistError.value=''; checklistResult.value=null; checklistFile.value = e.target.files?.[0] || null;
+}
+
+function resetChecklist(){
+  checklistFile.value=null; checklistError.value=''; checklistResult.value=null;
+}
+
+async function analyzeChecklist(){
+  if(!checklistFile.value){ checklistError.value='请先选择文件'; return; }
+  checklistError.value=''; checklistResult.value=null; checklistLoading.value=true;
+  try {
+    checklistResult.value = await analyzeEUExpansionChecklist([checklistFile.value]);
+    // 默认展开 sheet 列表
+    checklistOpen.value['__sheet_list__']=true;
+  } catch(err){
+    console.error(err); checklistError.value='解析失败: '+(err.message||String(err));
+  } finally { checklistLoading.value=false; }
+}
+
+function formatJSON(obj){
+  try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+}
+
+function toggleChecklistSection(key){
+  checklistOpen.value[key] = !checklistOpen.value[key];
+}
+function isChecklistOpen(key){
+  return !!checklistOpen.value[key];
+}
 </script>
 
 <style scoped>
@@ -369,6 +572,29 @@ input[type=file] { margin:.55rem 0 .65rem; font-size:.7rem; color:#0f172a; }
 /* ---------- State & Feedback ---------- */
 .error { margin-top:.55rem; color:#b91c1c; font-size:.62rem; font-weight:600; letter-spacing:.3px; }
 .result-block { margin-top:1.35rem; }
+
+/* ---------- Collapse (Checklist) ---------- */
+.collapse { border:1px solid rgba(148,163,184,.35); border-radius:10px; background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.4)); margin-top:.7rem; box-shadow:inset 0 0 0 1px rgba(255,255,255,.35); }
+.collapse__header { cursor:pointer; display:flex; align-items:center; gap:.55rem; padding:.55rem .75rem; font-size:.63rem; user-select:none; font-weight:600; color:#0f172a; }
+.collapse__header:hover { background:rgba(148,163,184,.18); }
+.collapse__body { padding:.25rem .75rem .7rem; animation:fadeIn .25s ease; }
+.arrow { width:10px; height:10px; border-right:2px solid #334155; border-bottom:2px solid #334155; transform:rotate(-45deg); transition:.25s transform; margin-right:.1rem; }
+.arrow.open { transform:rotate(45deg); }
+
+/* ---------- JSON Overview Enhancements ---------- */
+.json-actions { display:flex; gap:.4rem; margin-left:auto; }
+.mini-btn { background:#1e293b; color:#f1f5f9; border:none; padding:.25rem .55rem .3rem; font-size:.55rem; border-radius:6px; cursor:pointer; font-weight:600; letter-spacing:.3px; box-shadow:0 1px 2px rgba(0,0,0,.35); transition:.2s background, .2s transform; }
+.mini-btn:hover { background:#334155; }
+.mini-btn:active { transform:translateY(1px); }
+.mini-btn.danger { background:#b91c1c; }
+.mini-btn.danger:hover { background:#991b1b; }
+.json-pre { max-height:480px; overflow:auto; font-size:.55rem; background:#0f172a; color:#f8fafc; padding:.65rem .75rem; border-radius:12px; line-height:1.5; box-shadow:inset 0 0 0 1px rgba(255,255,255,.06); }
+.json-pre.fullscreen { max-height:none; height:calc(100vh - 72px); }
+.json-pre.selectable { user-select:text; }
+.hint-line { margin:.4rem 0 0; font-size:.5rem; color:#64748b; }
+.json-fullscreen { position:fixed; inset:0; background:rgba(15,23,42,.92); z-index:999; display:flex; flex-direction:column; padding:0 0 0; }
+.json-fullscreen__toolbar { display:flex; align-items:center; gap:.6rem; padding:.55rem .85rem; background:linear-gradient(135deg,#1e293b,#0f172a); color:#f1f5f9; font-size:.6rem; font-weight:600; box-shadow:0 2px 6px -2px rgba(0,0,0,.5); }
+.json-fullscreen__toolbar .fill { flex:1; }
 
 /* ---------- Responsive ---------- */
 @media (max-width:1080px){ .panel-grid { gap:1.4rem; } }
