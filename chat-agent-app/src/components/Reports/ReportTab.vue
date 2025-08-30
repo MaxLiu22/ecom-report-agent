@@ -8,12 +8,23 @@
           :key="tab.id"
           class="tab-item"
           :class="{ 'active': activeTab === tab.id }"
-          @click="switchTab(tab.id)"
+          @click="onMainTabClick(tab)"
         >
           <span class="tab-title">{{ tab.title }}</span>
           <div class="tab-indicator" v-if="activeTab === tab.id"></div>
         </div>
       </div>
+      <!-- 解决方案 下拉子菜单 -->
+      <transition name="dropdown-fade">
+        <div v-if="showSolutionMenu" class="solution-dropdown compact" @click.stop>
+          <ul class="dropdown-list">
+            <li v-for="item in solutionSubTabs" :key="item.id" class="dropdown-item" :class="{ selected: selectedSubTab === item.id }" @click="selectSubTab(item.id)">
+              <span class="item-title">{{ item.title }}</span>
+              <!-- <span class="item-desc">{{ item.desc }}</span> -->
+            </li>
+          </ul>
+        </div>
+      </transition>
     </div>
 
     <!-- Tab 内容区域 -->
@@ -105,7 +116,7 @@
             :ceeResult="ceeResult" />
       
       <!-- Tab 6: 欧洲站拓展解决方案定制 -->
-      <Tab6 v-if="activeTab === 5" />
+  <Tab6 v-if="activeTab === 5" :selectedSubTab="selectedSubTab" />
       
       <!-- Tab 7: 合规政策 -->
       <Tab7 v-if="activeTab === 6" />
@@ -121,7 +132,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import Tab5 from './Tab5.vue'
 import Tab6 from './Tab6.vue'
 import Tab7 from './Tab7.vue'
@@ -162,6 +173,15 @@ export default {
   setup(props) {
     // 当前活跃的标签页
     const activeTab = ref(0)
+    const showSolutionMenu = ref(false)
+    const selectedSubTab = ref(61)
+
+    const solutionSubTabs = [
+      { id: 61, title: '欧盟内部物流方案', desc: '解决方案子页面 1 概述' },
+      { id: 62, title: '英国和欧盟间物流方案', desc: '解决方案子页面 2 概述' },
+      { id: 63, title: 'PanEU机会分析', desc: '解决方案子页面 3 概述' },
+      // { id: 64, title: '页面4', desc: '解决方案子页面 4 概述' }
+    ]
     
     // 完整的标签页配置
     const allTabs = [
@@ -191,17 +211,55 @@ export default {
     }, { immediate: true })
     
     // 切换标签页
+    const closeSolutionMenu = () => { showSolutionMenu.value = false }
+
     const switchTab = (tabId) => {
-      // 只有在报告已生成或者切换到概览标签页时才允许切换
       if (props.reportGenerated || tabId === 0) {
         activeTab.value = tabId
+        if (tabId !== 5) closeSolutionMenu()
       }
     }
+
+    const onMainTabClick = (tab) => {
+      if (tab.id === 5) {
+        // 若已在解决方案主标签，则切换子菜单显示
+        if (activeTab.value === 5) {
+          showSolutionMenu.value = !showSolutionMenu.value
+        } else {
+          switchTab(5)
+          showSolutionMenu.value = true
+        }
+      } else {
+        switchTab(tab.id)
+      }
+    }
+
+    const selectSubTab = (id) => {
+      selectedSubTab.value = id
+      // 保持菜单展示状态，或可选择自动关闭：
+      showSolutionMenu.value = false
+    }
+
+    // 点击外部关闭下拉
+    const handleBodyClick = (e) => {
+      const dropdown = document.querySelector('.solution-dropdown')
+      const nav = document.querySelector('.tab-navigation')
+      if (showSolutionMenu.value && dropdown && !dropdown.contains(e.target) && nav && !nav.contains(e.target)) {
+        closeSolutionMenu()
+      }
+    }
+    onMounted(() => document.addEventListener('click', handleBodyClick))
+    onBeforeUnmount(() => document.removeEventListener('click', handleBodyClick))
     
     return {
       activeTab,
       tabs,
-      switchTab
+      switchTab,
+      onMainTabClick,
+      showSolutionMenu,
+      solutionSubTabs,
+      selectedSubTab,
+      selectSubTab
     }
   }
 }
@@ -224,6 +282,7 @@ export default {
   border-bottom: none;
   padding: 0 12px;
   box-shadow: 0 2px 8px rgba(35, 47, 62, 0.15);
+  position: relative;
 }
 
 .tab-container {
@@ -261,6 +320,19 @@ export default {
   border-bottom-color: #ff9900;
   background-color: rgba(255, 153, 0, 0.1);
 }
+
+/* 解决方案 子菜单 */
+.solution-dropdown { position:absolute; left:0; top:100%; background:#ffffff; border:1px solid #e5e7eb; z-index:30; padding:8px 0; box-shadow:0 8px 18px -4px rgba(0,0,0,0.12),0 4px 8px -2px rgba(0,0,0,0.08); width:240px; border-radius:8px; }
+.solution-dropdown.compact { right:auto; }
+.dropdown-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.dropdown-item { display:flex; flex-direction:column; padding:8px 12px 6px; border-left:3px solid transparent; cursor:pointer; transition:background .2s ease,border-color .25s ease; }
+.dropdown-item:hover { background:#fff8ec; border-left-color:#ff9900; }
+.dropdown-item.selected { background:#fff3e0; border-left-color:#ff9900; }
+.dropdown-item .item-title { font-size:13px; font-weight:600; color:#232f3e; line-height:1.2; margin-bottom:2px; }
+.dropdown-item .item-desc { font-size:11px; color:#666; line-height:1.3; white-space:normal; }
+
+.dropdown-fade-enter-active,.dropdown-fade-leave-active { transition:opacity .25s ease, transform .3s ease; }
+.dropdown-fade-enter-from,.dropdown-fade-leave-to { opacity:0; transform:translateY(-6px); }
 
 .tab-title {
   font-size: 13px;
