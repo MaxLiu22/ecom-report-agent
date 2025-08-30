@@ -219,15 +219,42 @@
         </div>
       </div>
       
+      <!-- Tab 5: 欧洲站点拓展评估 -->
+      <Tab5 v-if="activeTab === 4" />
+      
+      <!-- Tab 6: 欧洲站拓展解决方案定制 -->
+      <Tab6 v-if="activeTab === 5" />
+      
+      <!-- Tab 7: 合规政策 -->
+      <Tab7 v-if="activeTab === 6" />
+      
+      <!-- Tab 8: 行动计划 -->
+      <Tab8 v-if="activeTab === 7" />
+      
+      <!-- Tab 9: 其他 -->
+      <Tab9 v-if="activeTab === 8" />
+      
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
+import Tab5 from './Tab5.vue'
+import Tab6 from './Tab6.vue'
+import Tab7 from './Tab7.vue'
+import Tab8 from './Tab8.vue'
+import Tab9 from './Tab9.vue'
 
 export default {
   name: 'ReportTab',
+  components: {
+    Tab5,
+    Tab6,
+    Tab7,
+    Tab8,
+    Tab9
+  },
   props: {
     // 是否已生成报告
     reportGenerated: {
@@ -250,21 +277,46 @@ export default {
       default: null
     }
   },
-  setup() {
+  setup(props) {
     // 当前活跃的标签页
     const activeTab = ref(0)
     
-    // 标签页配置
-    const tabs = [
+    // 完整的标签页配置
+    const allTabs = [
       { id: 0, title: '概览', key: 'overview' },
-      { id: 1, title: 'PanEU分析', key: 'paneu' },
+      { id: 1, title: 'PanEU', key: 'paneu' },
       { id: 2, title: 'DI分析', key: 'di' },
-      { id: 3, title: 'CEE分析', key: 'cee' }
+      { id: 3, title: 'CEE', key: 'cee' },
+      { id: 4, title: '站点评估', key: 'europe_expansion_assessment' },
+      { id: 5, title: '解决方案', key: 'europe_expansion_solution' },
+      { id: 6, title: '合规', key: 'compliance_policy' },
+      { id: 7, title: '行动计划', key: 'action_plan' },
+      { id: 8, title: '其他', key: 'others' }
     ]
+    
+    // 根据报告生成状态过滤可用的标签页
+    const tabs = computed(() => {
+      if (!props.reportGenerated) {
+        // 报告未生成时，只显示概览标签页
+        return allTabs.filter(tab => tab.id === 0)
+      }
+      // 报告已生成时，显示所有标签页
+      return allTabs
+    })
+    
+    // 监听 reportGenerated 变化，确保在报告未生成时活跃标签页为概览
+    watch(() => props.reportGenerated, (newValue) => {
+      if (!newValue) {
+        activeTab.value = 0
+      }
+    }, { immediate: true })
     
     // 切换标签页
     const switchTab = (tabId) => {
-      activeTab.value = tabId
+      // 只有在报告已生成或者切换到概览标签页时才允许切换
+      if (props.reportGenerated || tabId === 0) {
+        activeTab.value = tabId
+      }
     }
     
     return {
@@ -291,7 +343,7 @@ export default {
 .tab-navigation {
   background-color: #232f3e;
   border-bottom: none;
-  padding: 0 20px;
+  padding: 0 12px;
   box-shadow: 0 2px 8px rgba(35, 47, 62, 0.15);
 }
 
@@ -300,16 +352,25 @@ export default {
   gap: 0;
   width: 100%;
   margin: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tab-container::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-item {
   position: relative;
-  padding: 16px 24px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   border-bottom: 3px solid transparent;
   white-space: nowrap;
   color: #ffffff;
+  flex-shrink: 0;
+  min-width: fit-content;
 }
 
 .tab-item:hover {
@@ -323,9 +384,9 @@ export default {
 }
 
 .tab-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
 .tab-indicator {
@@ -450,11 +511,14 @@ export default {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .tab-navigation {
-    padding: 0 10px;
+    padding: 0 8px;
   }
   
   .tab-item {
-    padding: 12px 16px;
+    padding: 10px 12px;
+  }
+  
+  .tab-title {
     font-size: 12px;
   }
   
