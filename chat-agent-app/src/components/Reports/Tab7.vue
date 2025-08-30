@@ -25,26 +25,46 @@
 
     <div class="content-header second-block">
       <h2>📣 合规风险</h2>
-      <p class="content-description">最新的欧盟政策变化、官方来源与业务影响提示</p>
+      <p class="content-description">下列模块展示物流方案、PanEU政策、产品与VAT合规信息</p>
     </div>
 
     <div class="content-body">
-      <!-- 复用 Tab3 的政策更新图片板块，调整为本组件适配的样式 -->
-      <div class="policy-updates" style="margin-top: 10px">
-        <div class="policy-card" style="margin-top: 24px">
-          <div class="policy-link" style="cursor: default">
-            <img src="/src/assets/合规风险.jpg" alt="合规风险" class="policy-image" />
-          </div>
-          <div class="img-caption">合规风险参考图示</div>
+      <div class="compliance-modules">
+        <!-- <div class="module-item">
+          <EUInternalSolutionsComponent />
+        </div> -->
+        <!-- <div class="module-item">
+          <PanEUPolicyUpdateComponent />
+        </div> -->
+        <div class="module-item">
+          <ProductComplianceComponent />
         </div>
+        <!-- <div class="module-item">
+          <VATComplianceComponent />
+        </div>
+        <div class="module-item">
+          <VATInfoComponent />
+        </div> -->
       </div>
     </div>
   </div>
 </template>
-
 <script>
+import EUInternalSolutionsComponent from './EUInternalSolutionsComponent.vue'
+import PanEUPolicyUpdateComponent from './PanEUPolicyUpdateComponent.vue'
+import ProductComplianceComponent from './ProductComplianceComponent.vue'
+import VATComplianceComponent from './VATComplianceComponent.vue'
+import VATInfoComponent from './VATInfoComponent.vue'
+
 export default {
   name: 'Tab7',
+  components: {
+    EUInternalSolutionsComponent,
+    PanEUPolicyUpdateComponent,
+    ProductComplianceComponent,
+    VATComplianceComponent,
+    VATInfoComponent
+  }
 }
 </script>
 
@@ -136,6 +156,18 @@ export default {
   letter-spacing: 0.5px;
 }
 
+/* 合规模块布局 */
+.compliance-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 8px;
+}
+
+.module-item {
+  background: transparent; /* 内部组件自带卡片样式 */
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .content-panel {
@@ -151,6 +183,10 @@ export default {
   }
   .img-caption {
     font-size: 11px;
+  }
+
+  .compliance-modules {
+    gap: 24px;
   }
 }
 </style>
