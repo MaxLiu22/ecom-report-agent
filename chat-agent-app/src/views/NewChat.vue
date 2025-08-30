@@ -1,6 +1,7 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue';
 import ReportFrame from './ReportFrame.vue';
+import ReportTab from '@/components/Reports/ReportTab.vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
 import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
 import CeeService from '@/services/CeeService.js';
@@ -754,146 +755,13 @@ onMounted(() => {
           </div>
         </div>
         
-        <div class="report-frame">
-          <!-- Tab 导航栏 -->
-          <div class="tab-navigation">
-            <div class="tab-container">
-              <div
-                class="tab-item active"
-              >
-                <span class="tab-title">分析报告</span>
-                <div class="tab-indicator"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tab 内容区域 -->
-          <div class="tab-content">
-            <div class="content-panel">
-              <div v-if="!reportGenerated" class="content-header">
-                <h2> 物流分析报告 </h2>
-              </div>
-              
-              <div class="content-body">
-                <div v-if="!reportGenerated">
-                  <div style="margin-top: 30px;">
-                    <h3 style="color: #333; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">📋 使用步骤</h3>
-                    <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
-                      <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                        <span style="background: #FF8C00; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">1</span>
-                        <span style="color: #333; font-size: 14px;">上传分析所需的数据文件</span>
-                      </div>
-                      <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                        <span style="background: #FF8C00; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">2</span>
-                        <span style="color: #333; font-size: 14px;">填写 CEE 中欧计划分析参数</span>
-                      </div>
-                      <div style="display: flex; align-items: center;">
-                        <span style="background: #FF8C00; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">3</span>
-                        <span style="color: #333; font-size: 14px;">点击生成报告并查看结果</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- 报告生成完成后显示结果 -->
-                <div v-else>
-                  <div class="content-header">
-                    <h2>📊 IntraEU.AI </h2>
-                    <p class="content-description">基于您的数据生成的详细分析结果</p>
-                  </div>
-                  
-                  <!-- PanEU 分析结果 -->
-                  <div v-if="panEUResult" style="margin: 20px 0; padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px;">
-                    <h3 style="color: #333; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">🌍 PanEU 分析结果</h3>
-                    <h4 style="color: #333; font-size: 16px; margin: 10px 0;">{{ panEUResult.report_title }}</h4>
-                    <p style="color: #666; font-size: 14px; margin: 10px 0;">{{ panEUResult.report_subtitle }}</p>
-                    
-                    <!-- PanEU 表格 -->
-                    <div v-if="panEUResult.excel_data" style="margin: 20px 0;">
-                      <h5 style="color: #333; font-size: 14px; margin-bottom: 15px;">PanEU ASIN 机会概览</h5>
-                      <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border: 1px solid #ddd; border-radius: 4px;">
-                          <thead>
-                            <tr>
-                              <th v-for="header in panEUResult.excel_data.headers" :key="header" style="background: #333; color: white; padding: 12px 8px; text-align: center; border-right: 1px solid #555;">{{ header }}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
-                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row.metric }}</td>
-                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #FF6B35;">{{ row.count }}</td>
-                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row.description }}</td>
-                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row.formula }}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- DI 分析结果 -->
-                  <div v-if="diResult" style="margin: 20px 0; padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px;">
-                    <h3 style="color: #333; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">🔄 DI 分析结果</h3>
-                    <h4 style="color: #333; font-size: 16px; margin: 10px 0;">{{ diResult.report_title }}</h4>
-                    
-                    <!-- 关键机会分析 -->
-                    <div v-if="diResult.key_opportunity_analysis" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
-                      <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.title }}</h5>
-                      <p style="color: #666; font-size: 13px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.subtitle }}</p>
-                      <ul style="margin: 0; padding-left: 20px;">
-                        <li v-for="point in diResult.key_opportunity_analysis.points" :key="point.title" style="color: #555; font-size: 13px; margin: 5px 0;">
-                          <strong>{{ point.title }}:</strong> {{ point.description }}
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <!-- 推荐行动 -->
-                    <div v-if="diResult.recommended_actions" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
-                      <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.recommended_actions.title }}</h5>
-                      <ol style="margin: 0; padding-left: 20px;">
-                        <li v-for="action in diResult.recommended_actions.actions" :key="action.priority" style="color: #555; font-size: 13px; margin: 8px 0;">
-                          <span style="background: #FF6B35; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P{{ action.priority }}</span>
-                          {{ action.recommendation }}
-                        </li>
-                      </ol>
-                    </div>
-                    
-                    <!-- 数据表 -->
-                    <div v-if="diResult.data_table" style="margin: 20px 0;">
-                      <h5 style="color: #333; font-size: 14px; margin-bottom: 15px;">数据表</h5>
-                      <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border: 1px solid #ddd; border-radius: 4px;">
-                          <thead>
-                            <tr>
-                              <th v-for="header in diResult.data_table.headers" :key="header" style="background: #333; color: white; padding: 12px 8px; text-align: center; border-right: 1px solid #555;">{{ header }}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="row in diResult.data_table.rows" :key="row['#']">
-                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['#'] }}</td>
-                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['UK<>EU ASIN'] }}</td>
-                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #FF6B35;">{{ row['数量'] }}</td>
-                              <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['来源商城销售额(T30D)'] }}</td>
-                              <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['机会点及操作'] }}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- CEE 成本分析结果 -->
-                  <div v-if="ceeResult" style="margin: 20px 0; padding: 20px; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px;">
-                    <h3 style="color: #333; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">💰 CEE 成本分析结果</h3>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
-                      <pre style="font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 11px; line-height: 1.4; color: #333; white-space: pre-wrap; word-wrap: break-word; margin: 0;">{{ JSON.stringify(ceeResult, null, 2) }}</pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- 使用 ReportTab 组件 -->
+        <ReportTab
+          :report-generated="reportGenerated"
+          :pan-e-u-result="panEUResult"
+          :di-result="diResult"
+          :cee-result="ceeResult"
+        />
         <!-- 按键区域 -->
         <div class="button-area">
           <div class="button-left">
