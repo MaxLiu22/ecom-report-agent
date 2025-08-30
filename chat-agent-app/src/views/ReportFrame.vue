@@ -590,6 +590,9 @@ const switchSubSection = (subId) => {
         </div>
         <div class="content-body">
           <!-- 主要机会点分析 -->
+          <div style="text-align: center; margin: 20px 0;">
+            <img src="@/assets/sum.png" alt="总结图表" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+          </div>
           <div style="background: #ffffff; border: 1px solid #e8e8e8; border-radius: 8px; margin: 20px 0; padding: 25px;">
             <div style="margin-bottom: 20px; border-bottom: 2px solid #f0f8ff; padding-bottom: 15px;">
               <h3 style="color: #333; font-size: 20px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">🎯 主要机会点分析</h3>
@@ -618,6 +621,7 @@ const switchSubSection = (subId) => {
             </div>
           </div>
         </div>
+        
       </div>
 
       <!-- Tab 5: 其他-->

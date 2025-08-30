@@ -483,6 +483,10 @@ onMounted(() => {
     });
   }
 
+  setTimeout(() => {
+    typeWriter();
+  }, 1000);
+
 });
 </script>
 
@@ -497,17 +501,17 @@ onMounted(() => {
           <!-- 初始用户消息 (右侧) -->
           <div class="message-item user-message">
             <div class="message-content">
-              <!-- <p>请帮我生成一个 IntraEU 卖家分析报告</p> -->
-              <p></p>
+              <p>请帮我生成一个 IntraEU 卖家分析报告</p>
+              
             </div>
           </div>
           
           <!-- 初始Agent 消息 (左侧) -->
-          <!-- <div class="message-item agent-message">
+          <div class="message-item agent-message">
             <div class="message-content">
               <pre class="file-paths-text">{{ displayedText }}<span v-if="isTyping" class="typing-cursor">|</span></pre>
             </div>
-          </div> -->
+          </div>
 
           <!-- 动态消息列表 -->
           <div v-for="msg in messages" :key="msg.id" class="message-item" :class="msg.type === 'user' ? 'user-message' : 'agent-message'">
@@ -794,7 +798,7 @@ onMounted(() => {
                 <!-- 报告生成完成后显示结果 -->
                 <div v-else>
                   <div class="content-header">
-                    <h2>📊 CEE 分析报告</h2>
+                    <h2>📊 IntraEU.AI </h2>
                     <p class="content-description">基于您的数据生成的详细分析结果</p>
                   </div>
                   
