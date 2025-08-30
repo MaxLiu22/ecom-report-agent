@@ -23,6 +23,7 @@ class CeeService {
       const finalSaving = estimatedSaving - vatRegistrationCost
       
       return {
+        soldCount: Number(soldCount),
         estimatedSaving: Number(estimatedSaving.toFixed(2)),
         vatRegistrationCost,
         finalSaving: Number(finalSaving.toFixed(2))
