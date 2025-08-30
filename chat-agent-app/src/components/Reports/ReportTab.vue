@@ -32,9 +32,27 @@
       <!-- Tab 1: 概览 -->
       <div v-if="activeTab === 0" class="content-panel">
         <div class="content-header">
-          <h2 v-if="!reportGenerated">📋 物流分析报告</h2>
-          <h2 v-else>📊 IntraEU.AI</h2>
-          <p v-if="reportGenerated" class="content-description">基于您的数据生成的详细分析结果概览</p>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #FF8C00; margin: 20px 0;">
+            <h4 style="color: #333; font-size: 18px; font-weight: 600; margin: 0 0 15px 0;">本报告包含以下分析内容：</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-top: 15px;">
+              <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                <h5 style="color: #FF6B35; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">🌍 欧盟内部物流方案</h5>
+                <p style="color: #666; font-size: 13px; line-height: 1.4; margin: 0;">欧洲站点拓展解决方案对比分析，包括PanEU、EFN等物流模式</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                <h5 style="color: #FF6B35; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">📊 英国和欧盟间物流方案</h5>
+                <p style="color: #666; font-size: 13px; line-height: 1.4; margin: 0;">147个ASIN的PanEU同步机会，预计节省€3,313,102.44</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                <h5 style="color: #FF6B35; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">🎯 更多成本节约（CEE）</h5>
+                <p style="color: #666; font-size: 13px; line-height: 1.4; margin: 0;">英国-欧盟双向入库机会，高潜力选品识别</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                <h5 style="color: #FF6B35; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">📈 合规风险</h5>
+                <p style="color: #666; font-size: 13px; line-height: 1.4; margin: 0;">双向分析数据，包含销售潜力和成本优化建议</p>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div class="content-body">
