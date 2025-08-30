@@ -28,23 +28,57 @@ class ActionService {
       
       if (!vatItem || !warehouseItem) return [];
       
-      const countries = ["英国", "德国", "意大利", "法国", "西班牙"];
-      const results = [];
+      // 动态获取国家列表，排除"指标"字段
+      const countries = Object.keys(vatItem).filter(key => key !== "指标");
       
+      // 按情况分组存储国家
+      const groupedResults = {
+        compliant: [],      // 已合规：warehouse=1, vat=1
+        needVAT: [],        // 需上传税号：warehouse=1, vat=0
+        canOpenWarehouse: [], // 可开启仓储：warehouse=0, vat=1
+        needVATAndWarehouse: [] // 需上传税号并开启仓储：warehouse=0, vat=0
+      };
+      
+      // 遍历所有国家并分组
       countries.forEach(country => {
         const vatStatus = vatItem[country];
         const warehouseStatus = warehouseItem[country];
         
+        // 跳过无效值（null或undefined）
+        if (vatStatus === null || vatStatus === undefined || 
+            warehouseStatus === null || warehouseStatus === undefined) {
+          return;
+        }
+        
         if (warehouseStatus === 1 && vatStatus === 1) {
-          results.push(`${country}已经合规开启了PanEU所有的仓储，无需额外操作。`);
+          groupedResults.compliant.push(country);
         } else if (warehouseStatus === 1 && vatStatus === 0) {
-          results.push(`${country}需上传税号;`);
+          groupedResults.needVAT.push(country);
         } else if (warehouseStatus === 0 && vatStatus === 1) {
-          results.push(`${country}可以开启本地仓储，享受本地配送费，`);
+          groupedResults.canOpenWarehouse.push(country);
         } else if (warehouseStatus === 0 && vatStatus === 0) {
-          results.push(`需上传${country}税号，可以开启${country}仓储，享受本地配送费`);
+          groupedResults.needVATAndWarehouse.push(country);
         }
       });
+      
+      const results = [];
+      
+      // 生成合并后的结果
+      if (groupedResults.compliant.length > 0) {
+        results.push(`${groupedResults.compliant.join('、')}已经合规开启了PanEU所有的仓储，无需额外操作。`);
+      }
+      
+      if (groupedResults.needVAT.length > 0) {
+        results.push(`${groupedResults.needVAT.join('、')}需上传税号;`);
+      }
+      
+      if (groupedResults.canOpenWarehouse.length > 0) {
+        results.push(`${groupedResults.canOpenWarehouse.join('、')}可以开启本地仓储，享受本地配送费，`);
+      }
+      
+      if (groupedResults.needVATAndWarehouse.length > 0) {
+        results.push(`需上传${groupedResults.needVATAndWarehouse.join('、')}税号，可以开启${groupedResults.needVATAndWarehouse.join('、')}仓储，享受本地配送费`);
+      }
       
       return results;
     }
@@ -142,7 +176,7 @@ export default ActionService;
           {
             count: 560,
             detail: "",
-            estimatedAnnualSavingsEUR: "",
+            estimatedAnnualSavingsEUR: "10000",
             opportunityType: "可加入PanEU ASIN",
             recommendation: "同步商品到DE/FR/IT/ES四国，启用PanEU服务"
           },
