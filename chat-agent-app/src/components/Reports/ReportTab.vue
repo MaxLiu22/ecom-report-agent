@@ -133,7 +133,11 @@
             :ceeResult="ceeResult" />
       
       <!-- Tab 6: 欧洲站拓展解决方案定制 -->
-  <Tab6 v-if="activeTab === 5" :selectedSubTab="selectedSubTab" />
+  <Tab6 v-if="activeTab === 5"
+    :selectedSubTab="selectedSubTab"
+    :panEUResult="panEUResult"
+    :diResult="diResult"
+    :ceeResult="ceeResult" />
       
       <!-- Tab 7: 合规政策 -->
       <Tab7 v-if="activeTab === 6" />

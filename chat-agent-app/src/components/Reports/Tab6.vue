@@ -1,6 +1,6 @@
 <template>
   <div class="content-panel">
-    <component :is="currentComponent" />
+    <component :is="currentComponent" v-bind="currentProps" />
   </div>
 </template>
 
@@ -41,6 +41,18 @@ export default {
         case 63: return Tab63
         case 64: return Tab64
         default: return Tab61
+      }
+    },
+    currentProps() {
+      switch (this.selectedSubTab) {
+        case 62:
+          return { diResult: this.diResult }
+        case 63:
+          return { ceeResult: this.ceeResult }
+        case 64:
+          return {}
+        default:
+          return { panEUResult: this.panEUResult }
       }
     }
   }

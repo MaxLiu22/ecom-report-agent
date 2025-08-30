@@ -57,6 +57,58 @@
           </div>
         </div>
       </transition>
+        <!-- CEE 成本分析结果区块 -->
+        <div class="analysis-section">
+          <div class="section-header">
+            <h3>💰 CEE 成本分析结果</h3>
+            <p class="section-description">中欧计划成本效益分析详情</p>
+          </div>
+          <div class="section-content">
+            <div v-if="ceeResult">
+              <div class="cee-table-wrapper">
+                <table class="cee-table">
+                  <thead>
+                    <tr>
+                      <th style="width:38%;">指标</th>
+                      <th style="width:22%;">数值</th>
+                      <th>说明</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>德国商城过去12个月已售商品数量</td>
+                      <td>{{ formatNumber(ceeResult.soldCount) }}</td>
+                      <td>历史销量 (件)</td>
+                    </tr>
+                    <tr>
+                      <td>中欧计划预计节约费用€</td>
+                      <td>{{ formatCurrency(ceeResult.estimatedSaving) }}</td>
+                      <td>按每件 €0.26 估算</td>
+                    </tr>
+                    <tr>
+                      <td>VAT注册成本€</td>
+                      <td>{{ formatCurrency(ceeResult.vatRegistrationCost) }}</td>
+                      <td>波兰 + 捷克 预估一次性</td>
+                    </tr>
+                    <tr>
+                      <td>VAT注册所需时间：4～6周</td>
+                      <td colspan="2" style="text-align:left;">请预留时间提前启动，避免影响计划生效</td>
+                    </tr>
+                    <tr class="final-row">
+                      <td>最终节约的费用€</td>
+                      <td>{{ formatCurrency(ceeResult.finalSaving) }}</td>
+                      <td>预计节约 - VAT 成本</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="cee-summary-tip">说明：若销量增长或参与更多跨境订单，节约金额会进一步提升。</div>
+              </div>
+            </div>
+            <div v-else class="no-data">
+              <p>暂无 CEE 成本分析数据</p>
+            </div>
+          </div>
+        </div>
     </div>
   </div>
 </template>
@@ -64,6 +116,13 @@
 <script>
 export default {
   name: 'Tab63',
+  props: {
+    // cee 分析结果
+    ceeResult: {
+      type: Object,
+      default: null,
+    },
+  },
   data() {
     return {
       open: true,
@@ -97,6 +156,14 @@ export default {
   methods: {
     toggleMain() {
       this.open = !this.open
+    },
+    formatNumber(v) {
+      if (v === null || v === undefined || isNaN(v)) return '-'
+      return Number(v).toLocaleString('en-US')
+    },
+    formatCurrency(v) {
+      if (v === null || v === undefined || isNaN(v)) return '-'
+      return Number(v).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
     }
   }
 }
@@ -109,4 +176,23 @@ export default {
 .card-header:hover { background:#f0f8ff; transform:translateX(3px); }
 .fade-slide-enter-active,.fade-slide-leave-active { transition: all .35s cubic-bezier(.4,0,.2,1); }
 .fade-slide-enter-from,.fade-slide-leave-to { opacity:0; transform:translateY(-6px); }
+/* CEE 分析区块复用 Tab5 样式 */
+.analysis-section { margin-top:20px; background:#ffffff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden; }
+.section-header { background:#f8f9fa; padding:20px 24px; border-bottom:1px solid #e0e0e0; }
+.section-header h3 { margin:0 0 8px 0; color:#232f3e; font-size:20px; font-weight:600; }
+.section-description { margin:0; color:#666; font-size:14px; line-height:1.5; }
+.section-content { padding:24px; }
+.no-data { text-align:center; padding:40px; color:#999; font-size:14px; }
+.no-data p { margin:0; }
+/* CEE 指标表格样式 */
+.cee-table-wrapper { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:16px 18px 20px; }
+.cee-table { width:100%; border-collapse:collapse; font-size:12px; }
+.cee-table thead th { background:#232f3e; color:#fff; padding:10px 8px; font-weight:600; text-align:center; }
+.cee-table tbody td { border:1px solid #e0e0e0; padding:10px 8px; text-align:center; background:#fafafa; }
+.cee-table tbody tr:nth-child(even) td { background:#f5f7fa; }
+.cee-table tbody td:first-child { font-weight:600; color:#232f3e; text-align:left; }
+.cee-table .final-row td { background:#fff7e6; font-weight:700; color:#d46b08; }
+.cee-summary-tip { margin-top:10px; font-size:11px; color:#666; text-align:right; }
 </style>
+
+<!-- 追加 CEE 成本分析结果区块结束 -->
