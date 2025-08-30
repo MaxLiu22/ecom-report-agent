@@ -609,6 +609,17 @@ export async function analyzePanEUOpportunities(sources) {
 			},
 			countries: CORE_COUNTRIES,
 			timestamp: new Date().toISOString()
+		},
+
+		cost_save: {
+			title: ["跨境配送国家", "预计可节约费用(RMB)", "预计节约配送费(RMB)", "申请VAT所需费用(RMB)", "申请VAT所器时间"],
+			value: [
+				{
+					FR: [6914.51, 15451.09, 142355, "8-13 weeks"],
+					DE: [8405, 18712, 25411, "8-13 weeks"],
+				}
+			],
+			"总额": [213123, 42134, 3244234, "-"]
 		}
 	};
 
