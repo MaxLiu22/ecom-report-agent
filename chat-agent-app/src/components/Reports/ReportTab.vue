@@ -16,11 +16,10 @@
       </div>
       <!-- 解决方案 下拉子菜单 -->
       <transition name="dropdown-fade">
-        <div v-if="showSolutionMenu" class="solution-dropdown compact" @click.stop>
+        <div v-if="showSolutionMenu" ref="solutionMenu" class="solution-dropdown compact centered" @click.stop>
           <ul class="dropdown-list">
             <li v-for="item in solutionSubTabs" :key="item.id" class="dropdown-item" :class="{ selected: selectedSubTab === item.id }" @click="selectSubTab(item.id)">
               <span class="item-title">{{ item.title }}</span>
-              <!-- <span class="item-desc">{{ item.desc }}</span> -->
             </li>
           </ul>
         </div>
@@ -220,6 +219,23 @@ export default {
       }
     }
 
+    const solutionTabRef = ref(null)
+    const solutionMenu = ref(null)
+    const updateMenuPosition = () => {
+      const nav = document.querySelector('.tab-navigation')
+      const tabsEl = nav?.querySelector('.tab-container')
+      if (!tabsEl) return
+      // 找到“解决方案” tab DOM
+      const target = [...tabsEl.children].find(child => child.textContent.trim() === '解决方案')
+      const menuEl = solutionMenu.value
+      if (target && menuEl) {
+        const targetRect = target.getBoundingClientRect()
+        const navRect = nav.getBoundingClientRect()
+        const centerX = targetRect.left + targetRect.width / 2 - navRect.left
+        menuEl.style.left = centerX + 'px'
+      }
+    }
+
     const onMainTabClick = (tab) => {
       if (tab.id === 5) {
         // 若已在解决方案主标签，则切换子菜单显示
@@ -229,6 +245,8 @@ export default {
           switchTab(5)
           showSolutionMenu.value = true
         }
+        // 下一个微任务更新定位
+        requestAnimationFrame(() => updateMenuPosition())
       } else {
         switchTab(tab.id)
       }
@@ -248,8 +266,8 @@ export default {
         closeSolutionMenu()
       }
     }
-    onMounted(() => document.addEventListener('click', handleBodyClick))
-    onBeforeUnmount(() => document.removeEventListener('click', handleBodyClick))
+  onMounted(() => { document.addEventListener('click', handleBodyClick); window.addEventListener('resize', updateMenuPosition) })
+  onBeforeUnmount(() => { document.removeEventListener('click', handleBodyClick); window.removeEventListener('resize', updateMenuPosition) })
     
     return {
       activeTab,
@@ -259,7 +277,8 @@ export default {
       showSolutionMenu,
       solutionSubTabs,
       selectedSubTab,
-      selectSubTab
+      selectSubTab,
+      solutionMenu
     }
   }
 }
@@ -322,7 +341,8 @@ export default {
 }
 
 /* 解决方案 子菜单 */
-.solution-dropdown { position:absolute; left:0; top:100%; background:#ffffff; border:1px solid #e5e7eb; z-index:30; padding:8px 0; box-shadow:0 8px 18px -4px rgba(0,0,0,0.12),0 4px 8px -2px rgba(0,0,0,0.08); width:240px; border-radius:8px; }
+.solution-dropdown { position:absolute; top:100%; background:#ffffff; border:1px solid #e5e7eb; z-index:30; padding:8px 0; box-shadow:0 8px 18px -4px rgba(0,0,0,0.12),0 4px 8px -2px rgba(0,0,0,0.08); width:240px; border-radius:8px; }
+.solution-dropdown.centered { left:50%; transform:translateX(-50%); }
 .solution-dropdown.compact { right:auto; }
 .dropdown-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
 .dropdown-item { display:flex; flex-direction:column; padding:8px 12px 6px; border-left:3px solid transparent; cursor:pointer; transition:background .2s ease,border-color .25s ease; }
