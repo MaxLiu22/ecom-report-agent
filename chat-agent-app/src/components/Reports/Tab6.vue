@@ -13,7 +13,26 @@ import Tab64 from './Tab64.vue'
 export default {
   name: 'Tab6',
   props: {
-    selectedSubTab: { type: Number, default: 61 }
+    selectedSubTab: { 
+      type: Number, 
+      default: 61 
+    },
+
+    // PanEU 分析结果
+    panEUResult: {
+      type: Object,
+      default: null
+    },
+    // DI 分析结果
+    diResult: {
+      type: Object,
+      default: null
+    },
+    // CEE 成本分析结果
+    ceeResult: {
+      type: Object,
+      default: null
+    }
   },
   computed: {
     currentComponent() {
