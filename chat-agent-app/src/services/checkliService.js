@@ -21,14 +21,15 @@ const METRICS = [
   '是否使用英国和欧盟之间的远程配送服务'
 ];
 
-// 国家列：允许多种别名匹配（英/缩写），输出统一中文列名
+// 国家列：加入英国（动态可选），允许多种别名匹配（英/缩写）
 const COUNTRY_ALIASES = {
   '德国': ['德国','DE','Germany','德國'],
   '意大利': ['意大利','IT','Italy','義大利'],
   '法国': ['法国','FR','France','法國'],
-  '西班牙': ['西班牙','ES','Spain','España','西班牙(Spain)']
+  '西班牙': ['西班牙','ES','Spain','España','西班牙(Spain)'],
+  '英国': ['英国','UK','UnitedKingdom','United Kingdom','GB','GreatBritain','Great Britain','UK(英国)']
 };
-const COUNTRIES = Object.keys(COUNTRY_ALIASES);
+const BASE_COUNTRIES = Object.keys(COUNTRY_ALIASES); // 用于匹配，实际输出按出现过滤
 
 function normalizeCell(v){
   if(v==null) return '';
@@ -37,7 +38,7 @@ function normalizeCell(v){
 
 function matchCountryName(cell){
   const n = normalizeCell(cell).toLowerCase();
-  for(const std of COUNTRIES){
+  for(const std of BASE_COUNTRIES){
     for(const alias of COUNTRY_ALIASES[std]){
       if(n === normalizeCell(alias).toLowerCase()) return std; // 精确
     }
@@ -116,7 +117,7 @@ function extractTableFromSheet(ws2d){
     if(!METRICS.includes(metric)) continue;
     if(foundRecords[metric]) continue; // 保留首个出现
     const record = { 指标: metric };
-    COUNTRIES.forEach(c=>{
+    BASE_COUNTRIES.forEach(c=>{
       const colIdx = countryColIndex[c];
       record[c] = colIdx != null ? row[colIdx] : null;
     });
@@ -126,18 +127,25 @@ function extractTableFromSheet(ws2d){
   // 允许部分指标缺失：构造顺序输出
   const table = METRICS.filter(m=> foundRecords[m]).map(m=> foundRecords[m]);
   if(!table.length) return null;
-  return table;
+  // 动态出现的国家（至少一列命中 header）且在记录里不全为空
+  const dynamicCountries = Object.keys(headerInfo.countryColIndex).filter(c=> BASE_COUNTRIES.includes(c));
+  return { table, countries: dynamicCountries };
 }
 
-function buildOutputs(table){
+function buildOutputs(table, countries){
   const matrix = {
-    headers: ['指标', ...COUNTRIES],
-    rows: table.map(r=> [r.指标, ...COUNTRIES.map(c=> r[c])])
+    headers: ['指标', ...countries],
+    rows: table.map(r=> [r.指标, ...countries.map(c=> r[c])])
   };
-  // 兼容字段: parsed_metrics (转成 {metric, values}) & parsed_matrix
-  const parsed_metrics = table.map(r=> ({ metric: r.指标, values: Object.fromEntries(COUNTRIES.map(c=> [c, r[c]])) }));
-  const parsed_matrix = matrix; // 同引用即可
-  return { table_json: table, matrix, parsed_metrics, parsed_matrix };
+  const parsed_metrics = table.map(r=> ({ metric: r.指标, values: Object.fromEntries(countries.map(c=> [c, r[c]])) }));
+  const parsed_matrix = matrix;
+  // 截断 table_json 中去掉未出现的国家列
+  const trimmedTable = table.map(r=> {
+    const o = { 指标: r.指标 };
+    countries.forEach(c=> o[c] = r[c]);
+    return o;
+  });
+  return { table_json: trimmedTable, matrix, parsed_metrics, parsed_matrix, countries };
 }
 
 export async function analyzeEUExpansionChecklist(files){
@@ -157,17 +165,18 @@ export async function analyzeEUExpansionChecklist(files){
   }
 
   // 遍历 sheet, 选第一个能解析出完整/部分指标的
-  let table=null, usedSheet=null;
+  let extracted=null, usedSheet=null;
   for(const name of wb.SheetNames){
     const ws2d = sheetTo2D(wb.Sheets[name]);
     const t = extractTableFromSheet(ws2d);
-    if(t){ table = t; usedSheet = name; break; }
+    if(t){ extracted = t; usedSheet = name; break; }
   }
-  if(!table){
+  if(!extracted){
     throw new Error('未能在任何 sheet 中解析到指标表 (未识别到包含国家列的表头或指标行)');
   }
 
-  const { table_json, matrix, parsed_metrics, parsed_matrix } = buildOutputs(table);
+  const { table: tableRaw, countries } = extracted;
+  const { table_json, matrix, parsed_metrics, parsed_matrix } = buildOutputs(tableRaw, countries);
 
   return {
     file_name: target.name,
@@ -176,6 +185,7 @@ export async function analyzeEUExpansionChecklist(files){
     sheets, // 兼容前端展开查看
     table_json, // 用户需求的表格 JSON
     matrix,     // 用户需求的矩阵结构
+    countries_used: countries,
     // 兼容旧字段
     parsed_metrics,
     parsed_matrix,

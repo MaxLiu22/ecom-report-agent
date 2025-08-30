@@ -51,13 +51,13 @@
               <thead>
                 <tr>
                   <th style="min-width:140px;">指标</th>
-                  <th v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ c }}</th>
+                  <th v-for="c in checklistDynamicCountries" :key="c">{{ c }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="r in checklistTableJson" :key="r.指标">
                   <td style="font-weight:600; white-space:nowrap;">{{ r.指标 }}</td>
-                  <td v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ r[c] ?? '' }}</td>
+                  <td v-for="c in checklistDynamicCountries" :key="c">{{ r[c] ?? '' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -69,13 +69,13 @@
               <thead>
                 <tr>
                   <th style="min-width:140px;">指标</th>
-                  <th v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ c }}</th>
+                  <th v-for="c in checklistDynamicCountries" :key="c">{{ c }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="m in checklistResult.parsed_metrics" :key="m.metric">
                   <td style="font-weight:600; white-space:nowrap;">{{ m.metric }}</td>
-                  <td v-for="c in ['德国','意大利','法国','西班牙']" :key="c">{{ m.values[c] ?? '' }}</td>
+                  <td v-for="c in checklistDynamicCountries" :key="c">{{ m.values[c] ?? '' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -97,28 +97,19 @@
               <span class="arrow" :class="{open: isChecklistOpen('__all_json__')}"></span>
               <strong>table_json JSON 预览</strong>
               <span class="json-actions" v-if="isChecklistOpen('__all_json__')" @click.stop>
-                <button class="mini-btn" @click="copyChecklistJSON">复制</button>
-                <button class="mini-btn" @click="downloadChecklistJSON">下载</button>
-                <button class="mini-btn" @click="openChecklistFull">全屏</button>
+                          <button class="mini-btn" @click="copyChecklistJSON">复制</button>
+                          <button class="mini-btn" @click="selectAllJSON('overview')">全选</button>
+                          <button class="mini-btn" @click="downloadChecklistJSON">下载</button>
+                          <button class="mini-btn" @click="openChecklistFull">全屏</button>
               </span>
             </div>
             <div class="collapse__body" v-show="isChecklistOpen('__all_json__')">
               <pre ref="jsonOverviewEl" class="json-pre selectable" @click="selectAllJSON('overview')">{{ formattedChecklistJSON }}</pre>
-              <p class="hint-line">点击 JSON 区域可快速全选复制；或使用上方按钮。</p>
+                        <p class="hint-line">点击或使用“全选”按钮后 Ctrl/⌘+C，或直接点“复制”。{{ copyStatus }}</p>
             </div>
           </div>
 
-          <!-- 全屏 JSON Modal -->
-          <div v-if="showChecklistJSONFull" class="json-fullscreen">
-            <div class="json-fullscreen__toolbar">
-              <span>Checklist table_json JSON</span>
-              <div class="fill"></div>
-              <button class="mini-btn" @click="copyChecklistJSON">复制</button>
-              <button class="mini-btn" @click="downloadChecklistJSON">下载</button>
-              <button class="mini-btn danger" @click="showChecklistJSONFull=false">关闭</button>
-            </div>
-            <pre ref="jsonFullscreenEl" class="json-pre fullscreen" @click="selectAllJSON('full')">{{ formattedChecklistJSON }}</pre>
-          </div>
+          <!-- 全屏 JSON Modal (已迁移为 Teleport 到 body，避免被父级 overflow/pointer 影响) -->
 
           <div class="sub-block collapse" v-for="s in checklistResult.sheet_names" :key="s">
             <div class="collapse__header" @click="toggleChecklistSection(s)">
@@ -301,10 +292,26 @@
     </section>
     </div>
   </div>
+  <!-- Teleport: 放到 body 保证最高层级可点击 -->
+  <teleport to="body">
+    <div v-if="showChecklistJSONFull" class="json-fullscreen" @click.self="closeFullJSON" aria-modal="true" role="dialog">
+      <div class="json-fullscreen__toolbar">
+        <span>Checklist table_json JSON</span>
+        <div class="fill"></div>
+        <button class="mini-btn" @click.stop="copyChecklistJSON">复制</button>
+        <button class="mini-btn" @click.stop="selectAllJSON('full')">全选</button>
+        <button class="mini-btn" @click.stop="downloadChecklistJSON">下载</button>
+        <button class="mini-btn danger" @click.stop="closeFullJSON">关闭 (Esc)</button>
+      </div>
+      <div class="json-fullscreen__content" @click.stop>
+        <pre ref="jsonFullscreenEl" class="json-pre fullscreen" tabindex="0" @click="selectAllJSON('full')">{{ formattedChecklistJSON }}</pre>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
 import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
 import { analyzeEUExpansionChecklist } from '@/services/checkliService.js';
@@ -422,6 +429,17 @@ const checklistOpen = ref({});
 // 新增：对新版字段做兼容聚合
 const checklistMatrix = computed(()=> checklistResult.value?.matrix || checklistResult.value?.parsed_matrix || null);
 const checklistTableJson = computed(()=> checklistResult.value?.table_json || []);
+// 动态国家列（排除 '指标'）
+const checklistDynamicCountries = computed(()=> {
+  if(checklistMatrix.value?.headers){
+    return checklistMatrix.value.headers.filter(h=> h !== '指标');
+  }
+    // 回退通过第一行对象 keys 推断
+  if(checklistTableJson.value.length){
+    return Object.keys(checklistTableJson.value[0]).filter(k=> k !== '指标');
+  }
+  return ['德国','意大利','法国','西班牙'];
+});
 // 仅展示 table_json 内容（用户需求）
 const formattedChecklistJSON = computed(()=> checklistResult.value?.table_json ? formatJSON(checklistResult.value.table_json) : '');
 
@@ -429,13 +447,36 @@ const formattedChecklistJSON = computed(()=> checklistResult.value?.table_json ?
 const showChecklistJSONFull = ref(false);
 const jsonOverviewEl = ref(null);
 const jsonFullscreenEl = ref(null);
+const copyStatus = ref('');
+
+function updateCopyStatus(msg, ok=true){
+  copyStatus.value = msg;
+  setTimeout(()=>{ if(copyStatus.value===msg) copyStatus.value=''; }, 3000);
+}
 
 function copyChecklistJSON(){
   if(!formattedChecklistJSON.value) return;
-  navigator.clipboard?.writeText(formattedChecklistJSON.value).then(()=>{
-    // 可选：简易提示（后续可替换成全局 toast）
-    console.log('JSON 已复制');
-  }).catch(err=> console.warn('复制失败', err));
+  const text = formattedChecklistJSON.value;
+  // 首选异步剪贴板
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>{
+      updateCopyStatus('已复制');
+    }).catch(()=> fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0'; ta.style.top='-1000px';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    updateCopyStatus(ok? '已复制(兼容模式)' : '复制失败', ok);
+  } catch(e){
+    console.warn('复制失败', e); updateCopyStatus('复制失败', false);
+  }
 }
 function downloadChecklistJSON(){
   const blob = new Blob([formattedChecklistJSON.value], { type:'application/json;charset=utf-8' });
@@ -449,6 +490,50 @@ function openChecklistFull(){ showChecklistJSONFull.value = true; setTimeout(()=
 function selectAllJSON(mode){
   const el = mode==='full' ? jsonFullscreenEl.value : jsonOverviewEl.value;
   if(!el) return; const range = document.createRange(); range.selectNodeContents(el); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+
+function closeFullJSON(){
+  showChecklistJSONFull.value = false;
+}
+
+// 打开时锁定 body 滚动，关闭时恢复
+watch(showChecklistJSONFull, (val)=>{
+  const body = document.body;
+  if(val){
+    body.dataset._scroll_lock_original_overflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+    nextTick(()=> selectAllJSON('full'));
+  } else {
+    if(body.dataset._scroll_lock_original_overflow !== undefined){
+      body.style.overflow = body.dataset._scroll_lock_original_overflow;
+      delete body.dataset._scroll_lock_original_overflow;
+    }
+  }
+});
+
+// 监听 Esc 关闭全屏 modal
+function handleKey(e){
+  if(e.key === 'Escape' && showChecklistJSONFull.value){
+    showChecklistJSONFull.value = false;
+  }
+  // Ctrl/Cmd + A 在全屏时自动全选 JSON
+  if(showChecklistJSONFull.value && ( (e.metaKey || e.ctrlKey) && e.key.toLowerCase()==='a')){
+    e.preventDefault(); selectAllJSON('full');
+  }
+}
+onMounted(()=>{ window.addEventListener('keydown', handleKey); });
+onBeforeUnmount(()=>{ window.removeEventListener('keydown', handleKey); });
+
+// 调试：在解析出 table_json 后打印到控制台，并挂到 window 方便从开发者工具获取
+watch(() => checklistResult.value?.table_json, (val) => {
+  if(val && Array.isArray(val)) {
+    console.log('%c[Checklist table_json] 当前解析结果 (数组长度: ' + val.length + ')', 'background:#1e293b;color:#fff;padding:2px 6px;border-radius:4px;');
+    // 分开两次，避免控制台折叠大型对象时不清晰
+    console.log(val);
+    // 暴露到全局（只读引用）
+    window.__CHECKLIST_TABLE_JSON__ = val;
+    console.log('%c已挂载到 window.__CHECKLIST_TABLE_JSON__ 方便复制。', 'color:#059669;font-weight:600;');
+  }
+});
 
 function onChecklistChange(e){
   checklistError.value=''; checklistResult.value=null; checklistFile.value = e.target.files?.[0] || null;
@@ -592,8 +677,10 @@ input[type=file] { margin:.55rem 0 .65rem; font-size:.7rem; color:#0f172a; }
 .json-pre.fullscreen { max-height:none; height:calc(100vh - 72px); }
 .json-pre.selectable { user-select:text; }
 .hint-line { margin:.4rem 0 0; font-size:.5rem; color:#64748b; }
-.json-fullscreen { position:fixed; inset:0; background:rgba(15,23,42,.92); z-index:999; display:flex; flex-direction:column; padding:0 0 0; }
-.json-fullscreen__toolbar { display:flex; align-items:center; gap:.6rem; padding:.55rem .85rem; background:linear-gradient(135deg,#1e293b,#0f172a); color:#f1f5f9; font-size:.6rem; font-weight:600; box-shadow:0 2px 6px -2px rgba(0,0,0,.5); }
+.copy-toast { position:fixed; bottom:14px; right:16px; background:#0f172a; color:#f1f5f9; padding:.5rem .8rem; font-size:.55rem; border-radius:8px; box-shadow:0 4px 14px -4px rgba(0,0,0,.5); font-weight:600; letter-spacing:.4px; animation:fadeIn .25s ease; }
+.json-fullscreen { position:fixed; inset:0; background:rgba(15,23,42,.92); z-index:9999; display:flex; flex-direction:column; padding:0; overflow:hidden; pointer-events:auto; }
+.json-fullscreen__toolbar { position:sticky; top:0; display:flex; align-items:center; gap:.6rem; padding:.55rem .85rem; background:linear-gradient(135deg,#1e293b,#0f172a); color:#f1f5f9; font-size:.6rem; font-weight:600; box-shadow:0 4px 18px -4px rgba(0,0,0,.6); z-index:1; }
+.json-fullscreen__content { flex:1; overflow:auto; padding:.6rem .8rem 1.2rem; }
 .json-fullscreen__toolbar .fill { flex:1; }
 
 /* ---------- Responsive ---------- */
