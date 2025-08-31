@@ -409,61 +409,88 @@ export default {
 
     // 包装导出与邮件发送（调用隐藏 UniReport 实例）
     // 多标签导出（排除 AM 指导话术 id=8），生成与当前 ReportTab 相似的可切换页面
+    // 构建导出数据（多标签 HTML），排除 AM 指导话术
+    const buildMultiTabHtml = async () => {
+      const inst = uniReportRef.value
+      let styles = ''
+      if (inst && typeof inst.collectStylesProcessed === 'function') {
+        styles = inst.collectStylesProcessed()
+      } else {
+        document.querySelectorAll('style').forEach(s => { if (s.innerHTML) styles += s.innerHTML + '\n' })
+        styles = styles.replace(/\[data-v-[^\]]+\]/g, '')
+      }
+      const exportTabs = (props.reportGenerated ? tabs.value : tabs.value.filter(t=>t.id===0)).filter(t => t.id !== 8)
+      if (!exportTabs.length) return null
+      const original = activeTab.value
+      const captured = []
+      for (const t of exportTabs) {
+        activeTab.value = t.id
+        await nextTick()
+        const contentRoot = document.querySelector('.tab-content')
+        if (!contentRoot) continue
+        let html = contentRoot.innerHTML
+        html = html.replace(/<button[\s\S]*?<\/button>/g, m => {
+          const text = m.replace(/<[^>]+>/g,'').trim()
+          return `<span class=\"export-static-label\">${text}</span>`
+        })
+        captured.push({ id: t.id, title: t.title, html })
+      }
+      activeTab.value = original
+      await nextTick()
+      styles += `\n/* Export Frame */\nhtml,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;}*{box-sizing:border-box;}\n.tab-export-root{display:flex;flex-direction:column;min-height:100vh;}\n.export-nav{background:#232f3e;padding:0 12px;display:flex;align-items:center;gap:0;box-shadow:0 2px 8px rgba(35,47,62,.15);position:sticky;top:0;z-index:10;}\n.export-nav .nav-item{color:#fff;padding:12px 16px;cursor:pointer;font-size:13px;position:relative;user-select:none;transition:.25s;border-bottom:3px solid transparent;}\n.export-nav .nav-item.active{color:#ff9900;border-bottom-color:#ff9900;background:rgba(255,153,0,.1);}\n.export-nav .nav-item:hover{background:rgba(255,255,255,.1);}\n.export-panels{flex:1;overflow:auto;background:#f5f5f5;}\n.export-panel{display:none;animation:fadeIn .25s ease;}\n.export-panel.active{display:block;}\n@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}\n.export-static-label{display:inline-block;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px;color:#555;}\n.content-panel{background:#fff;margin:0;padding:24px;min-height:100%;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #d9d9d9;padding:6px 8px;font-size:12px;}th{background:#232f3e;color:#fff;}\n`
+      const navHtml = captured.map((c,i)=>`<div class=\"nav-item${i===0?' active':''}\" data-tab=\"${c.id}\">${c.title}</div>`).join('')
+      const panelsHtml = captured.map((c,i)=>`<div class=\"export-panel${i===0?' active':''}\" data-tab=\"${c.id}\">${c.html}</div>`).join('\n')
+      const script = `<script>(()=>{const navItems=document.querySelectorAll('.nav-item');const panels=document.querySelectorAll('.export-panel');navItems.forEach(it=>it.addEventListener('click',()=>{const id=it.getAttribute('data-tab');navItems.forEach(n=>n.classList.remove('active'));it.classList.add('active');panels.forEach(p=>p.classList.toggle('active',p.getAttribute('data-tab')===id));}));})();</`+`script>`
+      const html = `<!DOCTYPE html><html lang=\"zh\"><head><meta charset=\"utf-8\"/><title>ReportTab导出</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/><style>${styles}</style></head><body><div class=\"tab-export-root\"><div class=\"export-nav\">${navHtml}</div><div class=\"export-panels\">${panelsHtml}</div></div>${script}</body></html>`
+      return new Blob([html], { type:'text/html;charset=utf-8' })
+    }
+
     const exportHtmlWrapper = async () => {
       try {
-        const inst = uniReportRef.value
-        let styles = ''
-        if (inst && typeof inst.collectStylesProcessed === 'function') {
-          styles = inst.collectStylesProcessed()
-        } else {
-          styles = ''
-          document.querySelectorAll('style').forEach(s => { if (s.innerHTML) styles += s.innerHTML + '\n' })
-          styles = styles.replace(/\[data-v-[^\]]+\]/g, '')
-        }
-        // 需要导出的标签（排除 AM 指导话术）
-        const exportTabs = (props.reportGenerated ? tabs.value : tabs.value.filter(t=>t.id===0)).filter(t => t.id !== 8)
-        if (!exportTabs.length) return
-        const original = activeTab.value
-        const captured = []
-        for (const t of exportTabs) {
-          activeTab.value = t.id
-          await nextTick()
-          const contentRoot = document.querySelector('.tab-content')
-          if (!contentRoot) continue
-          // innerHTML 只含当前激活面板
-          let html = contentRoot.innerHTML
-          // 去除内部按钮交互
-          html = html.replace(/<button[\s\S]*?<\/button>/g, m => {
-            const text = m.replace(/<[^>]+>/g,'').trim()
-            return `<span class=\"export-static-label\">${text}</span>`
-          })
-          captured.push({ id: t.id, title: t.title, html })
-        }
-        activeTab.value = original
-        await nextTick()
-
-        // 追加导出基础样式
-        styles += `\n/* Export Frame */\nhtml,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;}*{box-sizing:border-box;}\n.tab-export-root{display:flex;flex-direction:column;min-height:100vh;}\n.export-nav{background:#232f3e;padding:0 12px;display:flex;align-items:center;gap:0;box-shadow:0 2px 8px rgba(35,47,62,.15);position:sticky;top:0;z-index:10;}\n.export-nav .nav-item{color:#fff;padding:12px 16px;cursor:pointer;font-size:13px;position:relative;user-select:none;transition:.25s;border-bottom:3px solid transparent;}\n.export-nav .nav-item.active{color:#ff9900;border-bottom-color:#ff9900;background:rgba(255,153,0,.1);}\n.export-nav .nav-item:hover{background:rgba(255,255,255,.1);}\n.export-panels{flex:1;overflow:auto;background:#f5f5f5;}\n.export-panel{display:none;animation:fadeIn .25s ease;}\n.export-panel.active{display:block;}\n@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}\n.export-static-label{display:inline-block;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px;color:#555;}\n.content-panel{background:#fff;margin:0;padding:24px;min-height:100%;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #d9d9d9;padding:6px 8px;font-size:12px;}th{background:#232f3e;color:#fff;}\n`
-
-        const navHtml = captured.map((c,i)=>`<div class=\"nav-item${i===0?' active':''}\" data-tab=\"${c.id}\">${c.title}</div>`).join('')
-        const panelsHtml = captured.map((c,i)=>`<div class=\"export-panel${i===0?' active':''}\" data-tab=\"${c.id}\">${c.html}</div>`).join('\n')
-        const script = `<script>(()=>{const navItems=document.querySelectorAll('.nav-item');const panels=document.querySelectorAll('.export-panel');navItems.forEach(it=>it.addEventListener('click',()=>{const id=it.getAttribute('data-tab');navItems.forEach(n=>n.classList.remove('active'));it.classList.add('active');panels.forEach(p=>p.classList.toggle('active',p.getAttribute('data-tab')===id));}));})();</`+`script>`
-        const html = `<!DOCTYPE html><html lang=\"zh\"><head><meta charset=\"utf-8\"/><title>ReportTab导出</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/><style>${styles}</style></head><body><div class=\"tab-export-root\"><div class=\"export-nav\">${navHtml}</div><div class=\"export-panels\">${panelsHtml}</div></div>${script}</body></html>`
-        const blob = new Blob([html], { type:'text/html;charset=utf-8' })
+        const blob = await buildMultiTabHtml()
+        if (!blob) return
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
         a.download = 'ReportTab_Export.html'
         a.click()
         URL.revokeObjectURL(url)
-      } catch (e) {
-        console.error('导出 ReportTab 页面失败', e)
-      }
+      } catch (e) { console.error('导出 ReportTab 页面失败', e) }
     }
-    const sendEmailWrapper = () => {
-      const inst = uniReportRef.value
-      if (inst && typeof inst.sendEmail === 'function') inst.sendEmail()
-      else console.warn('UniReport 实例不可用：发送失败')
+
+    const sendEmailWrapper = async () => {
+      try {
+        const blob = await buildMultiTabHtml()
+        if (!blob) return
+        const fileName = 'ReportTab_Export.html'
+        // 1. Web Share Level 2 尝试
+        if (navigator.share && navigator.canShare) {
+          const file = new File([blob], fileName, { type:'text/html' })
+          if (navigator.canShare({ files:[file] })) {
+            try {
+              await navigator.share({ title:'IntraEU Report (No AM Tab)', text:'附上导出报告（已去除 AM 指导话术）。', files:[file] })
+              return
+            } catch (err) { console.warn('Web Share 取消或失败，回退 Outlook', err) }
+          }
+        }
+        // 2. 回退：生成 helper 页面，指导 Outlook 发送
+        // 2.1 先触发文件下载，保证用户有本地文件
+        const dlUrl = URL.createObjectURL(blob)
+        const a = document.createElement('a'); a.href = dlUrl; a.download = fileName; a.click();
+        setTimeout(()=>URL.revokeObjectURL(dlUrl), 5000)
+        // 2.2 生成 base64 供 helper 按需重新下载
+        const reader = new FileReader()
+        reader.onload = () => {
+          const base64 = reader.result.split(',')[1]
+          const mailSubject = 'IntraEU 报告 (不含 AM 指导)'
+          const mailBody = '您好,\n\n附件为 IntraEU 多标签报告。请使用浏览器打开 HTML 查看。\n\n祝好\n'
+          const helper = `<!DOCTYPE html><html lang='zh'><head><meta charset='utf-8'><title>发送邮件助手</title><meta name='viewport' content='width=device-width,initial-scale=1'/><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;margin:0;background:linear-gradient(135deg,#f5f7fa,#eef2f7);padding:34px 20px;color:#1f2933;}h1{margin:0 0 18px;font-size:22px;}p{line-height:1.55;margin:0 0 14px;}button{cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-weight:600;letter-spacing:.5px;font-size:13px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,.15);background:#ff9900;color:#232f3e;transition:.25s;}button:hover{background:#ffad33;} .secondary{background:#e5e7eb;color:#333;} .secondary:hover{background:#d5d7da;} .row{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 24px;}textarea{width:100%;min-height:160px;padding:12px 14px;border:1px solid #d0d7de;border-radius:10px;font:13px/1.5 monospace;background:#fff;}textarea:focus{outline:2px solid #ff9900;border-color:#ff9900;}code{background:#232f3e;color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;}footer{margin-top:40px;font-size:11px;color:#6b7280;text-align:center;} .badge{background:#ff9900;color:#232f3e;padding:2px 8px;font-size:11px;border-radius:12px;font-weight:600;letter-spacing:.5px;margin-left:6px;} .hint{font-size:12px;background:#fff8eb;border:1px solid #ffe0b2;padding:10px 12px;border-radius:10px;margin-top:10px;} </style></head><body><main style='max-width:820px;margin:0 auto;background:#fff;border:1px solid #e3e8ee;border-radius:18px;padding:40px 42px;box-shadow:0 10px 26px -6px rgba(0,0,0,.12),0 4px 10px -2px rgba(0,0,0,.06);'><h1>📨 发送报告 <span class='badge'>助手</span></h1><p>已为你生成并自动下载 <code>${fileName}</code>。若需要再次获取，可点击“重新下载”。</p><div class='row'><button id='redl'>重新下载</button><button id='corp' class='secondary'>打开 Outlook (企业)</button><button id='live' class='secondary'>打开 Outlook (个人)</button><button id='copy' class='secondary'>复制正文</button></div><label style='font-size:13px;font-weight:600;display:block;margin:0 0 6px;'>邮件正文建议：</label><textarea id='body'>${mailBody}</textarea><div class='hint'>提示：浏览器及 mailto 无法自动附加本地文件，请在打开的邮件窗口中手动添加已下载的 ${fileName}。</div><footer>IntraEU Report Helper • 数据仅在本地处理</footer><script>(()=>{const b64='${base64}';const fn='${fileName}';const toBlob=()=>{const byteChars=atob(b64);const aBuf=new ArrayBuffer(byteChars.length);const u8=new Uint8Array(aBuf);for(let i=0;i<byteChars.length;i++)u8[i]=byteChars.charCodeAt(i);return new Blob([u8],{type:'text/html'});} ;const redl=document.getElementById('redl');const corp=document.getElementById('corp');const live=document.getElementById('live');const copy=document.getElementById('copy');const ta=document.getElementById('body');redl.onclick=()=>{const blob=toBlob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);} ;const enc=encodeURIComponent;corp.onclick=()=>{const url='https://outlook.office.com/mail/deeplink/compose?subject='+enc('${mailSubject}')+'&body='+enc(ta.value);window.open(url,'_blank');};live.onclick=()=>{const url='https://outlook.live.com/mail/0/deeplink/compose?subject='+enc('${mailSubject}')+'&body='+enc(ta.value);window.open(url,'_blank');};copy.onclick=async()=>{try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(ta.value);}else{ta.select();document.execCommand('copy');}copy.textContent='已复制';setTimeout(()=>copy.textContent='复制正文',1500);}catch(_){alert('复制失败，请手动选择文本复制');}};})();</`+`script></main></body></html>`
+          const helperBlob = new Blob([helper], { type:'text/html;charset=utf-8' })
+          const helperUrl = URL.createObjectURL(helperBlob)
+          window.open(helperUrl,'_blank')
+        }
+        reader.readAsDataURL(blob)
+      } catch (e) { console.error('发送邮件失败', e) }
     }
 
     // 点击外部关闭下拉
