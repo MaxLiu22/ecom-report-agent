@@ -873,7 +873,7 @@
               <table style="width:100%; border-collapse:collapse; font-size:12px; background:#ffffff; border:1px solid #ddd; border-radius:4px;">
                 <thead>
                   <tr>
-                    <th v-for="header in panEUResult.excel_data.headers" :key="header" style="background:#333; color:white; padding:12px 8px; text-align:center; border-right:1px solid #555;">{{ header }}</th>
+                    <th v-for="header in panEUResult.excel_data.headers.slice(0, 3)" :key="header" style="background:#333; color:white; padding:12px 8px; text-align:center; border-right:1px solid #555;">{{ header }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -881,7 +881,7 @@
                     <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.metric }}</td>
                     <td style="padding:10px 8px; border:1px solid #ddd; text-align:center; font-weight:bold; color:#FF6B35;">{{ row.count }}</td>
                     <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.description }}</td>
-                    <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.formula }}</td>
+                    <!-- <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.formula }}</td> -->
                   </tr>
                 </tbody>
               </table>
