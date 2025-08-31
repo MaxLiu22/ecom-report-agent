@@ -169,7 +169,7 @@
 }
 
 .compliance-header {
-  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  background: #232f3e;
   padding: 20px;
   border-bottom: 1px solid #e8e8e8;
   display: flex;

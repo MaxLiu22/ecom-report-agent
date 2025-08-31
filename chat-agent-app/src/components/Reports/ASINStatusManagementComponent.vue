@@ -31,7 +31,7 @@ defineOptions({ name: 'ASINStatusManagementComponent' })
   align-items: center;
   gap: 10px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  background: #232f3e;
   border-bottom: 1px solid #e8e8e8;
 }
 .orange-arrow { color: #FF8C00; font-size: 18px; font-weight: bold; }

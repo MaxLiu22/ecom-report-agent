@@ -238,7 +238,7 @@
 }
 
 .compliance-header {
-  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  background: #232f3e;
   padding: 20px;
   border-bottom: 1px solid #e8e8e8;
   display: flex;
@@ -247,13 +247,13 @@
 }
 
 .orange-arrow {
-  color: #FF8C00;
+  color: #FFFFFF;
   font-size: 20px;
   font-weight: bold;
 }
 
 .compliance-title {
-  color: #333;
+  color: #ffffff;
   font-size: 22px;
   font-weight: 600;
   margin: 0;
