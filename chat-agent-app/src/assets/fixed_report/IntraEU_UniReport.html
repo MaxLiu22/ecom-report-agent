@@ -1,0 +1,5738 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"/><title>IntraEU统一报告</title><meta name="viewport" content="width=device-width,initial-scale=1"/><style>
+.vue-inspector-container {
+  cursor: pointer;
+  position: fixed;
+  text-align: center;
+  z-index: 2147483647;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.vue-inspector-card {
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 5px 8px;
+  border-radius: 4px;
+  text-align: left;
+  color:#e9e9e9;
+  font-size: 14px;
+  background-color:#42b883;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+.vue-inspector-card .tip {
+  font-size: 11px;
+  opacity: 0.7;
+}
+.vue-inspector-banner {
+  display: none;
+  position: absolute;
+  margin: 0;
+  width: 260px;
+  text-decoration: none;
+}
+.vue-inspector-container:hover .vue-inspector-banner {
+  display: block;
+}
+.vue-inspector-container--disabled:hover .vue-inspector-banner {
+  display: none;
+}
+.vue-inspector-floats {
+  z-index: 2147483647;
+  position: fixed;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.vue-inspector-size-indicator {
+  z-index: 2147483646;
+  position: fixed;
+  background-color:#42b88325;
+  border: 1px solid #42b88350;
+  border-radius: 5px;
+  pointer-events: none;
+}
+.vue-inspector-animated {
+  transition: all 0.1s ease-in;
+}
+@media (prefers-reduced-motion) {
+.vue-inspector-animated {
+    transition: none !important;
+}
+}
+
+/* color palette from <https://github.com/vuejs/theme> */
+:root {
+  --vt-c-white: #ffffff;
+  --vt-c-white-soft: #f8f8f8;
+  --vt-c-white-mute: #f2f2f2;
+
+  --vt-c-black: #181818;
+  --vt-c-black-soft: #222222;
+  --vt-c-black-mute: #282828;
+
+  --vt-c-indigo: #2c3e50;
+
+  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
+  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
+  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
+  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
+
+  --vt-c-text-light-1: var(--vt-c-indigo);
+  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
+  --vt-c-text-dark-1: var(--vt-c-white);
+  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+}
+/* semantic color variables for this project */
+:root {
+  --color-background: var(--vt-c-white);
+  --color-background-soft: var(--vt-c-white-soft);
+  --color-background-mute: var(--vt-c-white-mute);
+
+  --color-border: var(--vt-c-divider-light-2);
+  --color-border-hover: var(--vt-c-divider-light-1);
+
+  --color-heading: var(--vt-c-text-light-1);
+  --color-text: var(--vt-c-text-light-1);
+
+  --section-gap: 160px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--vt-c-black);
+    --color-background-soft: var(--vt-c-black-soft);
+    --color-background-mute: var(--vt-c-black-mute);
+
+    --color-border: var(--vt-c-divider-dark-2);
+    --color-border-hover: var(--vt-c-divider-dark-1);
+
+    --color-heading: var(--vt-c-text-dark-1);
+    --color-text: var(--vt-c-text-dark-2);
+  }
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+body {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-background);
+  transition:
+    color 0.5s,
+    background-color 0.5s;
+  line-height: 1.6;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+#app {
+  max-width: 100vw;
+  padding: 0;
+  font-weight: normal;
+}
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+  }
+}
+
+
+.dashboard-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  overflow: auto;
+}
+.dashboard-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  max-height: 100%;
+}
+
+
+.home {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+.seller-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #232f3e;
+  color: white;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  height: 50px;
+  z-index: 100;
+}
+.content {
+  margin-top: 60px;
+  width: 100vw;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 50px);
+}
+.logo-container {
+  display: flex;
+  align-items: baseline;
+}
+.logo {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #fff;
+}
+.seller-text {
+  font-size: 1rem;
+  margin-left: 5px;
+  color: #ccc;
+}
+.search-container {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 40%;
+}
+.search-input {
+  border: none;
+  padding: 0.5rem;
+  width: 100%;
+  outline: none;
+}
+.search-button {
+  background-color: #febd69;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.user-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+}
+.username {
+  font-size: 0.9rem;
+}
+.language {
+  font-size: 0.9rem;
+}
+.menu {
+  display: flex;
+  align-items: center;
+}
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100vh;
+  background-color: white;
+  z-index: 200;
+  transition: left 0.3s ease;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+.sidebar-visible {
+  left: 0;
+}
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.close-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #004b5f;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+}
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  color: #004b5f;
+  font-size: 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+.menu-item:hover {
+  background-color: #f5f5f5;
+}
+.arrow {
+  font-size: 20px;
+  font-weight: 300;
+  color: #004b5f;
+}
+.ai-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 15px;
+  padding: 10px;
+  background: linear-gradient(to right, #002F36, #01616F);
+  color: white;
+  border-radius: 30px;
+  font-size: 22px;
+  cursor: pointer;
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+}
+.ai-icon {
+  margin-right: 13px;
+  vertical-align: middle;
+  width: 22px;
+  height: 28px;
+}
+
+
+ {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.app {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  min-height: 100vh;
+  color: #333;
+}
+
+/* 顶部导航 */
+.top-nav {
+  background: #4a5568;
+  border-bottom: 3px solid #ed8936;
+  padding: 0 2rem;
+}
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+}
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.amazon-logo {
+  font-size: 2rem;
+}
+.site-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.nav-time {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+/* 主容器 */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* 标题区域 */
+.hero-section {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: #718096;
+}
+
+/* 服务列表 */
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.service-item {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid #ed8936;
+}
+.service-item:hover {
+  transform: translateX(8px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+.service-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #0891b2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.service-icon::after {
+  content: '✓';
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+.service-content {
+  flex: 1;
+}
+.service-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+.service-desc {
+  color: #718096;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.service-btn {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #4a5568;
+  color: white;
+  flex-shrink: 0;
+}
+.service-btn:hover {
+  background: #2d3748;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(74, 85, 104, 0.3);
+}
+
+/* 底部 */
+.footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2rem 0;
+  color: #718096;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.main-container {
+    padding: 2rem 1rem;
+}
+.hero-title {
+    font-size: 2rem;
+}
+.service-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+.service-item:hover {
+    transform: translateY(-4px);
+}
+.service-content {
+    text-align: center;
+}
+}
+
+
+.report-frame {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Tab 导航栏样式 */
+.tab-navigation {
+  background-color: #232f3e;
+  border-bottom: none;
+  padding: 0 20px;
+  box-shadow: 0 2px 8px rgba(35, 47, 62, 0.15);
+}
+.tab-container {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+}
+.tab-item {
+  position: relative;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.tab-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.tab-item.active {
+  color: #ff9900;
+  border-bottom-color: #ff9900;
+  background-color: rgba(255, 153, 0, 0.1);
+}
+.tab-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+}
+.tab-item.active .tab-title {
+  color: #ff9900;
+  font-weight: 600;
+}
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #ff9900;
+  border-radius: 2px 2px 0 0;
+}
+
+/* 内容区域样式 */
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  background-color: #fafafa;
+}
+.content-panel {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  height: 80vh;
+  padding: 20px;
+  animation: fadeIn-b26b33a0 0.4s ease-in;
+  box-sizing: border-box;
+}
+@keyframes fadeIn-b26b33a0 {
+from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+.content-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.content-header h2 {
+  font-size: 32px;
+  color: #232f3e;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.content-description {
+  font-size: 18px;
+  color: #5a6c7d;
+  margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  font-weight: 400;
+}
+.content-body {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1e8ed;
+  box-sizing: border-box;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Amazon风格下拉菜单样式 */
+.sub-section-dropdown {
+  padding: 16px 20px;
+  margin-bottom: 0;
+  background-color: #f7f8fa;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sub-section-dropdown::before {
+  content: "选择章节:";
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f1111;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  white-space: nowrap;
+}
+.dropdown-select {
+  min-width: 280px;
+  max-width: 400px;
+  padding: 8px 32px 8px 12px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #0f1111;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23565959' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6,9 12,15 18,9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  border: 1px solid #d5d9d9;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  line-height: 20px;
+}
+.dropdown-select:hover {
+  border-color: #ff9900;
+  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.3);
+}
+.dropdown-select:focus {
+  border-color: #ff9900;
+  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.5), inset 0 1px 2px rgba(15, 17, 17, 0.15);
+}
+.dropdown-select:active {
+  background-color: #f7f8fa;
+  border-color: #ff9900;
+}
+.dropdown-select option {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #0f1111;
+  background-color: #ffffff;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  line-height: 20px;
+}
+.dropdown-select option:hover {
+  background-color: #f3f3f3;
+}
+.dropdown-select option:checked {
+  background-color: #ff9900;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* 评估卡片样式 */
+.evaluation-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+.eval-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 1px solid #e1e8ed;
+}
+.eval-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(35, 47, 62, 0.15);
+  border-color: #ff9900;
+}
+.card-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+.eval-card h3 {
+  font-size: 20px;
+  color: #232f3e;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.eval-card p {
+  font-size: 15px;
+  color: #5a6c7d;
+  margin: 0;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* 解决方案样式 */
+.solution-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.solution-section {
+  border-left: 4px solid #ff9900;
+  padding-left: 24px;
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 0 8px 8px 0;
+  border: 1px solid #e1e8ed;
+  border-left: 4px solid #ff9900;
+}
+.solution-section h3 {
+  font-size: 22px;
+  color: #232f3e;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.solution-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #e1e8ed;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.detail-item:hover {
+  background-color: #fff3e6;
+  border-color: #ff9900;
+}
+.detail-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  color: #ff9900;
+}
+
+/* 政策更新样式 */
+.policy-updates {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.update-item {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border-left: 4px solid #ff9900;
+  border: 1px solid #e1e8ed;
+  border-left: 4px solid #ff9900;
+}
+.update-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff9900;
+  white-space: nowrap;
+  min-width: 80px;
+}
+.update-content {
+  flex: 1;
+}
+.update-content h4 {
+  font-size: 20px;
+  color: #232f3e;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.update-content p {
+  font-size: 15px;
+  color: #5a6c7d;
+  margin: 0 0 12px 0;
+  line-height: 1.6;
+}
+.impact-tag {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.impact-tag.high {
+  background-color: #d73027;
+  color: white;
+}
+.impact-tag.medium {
+  background-color: #ff9900;
+  color: white;
+}
+.impact-tag.low {
+  background-color: #146eb4;
+  color: white;
+}
+
+/* 行动计划样式 */
+.action-timeline {
+  position: relative;
+  padding-left: 40px;
+}
+.action-timeline::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #232f3e, #ff9900);
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 40px;
+  padding-left: 40px;
+}
+.timeline-marker {
+  position: absolute;
+  left: -28px;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  z-index: 1;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.timeline-marker.phase1 {
+  background-color: #232f3e;
+}
+.timeline-marker.phase2 {
+  background-color: #146eb4;
+}
+.timeline-marker.phase3 {
+  background-color: #ff9900;
+}
+.timeline-marker.phase4 {
+  background-color: #d73027;
+}
+.timeline-content {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #e1e8ed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.timeline-content h3 {
+  font-size: 22px;
+  color: #232f3e;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.action-list {
+  margin: 0;
+  padding-left: 20px;
+}
+.action-list li {
+  font-size: 15px;
+  color: #5a6c7d;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.report-frame {
+    font-size: 14px;
+}
+.tab-navigation {
+    padding: 0 12px;
+}
+.tab-container {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.tab-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: 6px 6px 0 0;
+}
+.content-panel {
+    padding: 16px 12px;
+}
+.content-header h2 {
+    font-size: 28px;
+}
+.content-description {
+    font-size: 16px;
+}
+.content-body {
+    padding: 16px 12px;
+}
+.evaluation-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+.eval-card {
+    padding: 20px;
+}
+.solution-section {
+    padding: 20px;
+}
+.solution-details {
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+.update-item {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+}
+.action-timeline {
+    padding-left: 24px;
+}
+.timeline-item {
+    padding-left: 24px;
+}
+.timeline-marker {
+    left: -20px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+}
+.timeline-content {
+    padding: 20px;
+}
+  
+  /* 移动端下拉菜单调整 */
+.sub-section-dropdown {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+.sub-section-dropdown::before {
+    font-size: 12px;
+}
+.dropdown-select {
+    min-width: 100%;
+    max-width: 100%;
+    font-size: 12px;
+    padding: 6px 28px 6px 10px;
+    background-size: 10px;
+    background-position: right 8px center;
+}
+}
+
+
+.report-container {
+  height: calc(100vh - 50px);
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  margin-left: auto;
+  margin-right: 0;
+  padding-bottom: 30px;
+  z-index: 1000;
+}
+.header-title {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.header-title h1 {
+  font-size: 24px;
+  color: #333;
+  font-weight: 500;
+  margin: 0;
+}
+.main-content {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+}
+.left-panel {
+  flex: 1;
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.message-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0px 5px;
+  max-height: calc(100vh - 250px);
+  scroll-behavior: smooth;
+}
+
+/* 自定义滚动条样式 */
+.message-container::-webkit-scrollbar {
+  width: 6px;
+}
+.message-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.message-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.message-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+.message-item {
+  display: flex;
+  margin-bottom: 15px;
+  animation: fadeIn-23997391 0.3s ease-in;
+}
+@keyframes fadeIn-23997391 {
+from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+.message-content {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.message-content p {
+  margin: 0;
+}
+
+/* Agent 消息样式 (左侧) */
+.agent-message {
+  justify-content: flex-start;
+}
+.agent-message .message-content {
+  background-color: #e8f4f0;
+  color: #2d5a45;
+  border-bottom-left-radius: 4px;
+  max-width: 90%;
+  border: 1px solid #d1e7dd;
+}
+.file-paths-text {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+/* 批量上传消息样式 */
+.upload-batch-message {
+  background-color: #d4f1e4 !important;
+  border: 1px solid #b8e6c8;
+  min-width: 280px;
+  max-width: 350px;
+}
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #a8dab8;
+}
+.upload-header p {
+  margin: 0;
+  color: #1e5233;
+  font-size: 14px;
+}
+.batch-status {
+  font-size: 11px;
+  background-color: #28a745;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.upload-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.upload-file {
+  font-size: 12px;
+  color: #1e5233;
+  padding: 4px 6px;
+  background-color: rgba(232, 244, 240, 0.8);
+  border-radius: 6px;
+  border: 1px solid #c8e6d0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 上传列表滚动条样式 */
+.upload-list::-webkit-scrollbar {
+  width: 4px;
+}
+.upload-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+.upload-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+/* CEE表单样式 */
+.cee-form-message {
+  max-width: 400px !important;
+  background-color: #e8f4f0 !important;
+  border: 1px solid #d1e7dd;
+  padding: 20px;
+}
+.cee-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #b8e6c8;
+}
+.cee-header h4 {
+  margin: 0;
+  color: #1e5233;
+  font-size: 16px;
+  font-weight: 600;
+}
+.form-section {
+  margin-bottom: 20px;
+}
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e5233;
+  margin-bottom: 8px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #9dd3a8;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: #f8fdf9;
+  color: #1e5233;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #7cc48a;
+  box-shadow: 0 0 0 2px rgba(157, 211, 168, 0.3);
+}
+.form-input::placeholder {
+  color: #6b9c78;
+}
+.checkbox-group {
+  margin-bottom: 10px;
+}
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.form-checkbox {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+.checkbox-item label {
+  font-size: 13px;
+  color: #1e5233;
+  cursor: pointer;
+}
+.form-note {
+  font-size: 11px;
+  color: #4a7c5a;
+  line-height: 1.4;
+  margin: 0;
+  padding: 8px;
+  background-color: #f0f8f2;
+  border-left: 3px solid #7cc48a;
+  border-radius: 4px;
+}
+.cee-submit-btn {
+  width: 100%;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.cee-submit-btn:hover {
+  background-color: #1e7e34;
+}
+
+/* 用户消息样式 (右侧) */
+.user-message {
+  justify-content: flex-end;
+}
+.user-message .message-content {
+  background-color: #d4f1e4;
+  color: #1e5233;
+  border-bottom-right-radius: 4px;
+  border: 1px solid #b8e6c8;
+}
+.right-panel {
+  flex: 1;
+  background-color: white;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #2d5a45;
+  overflow: hidden;
+  min-width: 0;
+}
+.report-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  width: 100%;
+}
+
+/* 报告区域滚动条样式 */
+.report-area::-webkit-scrollbar {
+  width: 6px;
+}
+.report-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.report-area::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.report-area::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+.report-area h2 {
+  font-size: 18px;
+  color: #666;
+  font-weight: 400;
+  margin: 0;
+  text-align: center;
+}
+
+/* 按键区域样式 */
+.button-area {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.preview-btn, .feedback-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #2d5a45;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+.preview-btn:hover, .feedback-btn:hover {
+  background-color: #1e3d30;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(45, 90, 69, 0.3);
+}
+.preview-btn:active, .feedback-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+.preview-btn svg, .feedback-btn svg {
+  flex-shrink: 0;
+}
+.button-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.button-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-input-area {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.message-input {
+  flex: 1;
+  border: 1px solid #e0e0e0;
+  border-radius: 25px;
+  padding: 12px 50px 12px 16px;
+  font-size: 14px;
+  outline: none;
+  background-color: #f8f8f8;
+}
+.message-input:focus {
+  border-color: #4285f4;
+  background-color: white;
+}
+.message-input::placeholder {
+  color: #999;
+}
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+.attachment-btn, .send-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  transition: background-color 0.2s;
+}
+.attachment-btn:hover, .send-btn:hover {
+  background-color: #f5f5f5;
+}
+
+/* 反馈表单遮罩层 */
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  cursor: pointer;
+}
+
+/* 反馈表单样式 */
+.feedback-form-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 2px solid #2d5a45;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  animation: fadeInScale-23997391 0.3s ease-out;
+}
+@keyframes fadeInScale-23997391 {
+from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+}
+to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+}
+.feedback-form-header {
+  background-color: #2d5a45;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.feedback-form-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+.close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.feedback-form-content {
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.form-group.full-width {
+  flex: 1 1 100%;
+}
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d5a45;
+  margin-bottom: 5px;
+}
+.form-input, .form-textarea {
+  padding: 8px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 13px;
+  background-color: #f6f8fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #2d5a45;
+  box-shadow: 0 0 0 2px rgba(45, 90, 69, 0.1);
+  background-color: white;
+}
+.form-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+.concern-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #2d5a45;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.checkbox-label:hover {
+  background-color: #f6f8fa;
+}
+.checkbox-label input[type="checkbox"] {
+  margin-right: 6px;
+  transform: scale(0.9);
+}
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+.submit-btn, .cancel-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-btn {
+  background-color: #2d5a45;
+  color: white;
+}
+.submit-btn:hover {
+  background-color: #1e3d30;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.3);
+}
+.cancel-btn {
+  background-color: #f6f8fa;
+  color: #656d76;
+  border: 1px solid #d0d7de;
+}
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* 滚动条样式 */
+.feedback-form-content::-webkit-scrollbar {
+  width: 6px;
+}
+.feedback-form-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.feedback-form-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.feedback-form-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+@media (max-width: 768px) {
+.main-content {
+    flex-direction: column;
+}
+.header-title h1 {
+    font-size: 20px;
+}
+.report-container {
+    padding: 15px;
+}
+.form-row {
+    flex-direction: column;
+    gap: 10px;
+}
+.concern-options {
+    grid-template-columns: 1fr;
+}
+.form-actions {
+    flex-direction: column;
+}
+.feedback-form-container {
+    width: 95%;
+    max-width: 500px;
+    max-height: 90vh;
+}
+.feedback-form-content {
+    max-height: 60vh;
+}
+}
+
+
+.content-panel {
+  background-color: #ffffff;
+  margin: 0;
+  padding: 24px;
+  min-height: 100%;
+}
+.content-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.content-header h2 {
+  margin: 0 0 8px 0;
+  color: #232f3e;
+  font-size: 24px;
+  font-weight: 600;
+}
+.content-description {
+  margin: 0;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.content-body {
+  color: #333333;
+}
+
+/* 欧洲站点评估表格样式 */
+.europe-expansion-table {
+  margin-bottom: 40px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+.europe-expansion-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: white;
+}
+.europe-expansion-table th {
+  background-color: #232f3e;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 8px;
+  border: 1px solid #444;
+}
+.region-header {
+  background-color: #37475a !important;
+  font-size: 16px;
+  padding: 16px 8px;
+}
+.region-header_1 {
+  background-color: #223a57 !important;
+  font-size: 16px;
+  padding: 16px 8px;
+}
+.sub-header {
+  background-color: #485769 !important;
+}
+.europe-expansion-table td {
+  padding: 12px 8px;
+  border: 1px solid #e0e0e0;
+  text-align: center;
+}
+.mcid-cell, .account-cell {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #232f3e;
+  text-align: center;
+  vertical-align: middle;
+}
+.metric-name {
+  text-align: left;
+  font-weight: 500;
+  color: #232f3e;
+  background-color: #f8f9fa;
+  padding-left: 16px !important;
+}
+.value-cell {
+  font-weight: 500;
+}
+.checkmark {
+  color: #00a650;
+  font-weight: bold;
+  font-size: 16px;
+}
+.cross {
+  color: #ff4d4f;
+  font-weight: bold;
+  font-size: 16px;
+}
+.null-value {
+  color: #999;
+  font-style: italic;
+}
+
+/* 分析部分样式 */
+.analysis-section {
+  margin-bottom: 40px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.section-header {
+  background: #f8f9fa;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.section-header h3 {
+  margin: 0 0 8px 0;
+  color: #232f3e;
+  font-size: 20px;
+  font-weight: 600;
+}
+.section-description {
+  margin: 0;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.section-content {
+  padding: 24px;
+}
+
+/* 无数据状态 */
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999999;
+  font-size: 14px;
+}
+.no-data p {
+  margin: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.content-panel {
+    padding: 16px;
+}
+.content-header h2 {
+    font-size: 20px;
+}
+.europe-expansion-table {
+    font-size: 12px;
+}
+.europe-expansion-table th,
+  .europe-expansion-table td {
+    padding: 8px 4px;
+}
+.metric-name {
+    padding-left: 8px !important;
+}
+}
+@media (max-width: 480px) {
+.europe-expansion-table {
+    display: block;
+}
+.europe-expansion-table thead {
+    display: none;
+}
+.europe-expansion-table tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
+}
+.europe-expansion-table td {
+    display: block;
+    border-bottom: none;
+    padding: 8px 0;
+    position: relative;
+    padding-left: 120px;
+    text-align: left;
+}
+.europe-expansion-table td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 110px;
+    padding-right: 10px;
+    font-weight: bold;
+    color: #232f3e;
+    text-align: right;
+}
+.mcid-cell, .account-cell {
+    text-align: left;
+    padding-left: 120px;
+}
+}
+
+
+.sub-tab-panel { background:#fff; padding:24px; border:1px solid #e5e7eb; border-radius:10px;
+}
+.sub-tab-panel h2 { margin:0 0 12px; font-size:22px; color:#232f3e;
+}
+.sub-tab-panel p { margin:0; font-size:14px; line-height:1.6; color:#444;
+}
+.analysis-section { background:#ffffff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;
+}
+.analysis-section + .analysis-section { margin-top:24px;
+}
+.analysis-section .section-header { background:#f8f9fa; padding:18px 20px; border-bottom:1px solid #e0e0e0;
+}
+.analysis-section .section-header h3 { font-size:18px; font-weight:600; color:#232f3e; margin:0;
+}
+.analysis-section .section-description { font-size:13px; color:#666;
+}
+.analysis-section .section-content { padding:20px 24px;
+}
+
+
+.sub-tab-panel {
+  background: #fff;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+.sub-tab-panel h2 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  color: #232f3e;
+}
+.sub-tab-panel p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
+}
+/* 追加 DI 分析区块样式 */
+.analysis-section {
+  margin-top: 40px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.section-header {
+  background: #f8f9fa;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.section-header h3 {
+  margin: 0 0 8px 0;
+  color: #232f3e;
+  font-size: 20px;
+  font-weight: 600;
+}
+.section-description {
+  margin: 0;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.section-content { padding: 24px;
+}
+.no-data { text-align: center; padding: 40px; color: #999; font-size: 14px;
+}
+.no-data p { margin: 0;
+}
+
+
+.sub-tab-panel { background:#fff; padding:24px; border:1px solid #e5e7eb; border-radius:10px;
+}
+.card-wrapper { background:white; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); padding:20px; margin-bottom:20px; border-left:4px solid #007bff;
+}
+.card-header { display:flex; align-items:center; margin-bottom:15px; cursor:pointer; transition:0.3s; padding:8px; border-radius:6px; background:transparent; transform:translateX(0);
+}
+.card-header:hover { background:#f0f8ff; transform:translateX(3px);
+}
+.fade-slide-enter-active,.fade-slide-leave-active { transition: all .35s cubic-bezier(.4,0,.2,1);
+}
+.fade-slide-enter-from,.fade-slide-leave-to { opacity:0; transform:translateY(-6px);
+}
+/* CEE 分析区块复用 Tab5 样式 */
+.analysis-section { margin-top:20px; background:#ffffff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;
+}
+.section-header { background:#f8f9fa; padding:20px 24px; border-bottom:1px solid #e0e0e0;
+}
+.section-header h3 { margin:0 0 8px 0; color:#232f3e; font-size:20px; font-weight:600;
+}
+.section-description { margin:0; color:#666; font-size:14px; line-height:1.5;
+}
+.section-content { padding:24px;
+}
+.no-data { text-align:center; padding:40px; color:#999; font-size:14px;
+}
+.no-data p { margin:0;
+}
+/* CEE 指标表格样式 */
+.cee-table-wrapper { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:16px 18px 20px;
+}
+.cee-table { width:100%; border-collapse:collapse; font-size:12px;
+}
+.cee-table thead th { background:#232f3e; color:#fff; padding:10px 8px; font-weight:600; text-align:center;
+}
+.cee-table tbody td { border:1px solid #e0e0e0; padding:10px 8px; text-align:center; background:#fafafa;
+}
+.cee-table tbody tr:nth-child(even) td { background:#f5f7fa;
+}
+.cee-table tbody td:first-child { font-weight:600; color:#232f3e; text-align:left;
+}
+.cee-table .final-row td { background:#fff7e6; font-weight:700; color:#d46b08;
+}
+.cee-summary-tip { margin-top:10px; font-size:11px; color:#666; text-align:right;
+}
+
+
+.sub-tab-panel { background:#fff; padding:24px; border:1px solid #e5e7eb; border-radius:10px;
+}
+.sub-tab-panel h2 { margin:0 0 12px; font-size:22px; color:#232f3e;
+}
+.sub-tab-panel p { margin:0; font-size:14px; line-height:1.6; color:#444;
+}
+
+
+.content-panel { background:#ffffff; margin:0; padding:0; min-height:100%;
+}
+
+
+.eu-solutions-container {
+  margin: 20px 0;
+}
+.solutions-section {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e8e8;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.solutions-header {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  padding: 20px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.orange-arrow {
+  color: #FF8C00;
+  font-size: 20px;
+  font-weight: bold;
+}
+.solutions-title {
+  color: #333;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+.solutions-content {
+  padding: 25px;
+}
+
+/* 表格样式 - 参考Chat.vue中的样式 */
+.solutions-table-container {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+.solutions-comparison-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 13px !important;
+  background: white !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.solutions-comparison-table th {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 15px 12px !important;
+  text-align: center !important;
+  border: 1px solid #357abd !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+.solutions-comparison-table td {
+  padding: 12px !important;
+  border: 1px solid #e0e0e0 !important;
+  vertical-align: top !important;
+  background: white !important;
+  color: #333 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+.solutions-comparison-table tbody tr:nth-child(even) {
+  background: #f8f9fa !important;
+}
+.solutions-comparison-table:hover tbody tr {
+  background: white !important;
+}
+.solutions-comparison-table tbody tr:nth-child(even):hover {
+  background: #f8f9fa !important;
+}
+
+/* 列样式 */
+.solution-type {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+  width: 15%;
+  text-align: center;
+  font-weight: 600;
+}
+.fba-solution {
+  width: 25%;
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+}
+.efn-solution {
+  width: 30%;
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+}
+.paneu-solution {
+  width: 30%;
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+  color: #333 !important;
+}
+
+/* 行标签样式 */
+.row-label {
+  background: #f8f9fa !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  color: #495057 !important;
+}
+
+/* 内容样式 */
+.solution-desc {
+  text-align: left !important;
+  line-height: 1.6 !important;
+}
+.solution-desc.highlight {
+  background: #fff3cd !important;
+  color: #856404 !important;
+  font-weight: 500 !important;
+}
+.criteria-item {
+  text-align: left !important;
+}
+.criteria-title {
+  font-weight: 600 !important;
+  color: #495057 !important;
+  margin-bottom: 4px;
+}
+.criteria-content {
+  color: #666 !important;
+  line-height: 1.4 !important;
+}
+.criteria-content.highlight {
+  background: #fff3cd !important;
+  color: #856404 !important;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500 !important;
+}
+.logistics-item {
+  text-align: left !important;
+  color: #666 !important;
+}
+.delivery-item {
+  text-align: left !important;
+  line-height: 1.6 !important;
+}
+.delivery-type {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 1px;
+}
+.delivery-type.local {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+.delivery-type.cross-border {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* 注释部分 */
+.note-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  border-radius: 4px;
+}
+.note-text {
+  color: #1565c0;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.solutions-content {
+    padding: 15px;
+}
+.solutions-comparison-table th,
+  .solutions-comparison-table td {
+    padding: 8px 6px !important;
+    font-size: 11px !important;
+}
+.solutions-title {
+    font-size: 18px;
+}
+.delivery-type {
+    font-size: 10px;
+    padding: 1px 4px;
+}
+}
+@media (max-width: 480px) {
+.solutions-comparison-table th,
+  .solutions-comparison-table td {
+    padding: 6px 4px !important;
+    font-size: 10px !important;
+}
+}
+
+
+.asin-status-wrapper {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin: 20px 0;
+  overflow: hidden;
+}
+.asin-status-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border-bottom: 1px solid #e8e8e8;
+}
+.orange-arrow { color: #FF8C00; font-size: 18px; font-weight: bold;
+}
+.asin-status-title { margin: 0; font-size: 18px; font-weight: 600; color: #333;
+}
+.asin-status-body { padding: 20px;
+}
+.placeholder-text { margin: 0 0 12px 0; font-size: 14px; color: #555; line-height: 1.5;
+}
+.status-list { list-style: none; margin: 0; padding: 0;
+}
+.status-item { padding: 8px 10px; background: #f8f9fa; border: 1px solid #eee; border-radius: 4px; margin: 6px 0; font-size: 13px;
+}
+.status-item:hover { background: #fff;
+}
+@media (max-width: 768px) {
+.asin-status-body { padding: 16px;
+}
+.asin-status-title { font-size: 16px;
+}
+}
+
+
+.paneu-policy-container {
+  margin: 20px 0;
+}
+.policy-section {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e8e8;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.policy-header {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  padding: 20px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.orange-arrow {
+  color: #FF8C00;
+  font-size: 20px;
+  font-weight: bold;
+}
+.policy-title {
+  color: #333;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+.policy-content {
+  padding: 25px;
+}
+
+/* 更新框样式 */
+.update-box {
+  background: #fff7e6;
+  border: 2px dashed #FFB84D;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+.update-info {
+  margin-bottom: 15px;
+}
+.asin-count {
+  margin-bottom: 10px;
+}
+.label {
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+.count-number {
+  color: #FF8C00;
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+.current-status {
+  line-height: 1.6;
+}
+.status-text {
+  color: #333;
+  font-size: 14px;
+}
+.attention-highlight {
+  background: #FFE066;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* 关键节点样式 */
+.key-point {
+  background: #f0f8ff;
+  padding: 12px 15px;
+  border-radius: 6px;
+  margin: 20px 0;
+  border-left: 4px solid #1890ff;
+}
+.point-label {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+}
+.point-date {
+  color: #FF8C00;
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0 8px;
+}
+.point-description {
+  color: #555;
+  font-size: 14px;
+}
+
+/* 注意事项样式 */
+.notice-section {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 20px 0;
+  border-left: 4px solid #28a745;
+}
+.notice-label {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.notice-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notice-text {
+  color: #555;
+  font-size: 14px;
+}
+.gpsr-link {
+  color: #007bff;
+  text-decoration: underline;
+  font-size: 14px;
+}
+.gpsr-link:hover {
+  color: #0056b3;
+}
+
+/* 详细信息样式 */
+.detailed-info {
+  margin-top: 25px;
+}
+.info-section {
+  background: #f8f9ff;
+  border: 1px solid #e3f2fd;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+.title-text {
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+}
+.new-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.section-content {
+  margin-top: 15px;
+}
+.content-text {
+  color: #555;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 12px 0;
+  text-align: justify;
+}
+
+/* 重要提醒样式 */
+.important-reminders {
+  margin-top: 25px;
+}
+.reminder-item {
+  padding: 12px 15px;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+.reminder-item.highlight {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-left: 4px solid #f39c12;
+}
+.reminder-item.warning {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-left: 4px solid #dc3545;
+}
+.reminder-text {
+  color: #333;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.reminder-item.highlight .reminder-text {
+  color: #856404;
+}
+.reminder-item.warning .reminder-text {
+  color: #721c24;
+}
+
+/* 统一表格样式 */
+.paneu-table,
+.policy-table,
+.update-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 13px !important;
+  background: white !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.paneu-table th,
+.policy-table th,
+.update-table th {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 15px 12px !important;
+  text-align: center !important;
+  border: 1px solid #357abd !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+.paneu-table td,
+.policy-table td,
+.update-table td {
+  padding: 12px !important;
+  border: 1px solid #e0e0e0 !important;
+  vertical-align: top !important;
+  background: white !important;
+  color: #333 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+.paneu-table tbody tr:nth-child(even),
+.policy-table tbody tr:nth-child(even),
+.update-table tbody tr:nth-child(even) {
+  background: #f8f9fa !important;
+}
+.paneu-table:hover tbody tr,
+.policy-table:hover tbody tr,
+.update-table:hover tbody tr {
+  background: white !important;
+}
+.paneu-table tbody tr:nth-child(even):hover,
+.policy-table tbody tr:nth-child(even):hover,
+.update-table tbody tr:nth-child(even):hover {
+  background: #f8f9fa !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.policy-content {
+    padding: 15px;
+}
+.update-box {
+    padding: 15px;
+}
+.section-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+.new-badge {
+    align-self: flex-start;
+}
+.notice-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+.key-point {
+    padding: 10px 12px;
+}
+.point-date {
+    margin: 0 5px;
+    font-size: 14px;
+}
+}
+
+
+.product-compliance-container {
+  margin: 20px 0;
+}
+.compliance-section {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e8e8;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.compliance-header {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  padding: 20px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.orange-arrow {
+  color: #FF8C00;
+  font-size: 20px;
+  font-weight: bold;
+}
+.compliance-title {
+  color: #333;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+.compliance-content {
+  padding: 30px;
+}
+
+/* 进度条样式 */
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.progress-step {
+  background: #e8e8e8;
+  color: #666;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 0;
+  position: relative;
+  min-width: 150px;
+  text-align: center;
+}
+.progress-step.completed {
+  background: #2c5aa0;
+  color: white;
+}
+.progress-step.current {
+  background: #FF8C00;
+  color: white;
+}
+.progress-arrow {
+  color: #ccc;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 产品合规简介标题 */
+.intro-title {
+  text-align: center;
+  margin: 50px 0;
+}
+.intro-title h1 {
+  color: #333;
+  font-size: 48px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 销售状态样式 */
+.sales-status {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+.status-badge {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #333;
+  padding: 15px 40px;
+  border-radius: 25px;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+  border: 2px solid #FF8C00;
+}
+.core-message {
+  text-align: center;
+  margin: 40px 0;
+}
+.main-text {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+.sub-text {
+  color: #333;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* 英国站样式 */
+.uk-section {
+  margin: 30px 0;
+}
+.country-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.uk-flag {
+  font-size: 32px;
+}
+.country-title {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+.compliance-info {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 8px;
+  border-left: 4px solid #FF8C00;
+}
+.info-title {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+.warning-text {
+  color: #dc3545;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+.fhdds-description {
+  margin: 15px 0 20px 0;
+}
+.fhdds-description p {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+.fhdds-links {
+  margin-top: 20px;
+}
+.link-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0;
+}
+.checkmark {
+  color: #00aa66;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 2px;
+}
+.link-text {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.link {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+/* 欧盟国家样式 */
+.eu-countries {
+  margin: 30px 0;
+}
+.country-flags {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.flag-item {
+  font-size: 32px;
+  padding: 10px;
+  border-radius: 50%;
+  background: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.eu-title {
+  text-align: center;
+}
+.eu-title h3 {
+  color: #FF8C00;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+.eu-subtitle {
+  color: #555;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* GPSR表格样式 */
+.gpsr-section {
+  margin: 30px 0;
+}
+.regulation-title {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+.compliance-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 13px !important;
+  background: white !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.compliance-table th {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 15px 12px !important;
+  text-align: center !important;
+  border: 1px solid #357abd !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+.compliance-table td {
+  padding: 12px !important;
+  border: 1px solid #e0e0e0 !important;
+  vertical-align: top !important;
+  background: white !important;
+  color: #333 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+.compliance-table tbody tr:nth-child(even) {
+  background: #f8f9fa !important;
+}
+.compliance-table:hover tbody tr {
+  background: white !important;
+}
+.compliance-table tbody tr:nth-child(even):hover {
+  background: #f8f9fa !important;
+}
+
+/* EPR样式 */
+.epr-section {
+  margin: 30px 0;
+}
+.epr-items {
+  margin-top: 15px;
+}
+.epr-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 15px 0;
+  line-height: 1.6;
+}
+.bullet {
+  color: #333;
+  font-weight: bold;
+  margin-top: 3px;
+  min-width: 8px;
+}
+.epr-text {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  flex: 1;
+}
+.epr-text strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* 政策更新标题 */
+.policy-title {
+  text-align: center;
+  margin: 50px 0;
+}
+.policy-title h1 {
+  color: #333;
+  font-size: 36px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.progress-bar {
+    flex-direction: column;
+    gap: 10px;
+}
+.progress-arrow {
+    transform: rotate(90deg);
+}
+.progress-step {
+    min-width: auto;
+    width: 100%;
+}
+.country-flags {
+    justify-content: center;
+}
+.flag-item {
+    font-size: 24px;
+    padding: 8px;
+}
+.intro-title h1 {
+    font-size: 32px;
+}
+.policy-title h1 {
+    font-size: 24px;
+}
+.main-text {
+    font-size: 20px;
+}
+.sub-text {
+    font-size: 18px;
+}
+.compliance-content {
+    padding: 20px;
+}
+.compliance-table {
+    font-size: 12px;
+}
+.compliance-table th,
+  .compliance-table td {
+    padding: 8px;
+}
+}
+
+
+.vat-compliance-container {
+  margin: 20px 0;
+}
+.compliance-section {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e8e8;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.compliance-header {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  padding: 20px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.orange-arrow {
+  color: #FF8C00;
+  font-size: 20px;
+  font-weight: bold;
+}
+.compliance-title {
+  color: #333;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+.compliance-content {
+  padding: 30px;
+}
+
+/* 第一部分：四步骤流程样式 */
+.process-steps {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.step-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 25px 20px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+.step-number {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.step-number.orange {
+  background: linear-gradient(135deg, #FF8C00 0%, #FF6B35 100%);
+}
+.step-number.teal {
+  background: linear-gradient(135deg, #20B2AA 0%, #008B8B 100%);
+}
+.step-number.pink {
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+}
+.step-number.blue {
+  background: linear-gradient(135deg, #1E90FF 0%, #0066CC 100%);
+}
+.step-content {
+  text-align: center;
+}
+.step-title {
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+.step-subtitle {
+  color: #FF8C00;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 15px 0;
+}
+.step-details {
+  text-align: left;
+  margin-top: 15px;
+}
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0;
+}
+.bullet {
+  color: #333;
+  font-weight: bold;
+  margin-top: 2px;
+  min-width: 6px;
+}
+.detail-text {
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* 第二部分：注意事项样式 */
+.notice-content {
+  max-width: 100%;
+}
+.notice-text {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+.address-options {
+  margin: 20px 0;
+}
+.option-item {
+  display: flex;
+  gap: 8px;
+  margin: 15px 0;
+  line-height: 1.6;
+}
+.option-label {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 80px;
+}
+.option-text {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* 示例截图区域 */
+.example-section {
+  margin: 25px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+.example-label {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+.example-box {
+  background: white;
+  border: 2px solid #ff4444;
+  border-radius: 6px;
+  padding: 15px;
+}
+.china-address {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.address-icon {
+  font-size: 16px;
+}
+.address-text {
+  color: #333;
+  font-size: 14px;
+  flex: 1;
+}
+.verify-button {
+  background: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* 地址说明选项 */
+.address-explanations {
+  margin: 25px 0;
+}
+.explanation-item {
+  display: flex;
+  gap: 8px;
+  margin: 15px 0;
+  line-height: 1.6;
+}
+.explanation-label {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 100px;
+}
+.explanation-text {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* 统一表格样式 */
+.compliance-table,
+.process-table,
+.notice-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 13px !important;
+  background: white !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.compliance-table th,
+.process-table th,
+.notice-table th {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 15px 12px !important;
+  text-align: center !important;
+  border: 1px solid #357abd !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+.compliance-table td,
+.process-table td,
+.notice-table td {
+  padding: 12px !important;
+  border: 1px solid #e0e0e0 !important;
+  vertical-align: top !important;
+  background: white !important;
+  color: #333 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+.compliance-table tbody tr:nth-child(even),
+.process-table tbody tr:nth-child(even),
+.notice-table tbody tr:nth-child(even) {
+  background: #f8f9fa !important;
+}
+.compliance-table:hover tbody tr,
+.process-table:hover tbody tr,
+.notice-table:hover tbody tr {
+  background: white !important;
+}
+.compliance-table tbody tr:nth-child(even):hover,
+.process-table tbody tr:nth-child(even):hover,
+.notice-table tbody tr:nth-child(even):hover {
+  background: #f8f9fa !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.process-steps {
+    flex-direction: column;
+    gap: 20px;
+}
+.step-card {
+    max-width: 100%;
+}
+.compliance-content {
+    padding: 20px;
+}
+.option-item,
+  .explanation-item {
+    flex-direction: column;
+    gap: 5px;
+}
+.option-label,
+  .explanation-label {
+    min-width: auto;
+}
+.china-address {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+}
+
+
+.vat-info-container {
+  margin: 20px 0;
+}
+.vat-section {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e8e8;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.vat-header {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  padding: 20px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.orange-arrow {
+  color: #FF8C00;
+  font-size: 20px;
+  font-weight: bold;
+}
+.vat-title {
+  color: #333;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+.amazon-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.amazon-text {
+  color: #FF8C00;
+  font-size: 14px;
+  font-weight: 600;
+}
+.global-selling {
+  color: #FF8C00;
+  font-size: 12px;
+  font-weight: 500;
+}
+.amazon-logo-text {
+  color: #FF8C00;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+}
+.global-text {
+  color: #FF8C00;
+  font-size: 10px;
+  font-weight: 400;
+  font-style: italic;
+}
+.vat-content {
+  padding: 30px;
+}
+
+/* 第一部分特殊样式 */
+.inventory-status {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+.status-badge {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #333;
+  padding: 15px 40px;
+  border-radius: 25px;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+  border: 2px solid #FF8C00;
+}
+.core-message {
+  text-align: center;
+  margin: 40px 0;
+}
+.main-text {
+  color: #333;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+.sub-text {
+  color: #333;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* 第二部分特殊样式 */
+.vat-basics {
+  max-width: 100%;
+}
+.info-title {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 25px 0 15px 0;
+  line-height: 1.4;
+}
+.info-points {
+  margin: 15px 0 25px 0;
+}
+.point-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0;
+  line-height: 1.6;
+}
+.bullet {
+  color: #333;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 2px;
+  min-width: 8px;
+}
+.point-text {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* 统一表格样式 */
+.vat-table,
+.info-table,
+.basic-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 13px !important;
+  background: white !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.vat-table th,
+.info-table th,
+.basic-table th {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 15px 12px !important;
+  text-align: center !important;
+  border: 1px solid #357abd !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+.vat-table td,
+.info-table td,
+.basic-table td {
+  padding: 12px !important;
+  border: 1px solid #e0e0e0 !important;
+  vertical-align: top !important;
+  background: white !important;
+  color: #333 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+.vat-table tbody tr:nth-child(even),
+.info-table tbody tr:nth-child(even),
+.basic-table tbody tr:nth-child(even) {
+  background: #f8f9fa !important;
+}
+.vat-table:hover tbody tr,
+.info-table:hover tbody tr,
+.basic-table:hover tbody tr {
+  background: white !important;
+}
+.vat-table tbody tr:nth-child(even):hover,
+.info-table tbody tr:nth-child(even):hover,
+.basic-table tbody tr:nth-child(even):hover {
+  background: #f8f9fa !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.vat-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+}
+.vat-title {
+    margin-left: 0;
+}
+.main-text {
+    font-size: 24px;
+}
+.sub-text {
+    font-size: 20px;
+}
+.status-badge {
+    font-size: 20px;
+    padding: 12px 30px;
+}
+.vat-content {
+    padding: 20px;
+}
+}
+
+
+.content-panel {
+  background-color: #ffffff;
+  margin: 0;
+  padding: 24px;
+  min-height: 100%;
+}
+.content-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.content-header h2 {
+  margin: 0 0 8px 0;
+  color: #232f3e;
+  font-size: 24px;
+  font-weight: 600;
+}
+.content-description {
+  margin: 0;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.second-block {
+  margin-top: 48px; /* 与上方模块拉开距离 */
+}
+.content-body {
+  color: #333333;
+}
+
+/* 政策更新图片区域 */
+.policy-card {
+  text-align: center;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+  position: relative;
+}
+.policy-card:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(-2px);
+}
+.policy-link {
+  display: inline-block;
+  cursor: pointer;
+  width: 100%;
+  max-width: 1200px;
+}
+.policy-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.policy-card:hover .policy-image {
+  transform: scale(1.02);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+}
+.img-caption {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #666;
+  letter-spacing: 0.5px;
+}
+
+/* 合规模块布局 */
+.compliance-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 8px;
+}
+.module-item {
+  background: transparent; /* 内部组件自带卡片样式 */
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.content-panel {
+    padding: 16px;
+}
+.content-header h2 {
+    font-size: 20px;
+}
+.policy-card {
+    padding: 12px;
+}
+.img-caption {
+    font-size: 11px;
+}
+.compliance-modules {
+    gap: 24px;
+}
+}
+
+
+.content-panel {
+  background-color: #ffffff;
+  margin: 0;
+  padding: 24px;
+  min-height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.content-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.content-header h2 {
+  margin: 0 0 8px 0;
+  color: #232f3e;
+  font-size: 24px;
+  font-weight: 600;
+}
+.content-description {
+  margin: 0;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.content-body {
+  color: #333333;
+}
+.action-plan-table {
+  overflow-x: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+.action-plan-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+.action-plan-table th {
+  background-color: #232f3e;
+  color: white;
+  font-weight: 600;
+  text-align: left;
+  padding: 16px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.action-plan-table td {
+  padding: 16px;
+  border-bottom: 1px solid #eaeaea;
+  vertical-align: top;
+}
+.action-plan-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+.action-plan-table tr:hover {
+  background-color: #f1f7ff;
+}
+.ranking-col {
+  width: 80px;
+}
+.action-col {
+  width: 200px;
+}
+.timeline-col {
+  width: 100px;
+}
+.logic-col {
+  /* 剩余空间 */
+}
+.ranking {
+  font-weight: bold;
+  color: #ff9900;
+  text-align: center;
+  font-size: 16px;
+}
+.action {
+  font-weight: 600;
+  color: #232f3e;
+}
+.timeline {
+  color: #666;
+  font-style: italic;
+}
+.logic ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.logic li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.growth-item {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e0e0e0;
+}
+.growth-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.growth-item strong {
+  color: #232f3e;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.content-panel {
+    padding: 16px;
+}
+.content-header h2 {
+    font-size: 20px;
+}
+.action-plan-table {
+    font-size: 14px;
+}
+.action-plan-table th,
+  .action-plan-table td {
+    padding: 12px 8px;
+}
+.ranking-col {
+    width: 60px;
+}
+.action-col {
+    width: 150px;
+}
+.timeline-col {
+    width: 80px;
+}
+}
+@media (max-width: 480px) {
+.action-plan-table {
+    display: block;
+}
+.action-plan-table thead {
+    display: none;
+}
+.action-plan-table tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
+}
+.action-plan-table td {
+    display: block;
+    border-bottom: none;
+    padding: 8px 0;
+    position: relative;
+    padding-left: 120px;
+}
+.action-plan-table td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 110px;
+    padding-right: 10px;
+    font-weight: bold;
+    color: #232f3e;
+    text-align: right;
+}
+.ranking {
+    text-align: left;
+}
+  
+  /* 为移动视图添加数据标签 */
+.action-plan-table td.ranking:before { content: "优先级: ";
+}
+.action-plan-table td.action:before { content: "行动: ";
+}
+.action-plan-table td.timeline:before { content: "时间: ";
+}
+.action-plan-table td.logic:before { 
+    content: "逻辑: "; 
+    position: static;
+    display: block;
+    margin-bottom: 8px;
+    text-align: left;
+    width: auto;
+    padding-right: 0;
+}
+.action-plan-table td.logic {
+    padding-left: 0;
+}
+}
+
+
+ {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.app {
+  font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+  line-height: 1.8;
+  color: #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+.header:hover {
+  transform: translateY(-5px);
+}
+.header h1 {
+  font-size: 2.5em;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-weight: 300;
+}
+.subtitle {
+  color: #7f8c8d;
+  font-size: 1.1em;
+  margin-bottom: 20px;
+}
+.search-box {
+  margin-top: 20px;
+}
+.search-box input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+.search-box input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+  transform: scale(1.02);
+}
+.sheet-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  margin-bottom: 30px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+.sheet-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+}
+.sheet-header {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  padding: 20px 30px;
+  font-size: 1.3em;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+.sheet-header:hover {
+  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+}
+.toggle-icon {
+  font-size: 1.2em;
+  transition: transform 0.3s ease;
+}
+.sheet-content {
+  padding: 30px;
+  max-height: 2000px;
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+.sheet-content.collapsed {
+  max-height: 0;
+  padding: 0 30px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+th {
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+  color: white;
+  padding: 18px 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1em;
+  letter-spacing: 0.5px;
+}
+td {
+  padding: 18px 15px;
+  border-bottom: 1px solid #ecf0f1;
+  vertical-align: top;
+  white-space: pre-line;
+  font-size: 0.95em;
+  line-height: 1.7;
+  transition: all 0.3s ease;
+}
+td:first-child {
+  font-weight: 500;
+  background-color: #f8f9fa;
+  width: 180px;
+}
+td:nth-child(2) {
+  width: 300px;
+}
+td:last-child {
+  min-width: 400px;
+}
+tr {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+tr:hover {
+  background-color: #e3f2fd;
+  transform: scale(1.01);
+}
+tr:hover td:first-child {
+  background-color: #bbdefb;
+}
+tr.highlighted {
+  background-color: #fff3e0 !important;
+  border-left: 4px solid #ff9800;
+  animation: pulse-ec058d51 2s infinite;
+}
+tr.highlighted td:first-child {
+  background-color: #ffe0b2 !important;
+}
+@keyframes pulse-ec058d51 {
+0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+}
+70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+}
+100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+}
+}
+.empty-cell {
+  color: #bdc3c7;
+  font-style: italic;
+}
+.empty-sheet {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  text-align: center;
+  color: #7f8c8d;
+  font-style: italic;
+}
+.footer {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 40px;
+  padding: 20px;
+  animation: fadeIn-ec058d51 2s ease-in;
+}
+@keyframes fadeIn-ec058d51 {
+from { opacity: 0; transform: translateY(20px);
+}
+to { opacity: 1; transform: translateY(0);
+}
+}
+@media (max-width: 768px) {
+.container {
+    padding: 10px;
+}
+.header {
+    padding: 20px;
+}
+.header h1 {
+    font-size: 2em;
+}
+.sheet-content {
+    padding: 15px;
+}
+table {
+    font-size: 0.85em;
+}
+th, td {
+    padding: 12px 8px;
+}
+td:first-child {
+    width: auto;
+}
+td:nth-child(2) {
+    width: auto;
+}
+td:last-child {
+    min-width: auto;
+}
+}
+
+
+.content-panel { background-color:#ffffff; margin:0; padding:24px; min-height:100%;
+}
+.content-header { margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #e0e0e0;
+}
+.content-header h2 { margin:0 0 8px 0; color:#232f3e; font-size:24px; font-weight:600;
+}
+.content-description { margin:0; color:#666; font-size:14px; line-height:1.5;
+}
+.content-body { color:#333;
+}
+
+/* 嵌入脚本区块样式 */
+.pitching-wrapper { margin-top:8px; border:1px solid #e0e0e0; border-radius:10px; background:#fafbfc; padding:20px 20px 10px; box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+.section-title { margin:0 0 6px; font-size:20px; font-weight:600; color:#232f3e;
+}
+.section-subtitle { margin:0 0 14px; font-size:13px; color:#666;
+}
+.pitching-embed { border:1px solid #d5d9d9; border-radius:12px; overflow:hidden; background:#fff;
+}
+
+/* 调整内部组件样式以融入当前面板 */
+ .app { background:transparent !important; min-height:auto !important;
+}
+ .container { max-width:100% !important; padding:0 0 10px 0 !important;
+}
+ .header { margin-bottom:18px !important; border-radius:14px !important; padding:28px 28px 26px !important;
+}
+ .sheet-container { margin-bottom:22px !important;
+}
+ .footer { color:#555 !important; background:#f8f9fa !important; border-radius:10px !important; padding:16px !important; margin-top:10px !important;
+}
+ table { font-size:13px !important;
+}
+@media (max-width:768px) {
+.pitching-wrapper { padding:16px 14px 8px;
+}
+.section-title { font-size:18px;
+}
+ .header h1 { font-size:1.6em !important;
+}
+.content-panel { padding:16px;
+}
+.content-header h2 { font-size:20px;
+}
+}
+
+
+.uni-report-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(4px); display:flex; align-items:flex-start; justify-content:center; padding:40px 30px 60px; z-index:3000; overflow:auto;
+}
+.uni-report-modal { background:#ffffff; width: min(1400px, 100%); max-height:100%; border-radius:14px; box-shadow:0 10px 30px -5px rgba(0,0,0,0.25),0 4px 10px -2px rgba(0,0,0,0.15); display:flex; flex-direction:column; overflow:hidden; border:1px solid #e5e7eb;
+}
+.uni-report-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#232f3e; color:#fff; position:sticky; top:0; z-index:10;
+}
+.uni-report-header .title { margin:0; font-size:20px; font-weight:600; letter-spacing:.5px;
+}
+.uni-report-header .actions { display:flex; gap:10px;
+}
+.close-btn, .export-btn { border:none; cursor:pointer; padding:8px 14px; border-radius:6px; font-size:13px; font-weight:600; letter-spacing:.5px; display:inline-flex; align-items:center; gap:6px; transition:.25s;
+}
+.close-btn { background:#ff5f56; color:#fff;
+}
+.close-btn:hover { background:#ff3b30;
+}
+.export-btn { background:#ff9900; color:#232f3e;
+}
+.export-btn:hover { background:#ffad33;
+}
+.uni-report-body { padding:20px 26px 40px; overflow-y:auto;
+}
+.intro-box { background:#f8f9fa; border:1px solid #e2e8f0; padding:14px 18px; border-radius:8px; font-size:13px; line-height:1.6; color:#444; box-shadow:0 1px 2px rgba(0,0,0,0.04);
+}
+.report-section { margin-top:10px;
+}
+.report-section + .report-section { margin-top:30px;
+}
+.section-title { margin:0 0 16px; font-size:18px; font-weight:600; color:#232f3e; position:relative; padding-left:10px;
+}
+.section-title:before { content:''; position:absolute; left:0; top:2px; bottom:2px; width:4px; border-radius:2px; background:#ff9900;
+}
+.section-content { background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:18px 20px; box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+/* 精简嵌套组件的外层间距 */
+.section-content .content-panel { padding:0; box-shadow:none;
+}
+.section-content .content-header { display:none;
+}
+.section-content .sub-tab-panel { padding:0; border:none; box-shadow:none;
+}
+.section-content .analysis-section { margin-top:20px;
+}
+.section-content table { font-size:12px;
+}
+@media (max-width: 1024px) {
+.uni-report-modal { width:100%;
+}
+.uni-report-overlay { padding:20px 10px 40px;
+}
+.uni-report-header .title { font-size:18px;
+}
+}
+
+
+/* ReportFrame 样式 */
+.report-frame {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Tab 导航栏样式 - AWS 风格 */
+.tab-navigation {
+  background-color: #232f3e;
+  border-bottom: none;
+  padding: 0 12px;
+  box-shadow: 0 2px 8px rgba(35, 47, 62, 0.15);
+  position: relative;
+  display:flex;
+  align-items:center;
+}
+.tab-container {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tab-container::-webkit-scrollbar {
+  display: none;
+}
+.nav-actions { margin-left:auto; display:flex; align-items:center; gap:10px; padding-left:12px;
+}
+.preview-btn { background:#ff9900; border:none; color:#232f3e; font-size:12px; font-weight:600; padding:8px 14px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 4px rgba(0,0,0,0.15); transition:.25s; letter-spacing:.5px; text-transform:lowercase;
+}
+.preview-btn:hover { background:#ffad33;
+}
+.preview-btn:active { transform:translateY(1px);
+}
+.tab-item {
+  position: relative;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  color: #ffffff;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+.tab-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.tab-item.active {
+  color: #ff9900;
+  border-bottom-color: #ff9900;
+  background-color: rgba(255, 153, 0, 0.1);
+}
+
+/* 解决方案 子菜单 */
+.solution-dropdown { position:absolute; top:100%; background:#ffffff; border:1px solid #e5e7eb; z-index:30; padding:8px 0; box-shadow:0 8px 18px -4px rgba(0,0,0,0.12),0 4px 8px -2px rgba(0,0,0,0.08); width:240px; border-radius:8px;
+}
+.solution-dropdown.centered { left:50%; transform:translateX(-50%);
+}
+.solution-dropdown.compact { right:auto;
+}
+.dropdown-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px;
+}
+.dropdown-item { display:flex; flex-direction:column; padding:8px 12px 6px; border-left:3px solid transparent; cursor:pointer; transition:background .2s ease,border-color .25s ease;
+}
+.dropdown-item:hover { background:#fff8ec; border-left-color:#ff9900;
+}
+.dropdown-item.selected { background:#fff3e0; border-left-color:#ff9900;
+}
+.dropdown-item .item-title { font-size:13px; font-weight:600; color:#232f3e; line-height:1.2; margin-bottom:2px;
+}
+.dropdown-item .item-desc { font-size:11px; color:#666; line-height:1.3; white-space:normal;
+}
+.dropdown-fade-enter-active,.dropdown-fade-leave-active { transition:opacity .25s ease, transform .3s ease;
+}
+.dropdown-fade-enter-from,.dropdown-fade-leave-to { opacity:0; transform:translateY(-6px);
+}
+.tab-title {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #ff9900;
+  border-radius: 2px 2px 0 0;
+}
+
+/* Tab 内容区域 */
+.tab-content {
+  flex: 1;
+  background-color: #f5f5f5;
+  overflow-y: auto;
+}
+.content-panel {
+  background-color: #ffffff;
+  margin: 0;
+  padding: 24px;
+  min-height: 100%;
+}
+.content-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.content-header h2 {
+  margin: 0 0 8px 0;
+  color: #232f3e;
+  font-size: 24px;
+  font-weight: 600;
+}
+.content-description {
+  margin: 0;
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.content-body {
+  color: #333333;
+}
+
+/* 概览卡片样式 */
+.overview-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.overview-card:hover {
+  border-color: #ff9900;
+  box-shadow: 0 4px 12px rgba(255, 153, 0, 0.15);
+  transform: translateY(-2px);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.card-header h4 {
+  margin: 0;
+  color: #232f3e;
+  font-size: 16px;
+  font-weight: 600;
+}
+.card-badge {
+  background-color: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.card-content {
+  color: #666666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.card-content p {
+  margin: 0 0 8px 0;
+}
+.card-stats {
+  color: #ff9900;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+/* 无数据状态 */
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999999;
+  font-size: 14px;
+}
+.no-data p {
+  margin: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.tab-navigation {
+    padding: 0 8px;
+}
+.tab-item {
+    padding: 10px 12px;
+}
+.tab-title {
+    font-size: 12px;
+}
+.content-panel {
+    padding: 16px;
+}
+.content-header h2 {
+    font-size: 20px;
+}
+.overview-card {
+    padding: 16px;
+}
+}
+
+
+.report-container {
+  height: calc(100vh - 50px);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  margin-left: auto;
+  margin-right: 0;
+  padding-bottom: 30px;
+  z-index: 1000;
+}
+.header-title {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.header-title h1 {
+  font-size: 24px;
+  color: #333;
+  font-weight: 500;
+  margin: 0;
+}
+.main-content {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  left: 60px;
+  width: calc(100vw - 300px);
+  max-width: none;
+  z-index: 1001;
+  position: relative;
+  overflow-x: auto;
+}
+.left-panel {
+  flex: 1.5;
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.message-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0px 5px;
+  max-height: calc(100vh - 250px);
+  scroll-behavior: smooth;
+}
+
+/* 自定义滚动条样式 */
+.message-container::-webkit-scrollbar {
+  width: 6px;
+}
+.message-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.message-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.message-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+.message-item {
+  display: flex;
+  margin-bottom: 15px;
+  animation: fadeIn-a0d4dfe5 0.3s ease-in;
+}
+@keyframes fadeIn-a0d4dfe5 {
+from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+.message-content {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.message-content p {
+  margin: 0;
+}
+
+/* Agent 消息样式 (左侧) */
+.agent-message {
+  justify-content: flex-start;
+}
+.agent-message .message-content {
+  background-color: #e8f4f0;
+  color: #2d5a45;
+  border-bottom-left-radius: 4px;
+  max-width: 90%;
+  border: 1px solid #d1e7dd;
+}
+.file-paths-text {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 10px;
+  line-height: 1.3;
+  color: #333;
+  white-space: pre-wrap;
+  margin: 0;
+  word-wrap: break-word;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.typing-cursor {
+  animation: blink-a0d4dfe5 1s infinite;
+  color: #333;
+}
+@keyframes blink-a0d4dfe5 {
+0%, 50% {
+    opacity: 1;
+}
+51%, 100% {
+    opacity: 0;
+}
+}
+
+/* 批量上传消息样式 */
+.upload-batch-message {
+  background-color: #d4f1e4 !important;
+  border: 1px solid #b8e6c8;
+  min-width: 280px;
+  max-width: 350px;
+}
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #a8dab8;
+}
+.upload-header p {
+  margin: 0;
+  color: #1e5233;
+  font-size: 14px;
+}
+.batch-status {
+  font-size: 11px;
+  background-color: #28a745;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.upload-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.upload-file {
+  font-size: 12px;
+  color: #1e5233;
+  padding: 4px 6px;
+  background-color: rgba(232, 244, 240, 0.8);
+  border-radius: 6px;
+  border: 1px solid #c8e6d0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 上传列表滚动条样式 */
+.upload-list::-webkit-scrollbar {
+  width: 4px;
+}
+.upload-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+.upload-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+/* CEE状态选择样式 */
+.cee-status-message {
+  max-width: 350px !important;
+  background-color: #e8f4f0 !important;
+  border: 1px solid #d1e7dd;
+  padding: 20px;
+}
+.cee-status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.cee-status-text {
+  color: #1e5233;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-line;
+  text-align: center;
+  font-weight: 500;
+}
+.cee-status-options {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.cee-status-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid #9dd3a8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f8fdf9;
+  color: #1e5233;
+}
+.cee-status-btn:hover {
+  border-color: #7cc48a;
+  background-color: #e8f4f0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+.cee-status-joined {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+.cee-status-joined:hover {
+  background-color: #1e7e34;
+  border-color: #1e7e34;
+}
+.cee-status-not-joined {
+  background-color: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+.cee-status-not-joined:hover {
+  background-color: #5a6268;
+  border-color: #5a6268;
+}
+
+/* CEE表单样式 */
+.cee-form-message {
+  max-width: 400px !important;
+  background-color: #e8f4f0 !important;
+  border: 1px solid #d1e7dd;
+  padding: 20px;
+}
+.cee-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #b8e6c8;
+}
+.cee-header h4 {
+  margin: 0;
+  color: #1e5233;
+  font-size: 16px;
+  font-weight: 600;
+}
+.form-section {
+  margin-bottom: 20px;
+}
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e5233;
+  margin-bottom: 8px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #9dd3a8;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: #f8fdf9;
+  color: #1e5233;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #7cc48a;
+  box-shadow: 0 0 0 2px rgba(157, 211, 168, 0.3);
+}
+.form-input::placeholder {
+  color: #6b9c78;
+}
+.checkbox-group {
+  margin-bottom: 10px;
+}
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.form-checkbox {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+.checkbox-item label {
+  font-size: 13px;
+  color: #1e5233;
+  cursor: pointer;
+}
+.form-note {
+  font-size: 11px;
+  color: #4a7c5a;
+  line-height: 1.4;
+  margin: 0;
+  padding: 8px;
+  background-color: #f0f8f2;
+  border-left: 3px solid #7cc48a;
+  border-radius: 4px;
+}
+.cee-submit-btn {
+  width: 100%;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.cee-submit-btn:hover {
+  background-color: #1e7e34;
+}
+
+/* 用户消息样式 (右侧) */
+.user-message {
+  justify-content: flex-end;
+}
+.user-message .message-content {
+  background-color: #d4f1e4;
+  color: #1e5233;
+  border-bottom-right-radius: 4px;
+  border: 1px solid #b8e6c8;
+}
+.right-panel {
+  flex: 1.5;
+  background-color: white;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #2d5a45;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ReportFrame 样式 */
+.report-frame {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Tab 导航栏样式 */
+.tab-navigation {
+  background-color: #232f3e;
+  border-bottom: none;
+  padding: 0 20px;
+  box-shadow: 0 2px 8px rgba(35, 47, 62, 0.15);
+}
+.tab-container {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+}
+.tab-item {
+  position: relative;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.tab-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.tab-item.active {
+  color: #ff9900;
+  border-bottom-color: #ff9900;
+  background-color: rgba(255, 153, 0, 0.1);
+}
+.tab-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+}
+.tab-item.active .tab-title {
+  color: #ff9900;
+  font-weight: 600;
+}
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #ff9900;
+  border-radius: 2px 2px 0 0;
+}
+
+/* 内容区域样式 */
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  background-color: #fafafa;
+}
+.content-panel {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  height: 80vh;
+  padding: 20px;
+  animation: fadeIn-a0d4dfe5 0.4s ease-in;
+  box-sizing: border-box;
+}
+@keyframes fadeIn-a0d4dfe5 {
+from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+.content-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.content-header h2 {
+  font-size: 32px;
+  color: #232f3e;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.content-description {
+  font-size: 18px;
+  color: #5a6c7d;
+  margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  font-weight: 400;
+}
+.content-body {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1e8ed;
+  box-sizing: border-box;
+  margin: 0 auto;
+  width: 100%;
+}
+.report-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  width: 100%;
+}
+
+/* 报告区域滚动条样式 */
+.report-area::-webkit-scrollbar {
+  width: 6px;
+}
+.report-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.report-area::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.report-area::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+.report-area h2 {
+  font-size: 18px;
+  color: #666;
+  font-weight: 400;
+  margin: 0;
+  text-align: center;
+}
+
+/* 按键区域样式 */
+.button-area {
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.preview-btn, .feedback-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background-color: #2d5a45;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+.preview-btn:hover, .feedback-btn:hover {
+  background-color: #1e3d30;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(45, 90, 69, 0.3);
+}
+.preview-btn:active, .feedback-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
+}
+.preview-btn svg, .feedback-btn svg {
+  flex-shrink: 0;
+}
+.button-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.button-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-input-area {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.message-input {
+  flex: 1;
+  border: 1px solid #e0e0e0;
+  border-radius: 25px;
+  padding: 12px 50px 12px 16px;
+  font-size: 14px;
+  outline: none;
+  background-color: #f8f8f8;
+}
+.message-input:focus {
+  border-color: #4285f4;
+  background-color: white;
+}
+.message-input::placeholder {
+  color: #999;
+}
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+.attachment-btn, .send-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  transition: background-color 0.2s;
+}
+.attachment-btn:hover, .send-btn:hover {
+  background-color: #f5f5f5;
+}
+.send-btn.has-content {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+.send-btn.has-content:hover {
+  background-color: #c8e6c8;
+}
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.send-btn:disabled:hover {
+  background-color: transparent;
+}
+
+/* 上传文件列表样式 */
+.uploaded-files-area {
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dee2e6;
+}
+.files-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+}
+.clear-all-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+.clear-all-btn:hover {
+  background-color: #e9ecef;
+  color: #dc3545;
+}
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+.file-item:hover {
+  border-color: #adb5bd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.file-icon {
+  color: #6c757d;
+  flex-shrink: 0;
+}
+.file-details {
+  flex: 1;
+  min-width: 0;
+}
+.file-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.file-meta {
+  font-size: 11px;
+  color: #6c757d;
+}
+.remove-file-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.remove-file-btn:hover {
+  background-color: #f8d7da;
+  color: #dc3545;
+}
+
+/* 文件列表滚动条样式 */
+.files-list::-webkit-scrollbar {
+  width: 4px;
+}
+.files-list::-webkit-scrollbar-track {
+  background: #f1f3f4;
+  border-radius: 2px;
+}
+.files-list::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 2px;
+}
+.files-list::-webkit-scrollbar-thumb:hover {
+  background: #bdc1c6;
+}
+
+/* 文件消息样式 */
+.file-message {
+  background-color: #e3f2fd !important;
+  border: 1px solid #bbdefb !important;
+  min-width: 200px;
+  max-width: 300px;
+}
+.files-message {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.files-message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 13px;
+}
+.files-message-header svg {
+  color: #1976d2;
+}
+.files-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.file-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #424242;
+  padding: 2px 0;
+}
+.file-preview-item svg {
+  color: #757575;
+  flex-shrink: 0;
+}
+.file-preview-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+.more-files {
+  font-size: 11px;
+  color: #757575;
+  font-style: italic;
+  padding: 2px 0;
+  margin-left: 18px;
+}
+
+/* CEE表单容器样式 */
+.cee-form-container {
+  width: 100%;
+}
+
+/* CEE表单消息特殊样式覆盖 */
+.message-content.cee-form-message {
+  max-width: 400px !important;
+  background-color: #e8f4f0 !important;
+  border: 1px solid #d1e7dd !important;
+  padding: 20px !important;
+}
+
+/* 初始上传提示容器样式 - 与普通agent消息保持一致 */
+.initial-prompts-container {
+  background-color: #e8f4f0 !important;
+  color: #2d5a45 !important;
+  border: 1px solid #d1e7dd !important;
+  border-bottom-left-radius: 4px !important;
+  max-width: 90% !important;
+  padding: 20px !important;
+}
+.upload-prompt-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+.upload-prompt-section:last-child {
+  margin-bottom: 0;
+}
+.title-button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.prompt-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e5233;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.title-checkmark {
+  font-size: 16px;
+  animation: checkmarkAppear-a0d4dfe5 0.3s ease-in;
+}
+@keyframes checkmarkAppear-a0d4dfe5 {
+from {
+    opacity: 0;
+    transform: scale(0.8);
+}
+to {
+    opacity: 1;
+    transform: scale(1);
+}
+}
+.upload-prompt-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 120px;
+  justify-content: center;
+}
+.paneu-btn {
+  background-color: #4285f4;
+  color: white;
+  border-color: #4285f4;
+}
+.paneu-btn:hover {
+  background-color: #3367d6;
+  border-color: #3367d6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+.di-btn {
+  background-color: #34a853;
+  color: white;
+  border-color: #34a853;
+}
+.di-btn:hover {
+  background-color: #2d8f47;
+  border-color: #2d8f47;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
+
+/* 已上传状态样式 */
+.upload-prompt-btn.uploaded {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+.upload-prompt-btn.uploaded:hover {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.upload-prompt-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+.prompt-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #9dd3a8, transparent);
+  margin: 12px 0;
+}
+
+/* 文件验证错误提示样式 */
+.validation-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-left: 4px solid #e53e3e;
+  border-radius: 6px;
+  max-width: 400px;
+}
+.error-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.error-text {
+  color: #c53030;
+  font-size: 13px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+
+/* 禁用状态的聊天输入区域 */
+.chat-input-area.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.chat-input-area.disabled .message-input {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+.chat-input-area.disabled .attachment-btn,
+.chat-input-area.disabled .send-btn {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+.report-frame {
+    font-size: 14px;
+}
+.tab-navigation {
+    padding: 0 12px;
+}
+.tab-container {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.tab-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: 6px 6px 0 0;
+}
+.content-panel {
+    padding: 16px 12px;
+}
+.content-header h2 {
+    font-size: 28px;
+}
+.content-description {
+    font-size: 16px;
+}
+.content-body {
+    padding: 16px 12px;
+}
+}
+@media (max-width: 768px) {
+.main-content {
+    flex-direction: column;
+}
+.header-title h1 {
+    font-size: 20px;
+}
+.report-container {
+    padding: 15px;
+}
+}
+
+/* 反馈表单遮罩层 */
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  cursor: pointer;
+}
+
+/* 反馈表单样式 */
+.feedback-form-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 2px solid #2d5a45;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  animation: fadeInScale-a0d4dfe5 0.3s ease-out;
+}
+@keyframes fadeInScale-a0d4dfe5 {
+from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+}
+to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+}
+.feedback-form-header {
+  background-color: #2d5a45;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.feedback-form-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+.close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.feedback-form-content {
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.form-group.full-width {
+  flex: 1 1 100%;
+}
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d5a45;
+  margin-bottom: 5px;
+}
+.form-input, .form-textarea {
+  padding: 8px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 13px;
+  background-color: #f6f8fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #2d5a45;
+  box-shadow: 0 0 0 2px rgba(45, 90, 69, 0.1);
+  background-color: white;
+}
+.form-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+.concern-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #2d5a45;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.checkbox-label:hover {
+  background-color: #f6f8fa;
+}
+.checkbox-label input[type="checkbox"] {
+  margin-right: 6px;
+  transform: scale(0.9);
+}
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+.submit-btn, .cancel-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-btn {
+  background-color: #2d5a45;
+  color: white;
+}
+.submit-btn:hover {
+  background-color: #1e3d30;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(45, 90, 69, 0.3);
+}
+.cancel-btn {
+  background-color: #f6f8fa;
+  color: #656d76;
+  border: 1px solid #d0d7de;
+}
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* 滚动条样式 */
+.feedback-form-content::-webkit-scrollbar {
+  width: 6px;
+}
+.feedback-form-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.feedback-form-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+.feedback-form-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+.form-row {
+    flex-direction: column;
+    gap: 10px;
+}
+.concern-options {
+    grid-template-columns: 1fr;
+}
+.form-actions {
+    flex-direction: column;
+}
+.feedback-form-container {
+    width: 95%;
+    max-width: 500px;
+    max-height: 90vh;
+}
+.feedback-form-content {
+    max-height: 60vh;
+}
+}
+
+
+.about {
+  height: calc(100vh - 50px);
+  position: relative;
+  background-color: #f0f0f0;
+}
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 50px;
+  width: 65px;
+  height: calc(100vh - 50px);
+  background-color: white;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  transition: width 0.3s ease;
+  z-index: 10;
+}
+.sidebar-expanded {
+  width: 200px;
+}
+.sidebar-collapsed {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+.sidebar-expanded-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 15px;
+}
+.sidebar-header {
+  margin-bottom: 20px;
+}
+.sidebar-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #004b5f;
+  margin: 0;
+}
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e8f0fe;
+  color: #4285f4;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+  justify-content: flex-start;
+}
+.new-chat-btn:hover {
+  background-color: #d2e3fc;
+}
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
+}
+.time-group {
+  margin-bottom: 15px;
+}
+.time-label {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+.chat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+.chat-item:hover {
+  background-color: #e5e5e5;
+}
+.chat-title {
+  font-size: 14px;
+  color: #333;
+}
+.chat-menu {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+.chat-menu:hover {
+  background-color: #ddd;
+}
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 15px;
+}
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #004b5f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-logo {
+  width: 20px;
+  height: 25px;
+  filter: brightness(0) invert(1);
+}
+.profile-text {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+}
+.sidebar-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+.sidebar-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+.sidebar-icon:hover {
+  background-color: #f5f5f5;
+}
+.sidebar-bottom {
+  display: flex;
+  justify-content: center;
+}
+.bottom-icon {
+  width: 45px;
+  height: 45px;
+  background-color: #004b5f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.bottom-logo {
+  width: 20px;
+  height: 25px;
+  filter: brightness(0) invert(1);
+}
+.main-content {
+  width: 100%;
+  padding-left: 65px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.header-section {
+  margin-top: 180px;
+  margin-bottom: 30px;
+}
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.eu-logo {
+  width: 40px;
+  height: 50px;
+  margin-right: 15px;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(71%) saturate(1392%) hue-rotate(167deg) brightness(96%) contrast(101%);
+}
+.title {
+  font-size: 48px;
+  color: #004b5f;
+  margin: 0;
+  font-weight: 400;
+}
+.input-section {
+  width: 100%;
+  max-width: 600px;
+  height: 100px;
+}
+.input-container {
+  position: relative;
+  background-color: white;
+  height: 180px;
+  border-radius: 25px;
+  padding: 18px 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+.message-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+  color: #333;
+  resize: none;
+  padding-bottom: 120px;
+  padding-right: 80px;
+}
+.message-input::placeholder {
+  color: #999;
+}
+.button-group {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+.attachment-btn, .send-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+}
+.attachment-btn:hover, .send-btn:hover {
+  background-color: #f5f5f5;
+}
+@media (max-width: 768px) {
+.title {
+    font-size: 36px;
+}
+.input-section {
+    max-width: 90%;
+}
+.header-section {
+    margin-bottom: 40px;
+}
+}
+.default-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.report-content-wrapper {
+  width: 100%;
+  height: calc(100vh - 50px);
+  background-color: #f0f0f0;
+  padding: 0;
+  margin: 0;
+}
+
+@font-face { font-family: "Inter var"; font-weight: 100 900; font-display: swap; font-style: normal; font-named-instance: "Regular"; src: url("chrome-extension://infppggnoaenmfagbfknfkancpbljcca/Inter-roman-latin.var.woff2") format("woff2") }
+.automa-element-selector { direction: ltr } 
+ [automa-isDragging] { user-select: none } 
+ [automa-el-list] {outline: 2px dashed #6366f1;}
+/* Export Base */
+html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#fff;color:#222;}
+body.export-body{padding:24px;}
+*{box-sizing:border-box;}
+ h1,h2,h3,h4,h5{font-weight:600;margin:0 0 12px;}
+ p{line-height:1.55;margin:0 0 12px;}
+ table{border-collapse:collapse;width:100%;background:#fff;}
+ th,td{border:1px solid #d9d9d9;padding:8px 10px;font-size:12px;vertical-align:middle;}
+ th{background:#232f3e;color:#fff;font-weight:600;}
+ tr:nth-child(even) td{background:#f8f9fb;}
+ .export-stack{display:flex;flex-direction:column;align-items:stretch;gap:28px;max-width:1400px;margin:0 auto;}
+ .export-stack > *{display:block !important;width:100% !important;clear:both;}
+ .export-stack section,.export-stack .report-section{display:block;width:100%;} 
+ .export-stack .content-panel,.export-stack .sub-tab-panel{width:100%!important;display:block!important;}
+ .export-stack [style*='flex: 1']{flex:initial!important;}
+ .section-title{margin:0 0 14px;font-size:20px;color:#232f3e;border-left:6px solid #ff9900;padding-left:10px;}
+ .intro-box{background:#f8f9fa;border:1px solid #e2e8f0;padding:14px 18px;border-radius:8px;font-size:13px;}
+ .report-section{page-break-inside:avoid;}
+ @media print{.export-btn,.close-btn,.actions{display:none!important;} body.export-body{padding:0;} .section-title{page-break-after:avoid;} .export-stack{gap:20px;}}
+</style></head><body class="export-body"><div class="export-stack"><!-- 概览提示 --><div data-v-c936af12="" class="intro-box"><p data-v-c936af12="">本报告整合了各分析子模块（站点拓展评估、欧盟内部物流、英欧物流方案、CEE 成本节约、行动计划与 AM 指导话术）。以下为生成版本的静态预览（互动元素已最小化以便打印/导出）。</p></div><!-- 1. 欧洲站点拓展评估 (Tab5) --><section data-v-c936af12="" class="report-section" id="section-expansion"><h3 data-v-c936af12="" class="section-title">1. 🌍 欧洲站点拓展评估</h3><div data-v-c936af12="" class="section-content"><div data-v-3312b63b="" data-v-c936af12="" class="content-panel"><div data-v-3312b63b="" class="content-header"><h2 data-v-3312b63b="">🌍 欧洲站点拓展评估</h2><p data-v-3312b63b="" class="content-description">欧洲各站点拓展机会评估分析</p></div><div data-v-3312b63b="" class="content-body"><!-- 新增的欧洲站点评估表格 --><div data-v-3312b63b="" class="europe-expansion-table"><table data-v-3312b63b="" cellspacing="0" cellpadding="0" style="width: 100%;"><thead data-v-3312b63b=""><tr data-v-3312b63b=""><th data-v-3312b63b="" colspan="3"></th><th data-v-3312b63b="" colspan="1" class="region-header">0.英国和欧盟间物流</th><th data-v-3312b63b="" colspan="4" class="region-header_1">1.EU5欧盟内物流</th></tr><tr data-v-3312b63b="" class="sub-header"><th data-v-3312b63b="">MCID</th><th data-v-3312b63b="">账户名称</th><th data-v-3312b63b="">指标名称</th><th data-v-3312b63b="">英国</th><th data-v-3312b63b="">德国</th><th data-v-3312b63b="">意大利</th><th data-v-3312b63b="">法国</th><th data-v-3312b63b="">西班牙</th></tr></thead><tbody data-v-3312b63b=""><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><td data-v-3312b63b="" rowspan="9" class="mcid-cell">157076946612</td><td data-v-3312b63b="" rowspan="9" class="account-cell">Sinuolong Lighting</td><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">账户健康情况</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">FBA选品数量</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="">44</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="">41</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="">40</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="">36</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">FBA潜在销售机会 (数量)*</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="cross">✗</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="">3</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="">4</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="">8</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">FBA BA /3P BA %</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">FBA GMS/total GMS %</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">持有有效增值税号国家</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">授权仓储国家</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">是否启用亚马逊物流欧洲整合服务(PanEU)</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="checkmark">✓</span></td></tr><tr data-v-3312b63b=""><!-- 只在第一行显示MCID和账户名称，并设置rowspan --><!--v-if--><!--v-if--><!-- 指标名称 --><td data-v-3312b63b="" class="metric-name">是否使用英国和欧盟之间的远程配送服务</td><!-- 国家数据 --><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b=""></span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="cross">✗</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="cross">✗</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="cross">✗</span></td><td data-v-3312b63b="" class="value-cell"><span data-v-3312b63b="" class="cross">✗</span></td></tr></tbody></table></div></div></div></div></section><!-- 2.1 欧盟内部物流方案 (Tab61) --><section data-v-c936af12="" class="report-section" id="section-internal"><h3 data-v-c936af12="" class="section-title">2.1 欧盟内部物流方案（PanEU）</h3><div data-v-c936af12="" class="section-content"><div data-v-c1556f6d="" data-v-c936af12="" class="sub-tab-panel"><!-- 2.1 欧盟内部物流方案 内容开始 --><h2 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#232f3e;" data-v-inspector="src/components/Reports/Tab61.vue:4:5" data-v-c1556f6d=""> 2.1 欧盟内部物流方案 </h2><div class="solution-details" data-v-inspector="src/components/Reports/Tab61.vue:7:5" data-v-c1556f6d=""><!-- 欧盟内部方案介绍与对比 --><div style="margin:20px 0;" data-v-inspector="src/components/Reports/Tab61.vue:9:7" data-v-c1556f6d=""><h4 style="color:#333;font-size:16px;margin:10px 0;" data-v-inspector="src/components/Reports/Tab61.vue:10:9" data-v-c1556f6d="">欧洲站点拓展解决方案</h4><h5 style="color:#666;font-size:14px;margin:10px 0;" data-v-inspector="src/components/Reports/Tab61.vue:11:9" data-v-c1556f6d="">欧盟内部物流方案</h5><div style="margin:18px 0 24px 0;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 4px 14px rgba(0, 0, 0, 0.06);position:relative;overflow:hidden;" data-v-inspector="src/components/Reports/Tab61.vue:12:9" data-v-c1556f6d=""><div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(135deg, #ff9d33 0%, #ff7f0e 100%);border-bottom:1px solid rgba(255, 255, 255, 0.25);" data-v-inspector="src/components/Reports/Tab61.vue:23:11" data-v-c1556f6d=""><span style="background:rgba(255, 255, 255, 0.25);width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;font-size:18px;color:#fff;font-weight:600;box-shadow:0 2px 4px rgba(0, 0, 0, 0.15);" data-v-inspector="src/components/Reports/Tab61.vue:33:13" data-v-c1556f6d="">▶</span><div style="display:flex;flex-direction:column;" data-v-inspector="src/components/Reports/Tab61.vue:49:13" data-v-c1556f6d=""><span style="font-size:16px;font-weight:700;color:#fff;letter-spacing:0.5px;" data-v-inspector="src/components/Reports/Tab61.vue:50:15" data-v-c1556f6d="">欧盟内部方案介绍与对比</span><span style="font-size:11px;color:#fff;opacity:0.9;" data-v-inspector="src/components/Reports/Tab61.vue:53:15" data-v-c1556f6d="">对比 EFN 与 PanEU 关键差异，突出成本/速度与准入要求</span></div></div><div style="padding:16px 18px 6px 18px;" data-v-inspector="src/components/Reports/Tab61.vue:58:11" data-v-c1556f6d=""><div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:14px;background:#fff9ef;border:1px solid #ffd7b3;padding:10px 12px;border-radius:8px;" data-v-inspector="src/components/Reports/Tab61.vue:59:13" data-v-c1556f6d=""><strong style="color:#c05621;" data-v-inspector="src/components/Reports/Tab61.vue:71:15" data-v-c1556f6d="">说明：</strong> 下表展示卖家在不同跨国 fulfillment 模式下的入仓策略、成本结构与配送速度差异，帮助快速判断是否升级至 PanEU。 </div><div class="table-container" style="overflow-x:auto;margin:0 0 16px 0;" data-v-inspector="src/components/Reports/Tab61.vue:74:13" data-v-c1556f6d=""><table style="width:100%;border-collapse:collapse;font-size:11px;border:2px solid #ddd;margin-bottom:15px;background:#fff;" data-v-inspector="src/components/Reports/Tab61.vue:75:15" data-v-c1556f6d="" cellspacing="0" cellpadding="0"><thead data-v-inspector="src/components/Reports/Tab61.vue:85:17" data-v-c1556f6d=""><tr data-v-inspector="src/components/Reports/Tab61.vue:86:19" data-v-c1556f6d=""><th rowspan="2" style="background:linear-gradient(135deg, #333 0%, #666 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:80px;" data-v-inspector="src/components/Reports/Tab61.vue:87:21" data-v-c1556f6d=""> 方案类型 </th><th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:25%;" data-v-inspector="src/components/Reports/Tab61.vue:100:21" data-v-c1556f6d=""> 欧盟 FBA 的物流模式 </th><th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:35%;" data-v-inspector="src/components/Reports/Tab61.vue:112:21" data-v-c1556f6d=""> 欧盟之间的远程配送网络<br data-v-inspector="src/components/Reports/Tab61.vue:122:34" data-v-c1556f6d="">European Fulfillment Network (EFN) </th><th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:35%;" data-v-inspector="src/components/Reports/Tab61.vue:124:21" data-v-c1556f6d=""> ⭐亚马逊物流欧洲整合服务<br data-v-inspector="src/components/Reports/Tab61.vue:134:35" data-v-c1556f6d="">Pan European (PanEU) </th></tr></thead><tbody data-v-inspector="src/components/Reports/Tab61.vue:138:17" data-v-c1556f6d=""><tr data-v-inspector="src/components/Reports/Tab61.vue:139:19" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:140:21" data-v-c1556f6d=""> 简介 </td><td style="padding:10px 8px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:152:21" data-v-c1556f6d=""> 卖家入仓至欧盟任一国家后，即可由此国的仓库远程配送到其他欧盟国家 </td><td style="padding:10px 8px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:155:21" data-v-c1556f6d=""> 卖家入仓至欧盟任一国家后，亚马逊将货存储在卖家启用了存储服务的国家/地区的欧盟运营中心内，并自主在这些卖家地区之间分配存储，不额外收取费用 </td><td style="padding:10px 8px;border:1px solid #ddd;font-size:10px;background:#fff9e6;border-left:3px solid #ff8c00;" data-v-inspector="src/components/Reports/Tab61.vue:158:21" data-v-c1556f6d=""> 卖家入仓至欧盟任一国家后，亚马逊将货存储在卖家启用了存储服务的国家/地区的欧盟运营中心内，并自主在这些卖家地区之间分配存储，不额外收取费用 </td></tr><tr data-v-inspector="src/components/Reports/Tab61.vue:170:19" data-v-c1556f6d=""><td rowspan="2" style="background:#f8f9fa;color:#333;font-weight:600;padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:171:21" data-v-c1556f6d=""> 加入条件 </td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:184:21" data-v-c1556f6d=""><div style="font-weight:600;margin-bottom:5px;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:185:23" data-v-c1556f6d=""> ASIN 设置 </div><div style="font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:188:23" data-v-c1556f6d="">需使用相同 ASIN/FNSKU#</div></td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:190:21" data-v-c1556f6d=""><div style="font-weight:600;margin-bottom:5px;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:191:23" data-v-c1556f6d=""> ASIN 设置 </div><div style="font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:194:23" data-v-c1556f6d="">需使用相同 ASIN/FNSKU#</div></td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:196:21" data-v-c1556f6d=""><div style="font-weight:600;margin-bottom:5px;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:197:23" data-v-c1556f6d=""> ASIN 设置 </div><div style="font-size:9px;background:#fff9e6;padding:4px;border-radius:3px;border:1px solid #ff8c00;" data-v-inspector="src/components/Reports/Tab61.vue:200:23" data-v-c1556f6d=""> 德法意西需使用相同 ASIN/FNSKU# </div></td></tr><tr data-v-inspector="src/components/Reports/Tab61.vue:213:19" data-v-c1556f6d=""><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:214:21" data-v-c1556f6d=""><div style="font-weight:600;margin-bottom:5px;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:215:23" data-v-c1556f6d=""> 仓储国要求* </div><div style="font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:218:23" data-v-c1556f6d="">仅开启一国仓储<br data-v-inspector="src/components/Reports/Tab61.vue:218:58" data-v-c1556f6d="">(需要1个 VAT)</div></td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:220:21" data-v-c1556f6d=""><div style="font-weight:600;margin-bottom:5px;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:221:23" data-v-c1556f6d=""> 仓储国要求* </div><div style="font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:224:23" data-v-c1556f6d="">仅开启一国仓储<br data-v-inspector="src/components/Reports/Tab61.vue:224:58" data-v-c1556f6d="">(需要1个 VAT)</div></td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:226:21" data-v-c1556f6d=""><div style="font-weight:600;margin-bottom:5px;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:227:23" data-v-c1556f6d=""> 仓储国要求* </div><div style="font-size:9px;background:#fff9e6;padding:4px;border-radius:3px;border:1px solid #ff8c00;" data-v-inspector="src/components/Reports/Tab61.vue:230:23" data-v-c1556f6d=""> 需要德法意西中，至少开启2国仓储（至少2个 VAT），<br data-v-inspector="src/components/Reports/Tab61.vue:239:52" data-v-c1556f6d="">启用仓储的国家为PanEU，未启用国家为 EFN </div></td></tr><tr data-v-inspector="src/components/Reports/Tab61.vue:244:19" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:245:21" data-v-c1556f6d=""> 头程物流<br data-v-inspector="src/components/Reports/Tab61.vue:255:27" data-v-c1556f6d="">(CN-&gt;EU FBA CC) </td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:257:21" data-v-c1556f6d=""> 需发货至欧盟某1个国家，成本低 </td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:267:21" data-v-c1556f6d=""> 需发货至欧盟某1个国家，成本低 </td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:277:21" data-v-c1556f6d=""> 需发货至欧盟某1个国家，成本低 </td></tr><tr data-v-inspector="src/components/Reports/Tab61.vue:288:19" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;padding:10px 8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:289:21" data-v-c1556f6d=""> 尾程配送<br data-v-inspector="src/components/Reports/Tab61.vue:299:27" data-v-c1556f6d="">(FBA) </td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:301:21" data-v-c1556f6d=""><span style="background:#fff2e8;color:#ff6b35;border:1px solid #ff6b35;padding:2px 6px;border-radius:12px;font-size:9px;margin:2px;" data-v-inspector="src/components/Reports/Tab61.vue:309:23" data-v-c1556f6d="">跨境配送</span>：费用高，3-5天送达 </td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:322:21" data-v-c1556f6d=""><span style="background:#fff5f0;color:#ff6b35;border:1px solid #ff6b35;padding:2px 6px;border-radius:12px;font-size:9px;margin:2px;" data-v-inspector="src/components/Reports/Tab61.vue:330:23" data-v-c1556f6d="">本地配送</span>：费用节约高达53%，1-2天送达<br data-v-inspector="src/components/Reports/Tab61.vue:341:41" data-v-c1556f6d=""><span style="background:#fff2e8;color:#ff6b35;border:1px solid #ff6b35;padding:2px 6px;border-radius:12px;font-size:9px;margin:2px;" data-v-inspector="src/components/Reports/Tab61.vue:341:47" data-v-c1556f6d="">跨境配送</span>+<span style="background:#fff2e8;color:#ff6b35;border:1px solid #ff6b35;padding:2px 6px;border-radius:12px;font-size:9px;margin:2px;" data-v-inspector="src/components/Reports/Tab61.vue:352:25" data-v-c1556f6d="">跨境配送</span></td><td style="padding:10px 8px;border:1px solid #ddd;text-align:center;font-size:10px;" data-v-inspector="src/components/Reports/Tab61.vue:365:21" data-v-c1556f6d=""><span style="background:#fff5f0;color:#ff6b35;border:1px solid #ff6b35;padding:2px 6px;border-radius:12px;font-size:9px;margin:2px;" data-v-inspector="src/components/Reports/Tab61.vue:373:23" data-v-c1556f6d="">本地配送</span>+<span style="background:#fff2e8;color:#ff6b35;border:1px solid #ff6b35;padding:2px 6px;border-radius:12px;font-size:9px;margin:2px;" data-v-inspector="src/components/Reports/Tab61.vue:384:25" data-v-c1556f6d="">跨境配送</span></td></tr></tbody></table></div><div style="display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 10px 0;" data-v-inspector="src/components/Reports/Tab61.vue:401:13" data-v-c1556f6d=""><div style="flex:1 1 240px;background:#f1f5f9;border:1px solid #d8e0e8;padding:10px 12px;border-radius:8px;font-size:11px;line-height:1.5;" data-v-inspector="src/components/Reports/Tab61.vue:402:15" data-v-c1556f6d=""><strong style="color:#334155;" data-v-inspector="src/components/Reports/Tab61.vue:413:17" data-v-c1556f6d="">何时采用 EFN：</strong><br data-v-inspector="src/components/Reports/Tab61.vue:413:66" data-v-c1556f6d="">单一仓储早期试水阶段 / SKU 规模较少 / 资金占用需控制。 </div><div style="flex:1 1 240px;background:#fff1e6;border:1px solid #ffd2af;padding:10px 12px;border-radius:8px;font-size:11px;line-height:1.5;" data-v-inspector="src/components/Reports/Tab61.vue:416:15" data-v-c1556f6d=""><strong style="color:#c05621;" data-v-inspector="src/components/Reports/Tab61.vue:427:17" data-v-c1556f6d="">升级 PanEU 信号：</strong><br data-v-inspector="src/components/Reports/Tab61.vue:427:69" data-v-c1556f6d="">多国已有自然出单 + 跨境配送费占比高 + 核心 ASIN 库存波动导致转化下滑。 </div><div style="flex:1 1 240px;background:#e6f7ff;border:1px solid #b3e3ff;padding:10px 12px;border-radius:8px;font-size:11px;line-height:1.5;" data-v-inspector="src/components/Reports/Tab61.vue:430:15" data-v-c1556f6d=""><strong style="color:#075985;" data-v-inspector="src/components/Reports/Tab61.vue:441:17" data-v-c1556f6d="">收益结构：</strong><br data-v-inspector="src/components/Reports/Tab61.vue:441:62" data-v-c1556f6d="">履约费节约 + 配送时效提升 → 转化提升 + 库存分布智能化降低缺货风险。 </div></div></div></div><!-- PanEU 成本节约 --><div style="margin-top:20px;padding:20px;background:#ffffff;border:1px solid #ddd;border-radius:6px;" data-v-inspector="src/components/Reports/Tab61.vue:448:9" data-v-c1556f6d=""><h5 style="color:#333;font-size:14px;font-weight:600;margin:0 0 15px 0;padding-bottom:8px;border-bottom:2px solid #ff8c00;" data-v-inspector="src/components/Reports/Tab61.vue:457:11" data-v-c1556f6d=""> 启用PanEU国家仓储获得配送费用节约 </h5><table style="width:100%;border-collapse:collapse;font-size:10px;background:#ffffff;border:1px solid #ddd;border-radius:4px;margin-bottom:10px;" data-v-inspector="src/components/Reports/Tab61.vue:469:11" data-v-c1556f6d="" cellspacing="0" cellpadding="0"><thead data-v-inspector="src/components/Reports/Tab61.vue:480:13" data-v-c1556f6d=""><tr data-v-inspector="src/components/Reports/Tab61.vue:481:15" data-v-c1556f6d=""><th style="background:#333;color:white;font-weight:600;padding:10px 8px;text-align:center;border-right:1px solid #555;font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:482:17" data-v-c1556f6d=""> 跨境配送国家 </th><th style="background:#333;color:white;font-weight:600;padding:10px 8px;text-align:center;border-right:1px solid #555;font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:495:17" data-v-c1556f6d=""> 预计可节约费用(RMB) </th><th style="background:#333;color:white;font-weight:600;padding:10px 8px;text-align:center;border-right:1px solid #555;font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:508:17" data-v-c1556f6d=""> 预计节约配送费(RMB) </th><th style="background:#333;color:white;font-weight:600;padding:10px 8px;text-align:center;border-right:1px solid #555;font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:521:17" data-v-c1556f6d=""> 申请VAT所需费用(RMB)** </th><th style="background:#333;color:white;font-weight:600;padding:10px 8px;text-align:center;font-size:9px;" data-v-inspector="src/components/Reports/Tab61.vue:534:17" data-v-c1556f6d=""> 申请VAT所需时间 </th></tr></thead><tbody data-v-inspector="src/components/Reports/Tab61.vue:548:13" data-v-c1556f6d=""><tr data-v-inspector="src/components/Reports/Tab61.vue:549:15" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:550:17" data-v-c1556f6d=""> FR </td><td style="color:#333;font-weight:500;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:562:17" data-v-c1556f6d=""> 6,914.51 </td><td style="color:#333;font-weight:500;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:573:17" data-v-c1556f6d=""> 8,291.46 </td><td style="color:#333;font-weight:500;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:584:17" data-v-c1556f6d=""> 1,376.95 </td><td style="color:#333;font-size:9px;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:595:17" data-v-c1556f6d=""> 8-13 weeks </td></tr><tr style="background:#333;" data-v-inspector="src/components/Reports/Tab61.vue:607:15" data-v-c1556f6d=""><td style="background:#333;color:white;font-weight:600;font-size:11px;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:608:17" data-v-c1556f6d=""> 总额 </td><td style="background:#333;color:white;font-weight:600;font-size:11px;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:621:17" data-v-c1556f6d=""> 6,914.51 </td><td style="background:#333;color:white;font-weight:600;font-size:11px;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:634:17" data-v-c1556f6d=""> 8,291.46 </td><td style="background:#333;color:white;font-weight:600;font-size:11px;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:647:17" data-v-c1556f6d=""> 1,376.95 </td><td style="background:#333;color:white;font-weight:600;font-size:11px;padding:8px;border:1px solid #ddd;text-align:center;" data-v-inspector="src/components/Reports/Tab61.vue:660:17" data-v-c1556f6d=""> - </td></tr></tbody></table></div><!-- 商品资格说明 --><div style="margin-top:20px;padding:20px;background:#ffffff;border:1px solid #ddd;border-radius:6px;" data-v-inspector="src/components/Reports/Tab61.vue:678:9" data-v-c1556f6d=""><div style="display:flex;align-items:center;margin-bottom:15px;gap:8px;" data-v-inspector="src/components/Reports/Tab61.vue:687:11" data-v-c1556f6d=""><span style="color:#ff8c00;font-size:16px;font-weight:bold;" data-v-inspector="src/components/Reports/Tab61.vue:688:13" data-v-c1556f6d="">▶</span><h4 style="color:#333;font-size:16px;font-weight:600;margin:0;" data-v-inspector="src/components/Reports/Tab61.vue:689:13" data-v-c1556f6d=""> PanEU商品资格要求 </h4></div><p style="color:#333;font-size:13px;line-height:1.5;margin:0 0 15px 0;" data-v-inspector="src/components/Reports/Tab61.vue:693:11" data-v-c1556f6d=""> 商品必须符合在欧洲各国之间运输流转的要求，以下列出不符合PanEU的商品种类： </p><table style="width:100%;border-collapse:collapse;font-size:11px;background:#ffffff;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:696:11" data-v-c1556f6d="" cellspacing="0" cellpadding="0"><thead data-v-inspector="src/components/Reports/Tab61.vue:705:13" data-v-c1556f6d=""><tr data-v-inspector="src/components/Reports/Tab61.vue:706:15" data-v-c1556f6d=""><th style="background:#333;color:white;font-weight:600;padding:12px 10px;text-align:center;border-right:1px solid #555;width:15%;" data-v-inspector="src/components/Reports/Tab61.vue:707:17" data-v-c1556f6d=""> 类目 </th><th style="background:#333;color:white;font-weight:600;padding:12px 10px;text-align:center;border-right:1px solid #555;width:35%;" data-v-inspector="src/components/Reports/Tab61.vue:720:17" data-v-c1556f6d=""> 禁售 </th><th style="background:#333;color:white;font-weight:600;padding:12px 10px;text-align:center;width:50%;" data-v-inspector="src/components/Reports/Tab61.vue:733:17" data-v-c1556f6d=""> 限制 </th></tr></thead><tbody data-v-inspector="src/components/Reports/Tab61.vue:747:13" data-v-c1556f6d=""><tr data-v-inspector="src/components/Reports/Tab61.vue:748:15" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:749:17" data-v-c1556f6d=""> 酒类<br data-v-inspector="src/components/Reports/Tab61.vue:759:21" data-v-c1556f6d="">Food </td><td style="color:#333;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:761:17" data-v-c1556f6d=""> 一般人烹调类、春节小杂、篱笆看台 </td><td style="color:#555;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:764:17" data-v-c1556f6d=""> 除非获得EU的相关食品安全认证，否则无法在欧盟销售；<br data-v-inspector="src/components/Reports/Tab61.vue:765:45" data-v-c1556f6d="">如果注册EU的相关认证，存在专业工厂专业生产线认证，运输总价29周的，<br data-v-inspector="src/components/Reports/Tab61.vue:765:86" data-v-c1556f6d="">总价值限制为2000欧元，上述限制内商品可在全欧盟内销售。 </td></tr><tr style="background:#f8f9fa;" data-v-inspector="src/components/Reports/Tab61.vue:768:15" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:769:17" data-v-c1556f6d=""> 汽车零件<br data-v-inspector="src/components/Reports/Tab61.vue:779:23" data-v-c1556f6d="">Auto motive </td><td style="color:#333;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:781:17" data-v-c1556f6d=""> 电子产品、车外后视镜(WK连接)、安规气外后电器、高正压(WK连接)、门锁(WK连接)、连接线(WK连接)、汽车工具(WK连接)、高压、安规线(WK连接)、咖啡工、基础润滑(WK连接)、门连线、下滑、工程主体 </td><td style="color:#555;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:784:17" data-v-c1556f6d=""> 汽车零件需要，手动制与当地的实验室认证，生产过程注册统一认证标识，各国最新认证文件一致性登录认证平台数据 </td></tr><tr data-v-inspector="src/components/Reports/Tab61.vue:788:15" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:789:17" data-v-c1556f6d=""> 玩具<br data-v-inspector="src/components/Reports/Tab61.vue:799:21" data-v-c1556f6d="">Toys </td><td style="color:#333;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:801:17" data-v-c1556f6d=""> 儿童用品、蒙古用、灯具、安规、轮胎、室内娱乐等 </td><td style="color:#555;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:804:17" data-v-c1556f6d=""> 玩具大类产品都需要REACH/LVD等认证，包括各类成套塑料等的测试 </td></tr><tr style="background:#f8f9fa;" data-v-inspector="src/components/Reports/Tab61.vue:808:15" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:809:17" data-v-c1556f6d=""> 喷雾类<br data-v-inspector="src/components/Reports/Tab61.vue:819:22" data-v-c1556f6d="">Sprays </td><td style="color:#333;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:821:17" data-v-c1556f6d=""> 喷雾类化学、化妆品、清洁类、定制类 </td><td style="color:#555;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:824:17" data-v-c1556f6d=""> 空气方面的危险品认定REACH/LVD认证，包括各类专业技术条件销售数据 </td></tr><tr data-v-inspector="src/components/Reports/Tab61.vue:828:15" data-v-c1556f6d=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:829:17" data-v-c1556f6d=""> 磁铁类型类<br data-v-inspector="src/components/Reports/Tab61.vue:839:24" data-v-c1556f6d="">带磁性元器件 </td><td style="color:#333;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:841:17" data-v-c1556f6d=""> 消磁类功能、化感类、高灵件工厂 </td><td style="color:#555;font-size:10px;padding:10px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab61.vue:844:17" data-v-c1556f6d=""> 需要达际到商务认证和相关证书，标识要符号等于产品功效现实定义，带磁类物<br data-v-inspector="src/components/Reports/Tab61.vue:845:54" data-v-c1556f6d="">受限，商关和欧盟等经营产品功等期效期平&lt;300克，高度&lt;360mm </td></tr></tbody></table></div><!-- 合规风险图片
+        &lt;div style=&quot;margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #ddd; border-radius: 6px;&quot;&gt;
+          &lt;div style=&quot;text-align: center;&quot;&gt;
+            &lt;img src=&quot;/src/assets/合规风险.jpg&quot; alt=&quot;合规风险&quot; style=&quot;width: 100%; max-width: 1200px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);&quot; /&gt;
+          &lt;/div&gt;
+        &lt;/div&gt; --></div></div><!-- 内容结束 --><!-- PanEU 分析结果（追加展示） --><div data-v-c1556f6d="" class="analysis-section" style="margin-top: 32px;"><div data-v-c1556f6d="" class="section-header"><h3 data-v-c1556f6d="" style="margin: 0px;">🌍 PanEU 分析结果</h3><p data-v-c1556f6d="" class="section-description" style="margin: 6px 0px 0px;">欧洲泛欧计划机会分析详情</p></div><div data-v-c1556f6d="" class="section-content"><div data-v-c1556f6d=""><h4 data-v-c1556f6d="" style="color: rgb(51, 51, 51); font-size: 16px; margin: 10px 0px;">PanEU选品拓展机会分析报告</h4><p data-v-c1556f6d="" style="color: rgb(102, 102, 102); font-size: 14px; margin: 10px 0px;">基于您的PanEU Report自动生成 | 共分析 979 个ASIN</p><div data-v-c1556f6d="" style="margin: 20px 0px;"><h5 data-v-c1556f6d="" style="color: rgb(51, 51, 51); font-size: 14px; margin-bottom: 15px;">PanEU ASIN 机会概览</h5><div data-v-c1556f6d="" style="overflow-x: auto;"><table data-v-c1556f6d="" style="width: 100%; border-collapse: collapse; font-size: 12px; background: rgb(255, 255, 255); border: 1px solid rgb(221, 221, 221); border-radius: 4px;" cellspacing="0" cellpadding="0"><thead data-v-c1556f6d=""><tr data-v-c1556f6d=""><th data-v-c1556f6d="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">EU4 ASIN</th><th data-v-c1556f6d="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">#</th><th data-v-c1556f6d="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">机会点及操作</th><th data-v-c1556f6d="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">公式</th></tr></thead><tbody data-v-c1556f6d=""><tr data-v-c1556f6d=""><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">可加入PanEU ASIN</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">560</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);"></td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);"></td></tr><tr data-v-c1556f6d=""><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">缺少1至2个报价</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">39</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">同步ASIN预计可节省0.3k RMB/年</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">41.71</td></tr><tr data-v-c1556f6d=""><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">缺少3个报价</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">127</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">同步ASIN预计可获得3.7k RMB销售额</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">-</td></tr><tr data-v-c1556f6d=""><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">失效PanEU ASIN</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">4</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">修复ASIN预计可节省0.1k RMB/年</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">12.84</td></tr><tr data-v-c1556f6d=""><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">总计</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">564</td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);"></td><td data-v-c1556f6d="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);"></td></tr></tbody></table></div></div></div></div></div></div></div></section><!-- 2.2 英国和欧盟间物流方案 (Tab62) --><section data-v-c936af12="" class="report-section" id="section-di"><h3 data-v-c936af12="" class="section-title">2.2 英国和欧盟间物流方案（DI）</h3><div data-v-c936af12="" class="section-content"><div data-v-fee2c559="" data-v-c936af12="" class="sub-tab-panel"><h2 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#232f3e;" data-v-inspector="src/components/Reports/Tab62.vue:3:5" data-v-fee2c559=""> 2.2 英国和欧盟间物流方案 </h2><div class="solution-details" data-v-inspector="src/components/Reports/Tab62.vue:6:5" data-v-fee2c559=""><div style="margin-top:30px;padding:20px;background:#ffffff;border:1px solid #ddd;border-radius:6px;" data-v-inspector="src/components/Reports/Tab62.vue:7:7" data-v-fee2c559=""><h4 style="color:#333;font-size:18px;font-weight:600;margin:0 0 8px 0;" data-v-inspector="src/components/Reports/Tab62.vue:16:9" data-v-fee2c559=""> 英国和欧盟物流方案 </h4><h5 style="color:#666;font-size:16px;font-weight:500;margin:0 0 4px 0;" data-v-inspector="src/components/Reports/Tab62.vue:19:9" data-v-fee2c559=""> 英国和欧盟物流方案的对比和建议 </h5><div style="display:flex;align-items:center;margin:20px 0 15px 0;gap:8px;padding:10px;background:#f8f9fa;border-radius:4px;border-left:4px solid #ff8c00;" data-v-inspector="src/components/Reports/Tab62.vue:22:9" data-v-fee2c559=""><span style="color:#ff8c00;font-size:16px;font-weight:bold;" data-v-inspector="src/components/Reports/Tab62.vue:34:11" data-v-fee2c559="">▶</span><h4 style="color:#333;font-size:16px;font-weight:600;margin:0;line-height:1.4;" data-v-inspector="src/components/Reports/Tab62.vue:35:11" data-v-fee2c559=""> 英国和欧盟间物流方案的对比和建议 </h4></div><div style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;text-align:center;margin:15px auto 20px auto;width:fit-content;box-shadow:0 2px 4px rgba(255, 140, 0, 0.3);" data-v-inspector="src/components/Reports/Tab62.vue:39:9" data-v-fee2c559=""> 英欧双向双入驻 vs. 英国单收取2个间配送跨境运 </div><table style="width:100%;border-collapse:collapse;font-size:11px;background:#ffffff;border:2px solid #ff8c00;border-radius:6px;margin-top:15px;" data-v-inspector="src/components/Reports/Tab62.vue:55:9" data-v-fee2c559="" cellspacing="0" cellpadding="0"><thead data-v-inspector="src/components/Reports/Tab62.vue:66:11" data-v-fee2c559=""><tr data-v-inspector="src/components/Reports/Tab62.vue:67:13" data-v-fee2c559=""><th style="background:#e67e22;color:white;font-weight:600;padding:12px 10px;text-align:center;border-right:1px solid #fff;font-size:11px;width:25%;" data-v-inspector="src/components/Reports/Tab62.vue:68:15" data-v-fee2c559=""> UK&lt;-&gt;EU FBA 物流模式 </th><th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;font-weight:600;padding:12px 10px;text-align:center;border-right:1px solid #fff;font-size:11px;width:37.5%;" data-v-inspector="src/components/Reports/Tab62.vue:82:15" data-v-fee2c559=""> 英国收获双选入驻<br data-v-inspector="src/components/Reports/Tab62.vue:94:25" data-v-fee2c559="">Dual Inbound (DI) </th><th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;font-weight:600;padding:12px 10px;text-align:center;font-size:11px;width:37.5%;" data-v-inspector="src/components/Reports/Tab62.vue:96:15" data-v-fee2c559=""> 英国与欧盟2个间的远程配送<br data-v-inspector="src/components/Reports/Tab62.vue:107:30" data-v-fee2c559="">Remote Fulfillment between the UK and EU (EURF) </th></tr></thead><tbody data-v-inspector="src/components/Reports/Tab62.vue:111:11" data-v-fee2c559=""><tr style="background:#f8f9fa;" data-v-inspector="src/components/Reports/Tab62.vue:112:13" data-v-fee2c559=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px 8px;border:1px solid #ddd;border-right:2px solid #ddd;" data-v-inspector="src/components/Reports/Tab62.vue:113:15" data-v-fee2c559=""> 介绍 </td><td style="background:#f8f9fa;color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:126:15" data-v-fee2c559=""> 卖家能够将货物入列,选至英国EU配送链运营 </td><td style="background:#f8f9fa;color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:138:15" data-v-fee2c559=""> 卖家入驻合欧盟欧选收后任一成本国。<br data-v-inspector="src/components/Reports/Tab62.vue:148:34" data-v-fee2c559="">即可以欧盟侧位者定者向任和到联欧洲盟通过当当和和 </td></tr><tr style="background:#fafafa;" data-v-inspector="src/components/Reports/Tab62.vue:151:13" data-v-fee2c559=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px 8px;border:1px solid #ddd;border-right:2px solid #ddd;" data-v-inspector="src/components/Reports/Tab62.vue:152:15" data-v-fee2c559=""> 头程物流 (CN-&gt;EU FBA FCs) </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:165:15" data-v-fee2c559=""> 需要保齐英国/EU仓都要发送成本高, 成本偏对应 </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:176:15" data-v-fee2c559=""> 需要保齐英国/EU仓都要发送成本高, 成本偏对应 </td></tr><tr data-v-inspector="src/components/Reports/Tab62.vue:188:13" data-v-fee2c559=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px 8px;border:1px solid #ddd;border-right:2px solid #ddd;" data-v-inspector="src/components/Reports/Tab62.vue:189:15" data-v-fee2c559=""> 尾程配送 (FBA) </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:202:15" data-v-fee2c559=""> 需即到及优缺费见卖水电配送选供下优程收商品. 1-2天送达 </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:213:15" data-v-fee2c559=""> 有销运费, 客期间, 5-7天送达 </td></tr><tr data-v-inspector="src/components/Reports/Tab62.vue:225:13" data-v-fee2c559=""><td colspan="3" style="background:#e9ecef;color:#495057;font-weight:600;text-align:center;padding:8px;font-size:12px;border:1px solid #ddd;" data-v-inspector="src/components/Reports/Tab62.vue:226:15" data-v-fee2c559=""> 加入条件 </td></tr><tr style="background:#fafafa;" data-v-inspector="src/components/Reports/Tab62.vue:241:13" data-v-fee2c559=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px 8px;border:1px solid #ddd;border-right:2px solid #ddd;" data-v-inspector="src/components/Reports/Tab62.vue:242:15" data-v-fee2c559=""> ASIN 设置 </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:255:15" data-v-fee2c559=""> 应收收市已的英国DI，以设收下及环费欧提综收都配配配，具其优可<br data-v-inspector="src/components/Reports/Tab62.vue:264:48" data-v-fee2c559="">可可可该中欧中是最在的优 </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:266:15" data-v-fee2c559=""> 需要配重设网英国/欧盟的DI的配配配. 部分 ASIN 无法除以设在欧应有或 </td></tr><tr data-v-inspector="src/components/Reports/Tab62.vue:278:13" data-v-fee2c559=""><td style="background:#f8f9fa;color:#333;font-weight:600;text-align:center;padding:10px 8px;border:1px solid #ddd;border-right:2px solid #ddd;" data-v-inspector="src/components/Reports/Tab62.vue:279:15" data-v-fee2c559=""> VAT 要求 </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:292:15" data-v-fee2c559=""> 需要配置2个VAT<br data-v-inspector="src/components/Reports/Tab62.vue:301:26" data-v-fee2c559="">或申请提调及者收欧盟的 VAT </td><td style="color:#333;text-align:left;padding:10px 12px;border:1px solid #ddd;font-size:10px;" data-v-inspector="src/components/Reports/Tab62.vue:303:15" data-v-fee2c559=""> 仅设置1个VAT<br data-v-inspector="src/components/Reports/Tab62.vue:312:25" data-v-fee2c559="">或申请提调及者收欧盟VAT </td></tr></tbody></table></div></div><!-- DI 分析结果区块（追加） --><div data-v-fee2c559="" class="analysis-section"><div data-v-fee2c559="" class="section-header"><h3 data-v-fee2c559="">🔄 DI 分析结果</h3><p data-v-fee2c559="" class="section-description">双边入库机会分析详情</p></div><div data-v-fee2c559="" class="section-content"><div data-v-fee2c559=""><h4 data-v-fee2c559="" style="color: rgb(51, 51, 51); font-size: 16px; margin: 10px 0px;">英国和欧盟选品拓展机会报告</h4><!-- 关键机会分析 --><div data-v-fee2c559="" style="margin: 20px 0px; padding: 15px; background: rgb(248, 249, 250); border-radius: 6px; border-left: 4px solid rgb(255, 140, 0);"><h5 data-v-fee2c559="" style="color: rgb(51, 51, 51); font-size: 14px; margin: 0px 0px 10px;">主要机会点分析</h5><p data-v-fee2c559="" style="color: rgb(102, 102, 102); font-size: 13px; margin: 0px 0px 10px;">基于上传的10个数据文件,我们识别出以下关键机会:</p><ul data-v-fee2c559="" style="margin: 0px; padding-left: 20px;"><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 5px 0px;"><strong data-v-fee2c559="">高销售潜力ASIN:</strong> UK&gt;EU方向有37个ASIN在欧盟市场具有高销售潜力,预计销售额€242,290.77(12M); EU&gt;UK方向有45个ASIN在英国市场具有高销售潜力,预计销售额£59,075.44(12M)</li><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 5px 0px;"><strong data-v-fee2c559="">全球拓展大礼包:</strong> UK&gt;EU方向有159个ASIN可获得最高€714,000.00代金券; EU&gt;UK方向有51个ASIN可获得最高£180,600.00代金券</li><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 5px 0px;"><strong data-v-fee2c559="">远程配送优化:</strong> 目前有0个ASIN开启远程配送,其中0个达到高销售额(&gt;€100),预计可节省配送费</li><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 5px 0px;"><strong data-v-fee2c559="">市场扩展潜力:</strong> 229个UK&gt;EU ASIN和230个EU&gt;UK ASIN都未开启远程配送,存在巨大扩展空间</li></ul></div><!-- 推荐行动 --><div data-v-fee2c559="" style="margin: 20px 0px; padding: 15px; background: rgb(248, 249, 250); border-radius: 6px; border-left: 4px solid rgb(255, 140, 0);"><h5 data-v-fee2c559="" style="color: rgb(51, 51, 51); font-size: 14px; margin: 0px 0px 10px;">建议行动优先级</h5><ol data-v-fee2c559="" style="margin: 0px; padding-left: 20px;"><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 8px 0px;"><span data-v-fee2c559="" style="background: rgb(255, 107, 53); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P1</span> 对37个EU高销售潜力ASIN和45个UK高销售潜力ASIN进行本地入库,预计总销售额€242,290.77 + £59,075.44</li><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 8px 0px;"><span data-v-fee2c559="" style="background: rgb(255, 107, 53); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P2</span> 充分利用总计€714,000.00 + £180,600.00的全球拓展大礼包激励资源</li><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 8px 0px;"><span data-v-fee2c559="" style="background: rgb(255, 107, 53); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P3</span> 为459个未开启远程配送的ASIN开启远程配送功能</li><li data-v-fee2c559="" style="color: rgb(85, 85, 85); font-size: 13px; margin: 8px 0px;"><span data-v-fee2c559="" style="background: rgb(255, 107, 53); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P4</span> 对已开启远程配送且销售额&gt;€100的0个ASIN考虑本地入库以节省配送成本</li></ol></div><!-- 数据表 --><div data-v-fee2c559="" style="margin: 20px 0px;"><h5 data-v-fee2c559="" style="color: rgb(51, 51, 51); font-size: 14px; margin-bottom: 15px;">数据表</h5><div data-v-fee2c559="" style="overflow-x: auto;"><table data-v-fee2c559="" style="width: 100%; border-collapse: collapse; font-size: 12px; background: rgb(255, 255, 255); border: 1px solid rgb(221, 221, 221); border-radius: 4px;" cellspacing="0" cellpadding="0"><thead data-v-fee2c559=""><tr data-v-fee2c559=""><th data-v-fee2c559="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">#</th><th data-v-fee2c559="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">UK&lt;&gt;EU ASIN</th><th data-v-fee2c559="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">数量</th><th data-v-fee2c559="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">来源商城销售额(T30D)</th><th data-v-fee2c559="" style="background: rgb(51, 51, 51); color: white; padding: 12px 8px; text-align: center; border-right: 1px solid rgb(85, 85, 85);">机会点及操作</th></tr></thead><tbody data-v-fee2c559=""><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">1</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">仅在英国本地入库的选品</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">229</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€147,966.62</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">-</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">2</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">在欧盟有高销售潜力</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">37</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€37,932.71</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">本地入库至欧盟,预计销售额€242,290.77(12M)</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">3</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">在欧盟有全球拓展大礼包</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">159</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€124,241.50</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">本地入库至欧盟,获取最高€714,000.00代金券</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">4</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">未在欧盟远程销售</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">229</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€147,966.62</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">开启英国至欧盟的远程配送</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">5</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">已在欧盟远程销售</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">0</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">-</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">-</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">6</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">远程销售额&gt;€100</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">0</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">-</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">-</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">7</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">仅在欧盟本地入库的选品</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">230</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€199,380.99</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">-</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">8</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">在英国有高销售潜力</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">45</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€65,497.02</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">本地入库至英国,预计销售额£59,075.44(12M)</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">9</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">在英国有全球拓展大礼包</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">51</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€18,637.93</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">本地入库至英国,获取最高£180,600.00代金券</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">10</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">未在英国远程销售</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">230</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">€199,380.99</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">开启欧盟至英国的远程配送</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">11</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">已在英国远程销售</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">0</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">-</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">-</td></tr><tr data-v-fee2c559=""><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">12</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">远程销售额&gt;£100</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center; font-weight: bold; color: rgb(255, 107, 53);">0</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221); text-align: center;">-</td><td data-v-fee2c559="" style="padding: 10px 8px; border: 1px solid rgb(221, 221, 221);">-</td></tr></tbody></table></div></div></div></div></div></div></div></section><!-- 2.3 更多成本节约（CEE） --><section data-v-c936af12="" class="report-section" id="section-cee"><h3 data-v-c936af12="" class="section-title">2.3 更多成本节约（CEE 中欧计划）</h3><div data-v-c936af12="" class="section-content"><div data-v-5fd69104="" data-v-c936af12="" class="sub-tab-panel"><h2 data-v-5fd69104="" style="margin: 0px 0px 16px; font-size: 24px; font-weight: 600; color: rgb(35, 47, 62);">2.3 更多成本节约</h2><!-- 成本节约折叠卡片 --><div data-v-5fd69104="" class="card-wrapper" id="cost-savings"><div data-v-5fd69104="" class="card-header"><div data-v-5fd69104="" style="font-size: 24px; margin-right: 10px;">📋</div><h3 data-v-5fd69104="" style="margin: 0px; color: rgb(0, 123, 255); font-size: 18px; font-weight: 600;">更多成本节约</h3><div data-v-5fd69104="" class="arrow" style="color: rgb(0, 123, 255); font-size: 16px; margin-left: 10px; transition: transform 0.3s; transform: rotate(90deg);">▶</div></div><div data-v-5fd69104="" id="cost-savings-content" style="display: flex; flex-direction: column; gap: 12px;"><div data-v-5fd69104="" class="section-head" style="display: flex; align-items: center; padding: 10px; background: rgb(240, 248, 255); border-radius: 8px; cursor: default; transition: 0.3s;"><div data-v-5fd69104="" style="color: rgb(0, 123, 255); font-size: 20px; margin-right: 15px; transition: transform 0.3s;">▼</div><span data-v-5fd69104="" style="color: rgb(51, 51, 51); font-weight: 600; font-size: 14px;">借助中欧计划节约FBA费用</span></div><!-- 可折叠的内容区域（此处始终展示，内部再做二级折叠可扩展） --><div data-v-5fd69104="" style="display: block; margin-top: 10px; padding: 15px; background: rgb(248, 249, 250); border-radius: 8px; border-left: 3px solid rgb(0, 123, 255);"><div data-v-5fd69104="" style="margin-bottom: 15px;"><p data-v-5fd69104="" style="margin: 0px 0px 8px; font-size: 12px; color: rgb(51, 51, 51); font-weight: 600;">什么是"中欧计划"？</p><p data-v-5fd69104="" style="margin: 0px 0px 12px; font-size: 11px; color: rgb(102, 102, 102); line-height: 1.4;">加入"中欧计划"后，亚马逊会把实际的库存不仅存储在德国的亚马逊物流中心，还将存储在波兰和捷克的物流中心。一旦中欧计划被激活，卖家的每件商品通过德国站点（Amazon.de）的产品都能享受每件0.26欧元减免，后台具体操作详见这里。</p></div><div data-v-5fd69104="" style="background: linear-gradient(135deg, rgb(233, 247, 239) 0%, rgb(245, 252, 248) 100%); padding: 16px 18px; border-radius: 10px; margin-bottom: 14px; border: 1px solid rgb(201, 238, 221); position: relative; overflow: hidden;"><div data-v-5fd69104="" style="position: absolute; inset: 0px; background: repeating-linear-gradient(45deg, rgba(40, 167, 69, 0.06) 0px, rgba(40, 167, 69, 0.06) 8px, rgba(255, 255, 255, 0) 8px, rgba(255, 255, 255, 0) 16px);"></div><div data-v-5fd69104="" style="position: relative; display: flex; align-items: center; gap: 8px; margin-bottom: 10px;"><span data-v-5fd69104="" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: rgb(40, 167, 69); color: rgb(255, 255, 255); border-radius: 8px; font-size: 16px; box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 4px;">✓</span><p data-v-5fd69104="" style="margin: 0px; font-size: 14px; color: rgb(21, 87, 36); font-weight: 700; letter-spacing: 0.5px;">中欧计划的优势</p></div><ul data-v-5fd69104="" style="position: relative; list-style: none; padding: 0px; margin: 0px; display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: rgb(21, 87, 36);"><li data-v-5fd69104="" style="display: flex; gap: 6px;"><span data-v-5fd69104="" style="color: rgb(40, 167, 69); font-weight: 600;">■</span><span data-v-5fd69104="">节省 FBA 费用（每件 €0.26 减免），适用于通过德国站点发出的订单（含跨境 EFN 配送）</span></li><li data-v-5fd69104="" style="display: flex; gap: 6px;"><span data-v-5fd69104="" style="color: rgb(40, 167, 69); font-weight: 600;">■</span><span data-v-5fd69104="">提升对德国南部及东欧消费者的配送时效（1–2 天可达）</span></li><li data-v-5fd69104="" style="display: flex; gap: 6px;"><span data-v-5fd69104="" style="color: rgb(40, 167, 69); font-weight: 600;">■</span><span data-v-5fd69104="">所有符合条件订单享受 Prime 购物体验，提高转化</span></li></ul></div><div data-v-5fd69104="" style="background: rgb(209, 236, 241); border: 1px solid rgb(190, 229, 235); border-radius: 6px; padding: 12px; margin-bottom: 15px;"><div data-v-5fd69104="" style="display: flex; align-items: flex-start;"><div data-v-5fd69104="" style="font-size: 16px; margin-right: 8px; margin-top: 2px;">📋</div><div data-v-5fd69104=""><p data-v-5fd69104="" style="margin: 0px; font-size: 12px; color: rgb(12, 84, 96); font-weight: 600;">重要提示：如果要在波兰和捷克和其他国家储存，您必须在每个国家注册增值税。因此，建议实际在激活CEE之前先注册波兰及捷克的VAT税号。</p></div></div></div><!-- <div style="background:#f8f9fa; border:2px dashed #ffc107; border-radius:8px; padding:20px; text-align:center; margin:15px 0; min-height:200px;">
+              <img :src="imageSrc" alt="成本节约示意" style="max-width:100%; height:auto; border-radius:6px;" v-if="imageLoaded" @error="imageLoaded=false" />
+              <div v-else style="font-size:12px; color:#999;">图片加载占位区域（图片11）</div>
+            </div> --></div></div><!-- CEE 成本分析结果区块 --><div data-v-5fd69104="" class="analysis-section"><div data-v-5fd69104="" class="section-header"><h3 data-v-5fd69104="">💰 CEE 成本分析结果</h3><p data-v-5fd69104="" class="section-description">中欧计划成本效益分析详情</p></div><div data-v-5fd69104="" class="section-content"><div data-v-5fd69104=""><div data-v-5fd69104="" class="cee-table-wrapper"><table data-v-5fd69104="" class="cee-table" cellspacing="0" cellpadding="0" style="width: 100%;"><thead data-v-5fd69104=""><tr data-v-5fd69104=""><th data-v-5fd69104="" style="width: 38%;">指标</th><th data-v-5fd69104="" style="width: 22%;">数值</th><th data-v-5fd69104="">说明</th></tr></thead><tbody data-v-5fd69104=""><tr data-v-5fd69104=""><td data-v-5fd69104="">德国商城过去12个月已售商品数量</td><td data-v-5fd69104="">20,000</td><td data-v-5fd69104="">历史销量 (件)</td></tr><tr data-v-5fd69104=""><td data-v-5fd69104="">中欧计划预计节约费用€</td><td data-v-5fd69104="">5,200</td><td data-v-5fd69104="">按每件 €0.26 估算</td></tr><tr data-v-5fd69104=""><td data-v-5fd69104="">VAT注册成本€</td><td data-v-5fd69104="">600</td><td data-v-5fd69104="">波兰 + 捷克 预估一次性</td></tr><tr data-v-5fd69104=""><td data-v-5fd69104="">VAT注册所需时间：4～6周</td><td data-v-5fd69104="" colspan="2" style="text-align: left;">请预留时间提前启动，避免影响计划生效</td></tr><tr data-v-5fd69104="" class="final-row"><td data-v-5fd69104="">最终节约的费用€</td><td data-v-5fd69104="">4,600</td><td data-v-5fd69104="">预计节约 - VAT 成本</td></tr></tbody></table><div data-v-5fd69104="" class="cee-summary-tip">说明：若销量增长或参与更多跨境订单，节约金额会进一步提升。</div></div></div></div></div></div></div></div></section><!-- 3. 行动计划 --><section data-v-c936af12="" class="report-section" id="section-action"><h3 data-v-c936af12="" class="section-title">3. 📅 行动计划</h3><div data-v-c936af12="" class="section-content"><div data-v-f4223f67="" data-v-c936af12="" class="content-panel"><div data-v-f4223f67="" class="content-header"><h2 data-v-f4223f67="">📅 行动计划</h2><p data-v-f4223f67="" class="content-description">基于分析结果的具体实施路线图</p></div><div data-v-f4223f67="" class="content-body"><div data-v-f4223f67="" class="action-plan-table"><table data-v-f4223f67="" cellspacing="0" cellpadding="0" style="width: 100%;"><thead data-v-f4223f67=""><tr data-v-f4223f67=""><th data-v-f4223f67="" class="ranking-col">优先级</th><th data-v-f4223f67="" class="action-col">行动</th><th data-v-f4223f67="" class="timeline-col">时间</th><th data-v-f4223f67="" class="logic-col">读取判断逻辑</th></tr></thead><tbody data-v-f4223f67=""><!-- 第一行: 合规 - new policy --><tr data-v-f4223f67=""><td data-v-f4223f67="" class="ranking">1</td><td data-v-f4223f67="" class="action">合规 - new policy (NL/IT)</td><td data-v-f4223f67="" class="timeline">1个月</td><td data-v-f4223f67="" class="logic">意大利税号需注意</td></tr><!-- 第二行: 合规 - 开了仓储没开税号 --><tr data-v-f4223f67=""><td data-v-f4223f67="" class="ranking">2</td><td data-v-f4223f67="" class="action">合规 - 开了仓储没开税号</td><td data-v-f4223f67="" class="timeline">3个月</td><td data-v-f4223f67="" class="logic"><ul data-v-f4223f67=""><li data-v-f4223f67="">德国、意大利、法国、西班牙已经合规开启了PanEU所有的仓储，无需额外操作。</li></ul></td></tr><!-- 第三行: cost saving - pan-EU placement --><tr data-v-f4223f67=""><td data-v-f4223f67="" class="ranking">3</td><td data-v-f4223f67="" class="action">cost saving - pan-EU placement</td><td data-v-f4223f67="" class="timeline">3个月</td><td data-v-f4223f67="" class="logic"><ul data-v-f4223f67=""><li data-v-f4223f67="">可开启 FR 仓储，获得配送费用节约 15451.09 RMB</li><li data-v-f4223f67="">可开启 DE 仓储，获得配送费用节约 18712 RMB</li></ul></td></tr><!-- 第四行: cost saving - pan-EU ASIN parity --><tr data-v-f4223f67=""><td data-v-f4223f67="" class="ranking">4</td><td data-v-f4223f67="" class="action">cost saving - pan-EU ASIN parity</td><td data-v-f4223f67="" class="timeline">1个月</td><td data-v-f4223f67="" class="logic">同步 560 ASIN，获得配送费用节约€, 同步商品到DE/FR/IT/ES四国，启用PanEU服务</td></tr><!-- 第五行: cost saving - CEE --><tr data-v-f4223f67=""><td data-v-f4223f67="" class="ranking">5</td><td data-v-f4223f67="" class="action">cost saving - CEE</td><td data-v-f4223f67="" class="timeline">3个月</td><td data-v-f4223f67="" class="logic">可开启中欧计划，获得配送费用节约€4600，</td></tr><!-- DI相关行 - 共享逻辑单元格 --><!-- 第六行: incentive - DI (GSI) --><tr data-v-f4223f67=""><td data-v-f4223f67="" class="ranking">6</td><td data-v-f4223f67="" class="action">incentive - DI (GSI)</td><td data-v-f4223f67="" class="timeline">1个月</td><td data-v-f4223f67="" class="logic" rowspan="2"><div data-v-f4223f67="" class="growth-item"><strong data-v-f4223f67="">高销售潜力ASIN:</strong> UK&gt;EU方向有37个ASIN在欧盟市场具有高销售潜力,预计销售额€242,290.77(12M); EU&gt;UK方向有45个ASIN在英国市场具有高销售潜力,预计销售额£59,075.44(12M)</div><div data-v-f4223f67="" class="growth-item"><strong data-v-f4223f67="">全球拓展大礼包:</strong> UK&gt;EU方向有159个ASIN可获得最高€714,000.00代金券; EU&gt;UK方向有51个ASIN可获得最高£180,600.00代金券</div><div data-v-f4223f67="" class="growth-item"><strong data-v-f4223f67="">远程配送优化:</strong> 目前有0个ASIN开启远程配送,其中0个达到高销售额(&gt;€100),预计可节省配送费</div><div data-v-f4223f67="" class="growth-item"><strong data-v-f4223f67="">市场扩展潜力:</strong> 229个UK&gt;EU ASIN和230个EU&gt;UK ASIN都未开启远程配送,存在巨大扩展空间</div></td></tr><!-- 第七行: sales uplift - DI (MPG) --><tr data-v-f4223f67=""><td data-v-f4223f67="" class="ranking">7</td><td data-v-f4223f67="" class="action">sales uplift - DI (MPG)</td><td data-v-f4223f67="" class="timeline">3个月</td><!-- 逻辑单元格已在上方合并，此行不需要逻辑单元格 --></tr></tbody></table></div></div></div></div></section><!-- 4. AM 指导话术 (简化版 Tab9 内容) --><section data-v-c936af12="" class="report-section" id="section-am"><h3 data-v-c936af12="" class="section-title">4. 💬 AM 指导话术（参考）</h3><div data-v-c936af12="" class="section-content"><div data-v-8244b720="" data-v-c936af12="" class="content-panel"><!-- <div class="content-header">
+      <h2>📝 AM 指导话术</h2>
+      <p class="content-description">其他相关信息和补充内容</p>
+    </div> --><div data-v-8244b720="" class="content-body"><div data-v-8244b720="" class="pitching-wrapper"><!-- <h3 class="section-title">AM Pitching 话术库</h3>
+        <p class="section-subtitle">支持搜索、折叠、行高亮的内部使用脚本</p> --><div data-v-8244b720="" class="pitching-embed"><div data-v-ec058d51="" data-v-8244b720="" class="app"><div data-v-ec058d51="" class="container"><div data-v-ec058d51="" class="header"><h1 data-v-ec058d51="">AM Pitching话术</h1><div data-v-ec058d51="" class="subtitle">Digital Intelligence · 2025/8/31 17:07:36</div><div data-v-ec058d51="" class="search-box"><span class="export-static-label"></span></div></div><div data-v-ec058d51="" class="sheet-container"><div data-v-ec058d51="" class="sheet-header"><span data-v-ec058d51="">📖 AM pitching 话术</span><span data-v-ec058d51="" class="toggle-icon">▼</span></div><div data-v-ec058d51="" class="sheet-content"><table data-v-ec058d51="" cellspacing="0" cellpadding="0" style="width: 100%;"><thead data-v-ec058d51=""><tr data-v-ec058d51=""><th data-v-ec058d51="">卖家群体</th><th data-v-ec058d51="">阻碍说明</th><th data-v-ec058d51="">话术要点</th></tr></thead><tbody data-v-ec058d51=""><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">Inbound</td><td data-v-ec058d51="" class="empty-cell">-</td><td data-v-ec058d51="" class="empty-cell">-</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">Not Listing Parity</td><td data-v-ec058d51="" class="">Asin Parity：卖同一品但Asin编号不一致</td><td data-v-ec058d51="" class="">1）了解卖家为什么用不同ASIN，为了规避合规/差评同步风险？
+2）介绍使用相同ASIN的benefit：
+   a) 后台同步销售数据和评价，提高综合排名、流量，且有助于第二市场的冷启动
+   b) 降低生产/备货成本，加强库存弹性
+   c) 相同ASIN可以享受亚马逊FBA相关物流福利，比如泛欧，英国和欧盟之间的远程配送
+3）如果卖家感兴趣，牵引卖家ASIN merge或未来备货时使用相同SKU</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="empty-cell">-</td><td data-v-ec058d51="" class="">Listing&amp;Asin Parity：卖不同产品</td><td data-v-ec058d51="" class="">如果您认为直接发货到欧盟风险比较大的变化，可以先行使用英国与欧盟之间的跨境配送进行试水，如果卖的比较好或者曝光量比较高的话，可以再直接发货过去</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="empty-cell">-</td><td data-v-ec058d51="" class="">同步但不可售</td><td data-v-ec058d51="" class="">1）库存问题（ex：缺货）：您需要尽快补货，长期缺货会影响您的账户健康度评分</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">有Incentive（band D/E卖家）</td><td data-v-ec058d51="" class="empty-cell">-</td><td data-v-ec058d51="" class="">此次活动截止日期是2025年12月，为商家邀请制，您可以用这笔现金作为对岸的启动资金，对冲单一市场波动风险</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">Not inbound</td><td data-v-ec058d51="" class="empty-cell">-</td><td data-v-ec058d51="" class="empty-cell">-</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">EU&gt;UK</td><td data-v-ec058d51="" class="empty-cell">-</td><td data-v-ec058d51="" class="empty-cell">-</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">No VAT</td><td data-v-ec058d51="" class="">经营意愿低，对于对岸市场销售预期低/卖进过销售表现不佳</td><td data-v-ec058d51="" class="">Incentive:
+您可以用这笔现金覆盖合规或广告成本，对冲单一市场波动风险。此次活动截止日期是2025年12月，为商家邀请制，为避免政策变化，建议您尽快参与
+
+Others:
+1）潜力大：亚马逊英国站体量接近德国站，语言友好，有13%的电商年复合增长率，有极高的销售和利润增长空间
+2）双边入库优势：一旦找到热销品，可以双边入库享受本地配送费和Prime资格，提高商品转化率和搜索排名
+3）利用远程配送低成本测试：可以先通过远程配送将欧盟商品销售到英国，无需额外库存。2024年2月起，亚马逊下调了欧盟到英国的远程配送费26-59%，成本更低</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="empty-cell">-</td><td data-v-ec058d51="" class="">缺乏运营人员/资金等资源开启对岸市场</td><td data-v-ec058d51="" class="">Incentive:
+您可以用这笔现金作为对岸的启动资金，对冲单一市场波动风险
+
+Others:
+1）可以先通过远程配送将欧盟商品销售到英国，无需额外库存和运营人员
+2）亚马逊有丰富的培训资源和客户经理支持，帮助您快速上手英国市场运营</td></tr></tbody></table></div></div><div data-v-ec058d51="" class="sheet-container"><div data-v-ec058d51="" class="sheet-header"><span data-v-ec058d51="">📖 Pitch flow (Blurb)</span><span data-v-ec058d51="" class="toggle-icon">▼</span></div><div data-v-ec058d51="" class="sheet-content"><table data-v-ec058d51="" cellspacing="0" cellpadding="0" style="width: 100%;"><thead data-v-ec058d51=""><tr data-v-ec058d51=""><th data-v-ec058d51="">步骤</th><th data-v-ec058d51="">内容</th></tr></thead><tbody data-v-ec058d51=""><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">开场</td><td data-v-ec058d51="" class="">您好，我是亚马逊的客户经理，今天联系您是想了解一下您在跨境业务方面的情况</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">了解现状</td><td data-v-ec058d51="" class="">请问您目前主要在哪些站点销售？对于拓展其他市场有什么想法吗？</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">识别机会</td><td data-v-ec058d51="" class="">根据您的情况，我发现您有一些很好的扩展机会...</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">提供方案</td><td data-v-ec058d51="" class="">针对您的情况，我们有以下建议和支持...</td></tr><tr data-v-ec058d51="" class=""><td data-v-ec058d51="" class="">跟进行动</td><td data-v-ec058d51="" class="">如果您感兴趣，我们可以安排具体的实施方案讨论</td></tr></tbody></table></div></div><div data-v-ec058d51="" class="footer"><p data-v-ec058d51="">📊 数据来源: AM Pitching话术-DI.xlsx</p><p data-v-ec058d51="">🤖 由 Amazon Q AI Assistant 自动生成</p></div></div></div></div></div></div></div></div></section></div></body></html>
