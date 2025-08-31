@@ -26,7 +26,7 @@
               align-items: center;
               gap: 10px;
               padding: 14px 18px;
-              background: linear-gradient(135deg, #ff9d33 0%, #ff7f0e 100%);
+              background: linear-gradient(135deg, #333 0%, #666 100%);
               border-bottom: 1px solid rgba(255, 255, 255, 0.25);
             "
           >
@@ -62,13 +62,13 @@
                 color: #555;
                 line-height: 1.5;
                 margin-bottom: 14px;
-                background: #fff9ef;
-                border: 1px solid #ffd7b3;
+                background: #f8f9fa;
+                border: 1px solid #ddd;
                 padding: 10px 12px;
                 border-radius: 8px;
               "
             >
-              <strong style="color: #c05621">说明：</strong> 下表展示卖家在不同跨国 fulfillment
+              <strong style="color: #333">说明：</strong> 下表展示卖家在不同跨国 fulfillment
               模式下的入仓策略、成本结构与配送速度差异，帮助快速判断是否升级至 PanEU。
             </div>
             <div class="table-container" style="overflow-x: auto; margin: 0 0 16px 0">
@@ -99,7 +99,7 @@
                     </th>
                     <th
                       style="
-                        background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);
+                        background: linear-gradient(135deg, #333 0%, #333 100%);
                         color: white;
                         padding: 12px 8px;
                         border: 1px solid #ddd;
@@ -111,7 +111,7 @@
                     </th>
                     <th
                       style="
-                        background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);
+                        background: linear-gradient(135deg, #333 0%, #333 100%);
                         color: white;
                         padding: 12px 8px;
                         border: 1px solid #ddd;
@@ -123,7 +123,7 @@
                     </th>
                     <th
                       style="
-                        background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);
+                        background: linear-gradient(135deg, #333 0%, #333 100%);
                         color: white;
                         padding: 12px 8px;
                         border: 1px solid #ddd;
@@ -160,8 +160,8 @@
                         padding: 10px 8px;
                         border: 1px solid #ddd;
                         font-size: 10px;
-                        background: #fff9e6;
-                        border-left: 3px solid #ff8c00;
+                        background: #f8f9fa;
+                        border-left: 3px solid #333;
                       "
                     >
                       卖家入仓至欧盟任一国家后，亚马逊将货存储在卖家启用了存储服务的国家/地区的欧盟运营中心内，并自主在这些卖家地区之间分配存储，不额外收取费用
@@ -200,10 +200,10 @@
                       <div
                         style="
                           font-size: 9px;
-                          background: #fff9e6;
+                          background: #f8f9fa;
                           padding: 4px;
                           border-radius: 3px;
-                          border: 1px solid #ff8c00;
+                          border: 1px solid #333;
                         "
                       >
                         德法意西需使用相同 ASIN/FNSKU#
@@ -230,10 +230,10 @@
                       <div
                         style="
                           font-size: 9px;
-                          background: #fff9e6;
+                          background: #f8f9fa;
                           padding: 4px;
                           border-radius: 3px;
-                          border: 1px solid #ff8c00;
+                          border: 1px solid #333;
                         "
                       >
                         需要德法意西中，至少开启2国仓储（至少2个 VAT），<br />启用仓储的国家为PanEU，未启用国家为
@@ -308,9 +308,9 @@
                     >
                       <span
                         style="
-                          background: #fff2e8;
-                          color: #ff6b35;
-                          border: 1px solid #ff6b35;
+                          background: #f8f9fa;
+                          color: #333;
+                          border: 1px solid #333;
                           padding: 2px 6px;
                           border-radius: 12px;
                           font-size: 9px;
@@ -329,9 +329,9 @@
                     >
                       <span
                         style="
-                          background: #fff5f0;
-                          color: #ff6b35;
-                          border: 1px solid #ff6b35;
+                          background: #f8f9fa;
+                          color: #333;
+                          border: 1px solid #333;
                           padding: 2px 6px;
                           border-radius: 12px;
                           font-size: 9px;
@@ -340,9 +340,9 @@
                         >本地配送</span
                       >：费用节约高达53%，1-2天送达<br /><span
                         style="
-                          background: #fff2e8;
-                          color: #ff6b35;
-                          border: 1px solid #ff6b35;
+                          background: #f8f9fa;
+                          color: #333;
+                          border: 1px solid #333;
                           padding: 2px 6px;
                           border-radius: 12px;
                           font-size: 9px;
@@ -351,9 +351,9 @@
                         >跨境配送</span
                       >+<span
                         style="
-                          background: #fff2e8;
-                          color: #ff6b35;
-                          border: 1px solid #ff6b35;
+                          background: #f8f9fa;
+                          color: #333;
+                          border: 1px solid #333;
                           padding: 2px 6px;
                           border-radius: 12px;
                           font-size: 9px;
@@ -372,9 +372,9 @@
                     >
                       <span
                         style="
-                          background: #fff5f0;
-                          color: #ff6b35;
-                          border: 1px solid #ff6b35;
+                          background: #f8f9fa;
+                          color: #333;
+                          border: 1px solid #333;
                           padding: 2px 6px;
                           border-radius: 12px;
                           font-size: 9px;
@@ -383,9 +383,9 @@
                         >本地配送</span
                       >+<span
                         style="
-                          background: #fff2e8;
-                          color: #ff6b35;
-                          border: 1px solid #ff6b35;
+                          background: #f8f9fa;
+                          color: #333;
+                          border: 1px solid #333;
                           padding: 2px 6px;
                           border-radius: 12px;
                           font-size: 9px;
@@ -416,15 +416,15 @@
               <div
                 style="
                   flex: 1 1 240px;
-                  background: #fff1e6;
-                  border: 1px solid #ffd2af;
+                  background: #f8f9fa;
+                  border: 1px solid #ddd;
                   padding: 10px 12px;
                   border-radius: 8px;
                   font-size: 11px;
                   line-height: 1.5;
                 "
               >
-                <strong style="color: #c05621">升级 PanEU 信号：</strong><br />多国已有自然出单 +
+                <strong style="color: #333">升级 PanEU 信号：</strong><br />多国已有自然出单 +
                 跨境配送费占比高 + 核心 ASIN 库存波动导致转化下滑。
               </div>
               <div
@@ -461,7 +461,7 @@
               font-weight: 600;
               margin: 0 0 15px 0;
               padding-bottom: 8px;
-              border-bottom: 2px solid #ff8c00;
+              border-bottom: 2px solid #333;
             "
           >
             启用PanEU国家仓储获得配送费用节约
@@ -685,7 +685,7 @@
           "
         >
           <div style="display: flex; align-items: center; margin-bottom: 15px; gap: 8px">
-            <span style="color: #ff8c00; font-size: 16px; font-weight: bold">▶</span>
+            <span style="color: #333; font-size: 16px; font-weight: bold">▶</span>
             <h4 style="color: #333; font-size: 16px; font-weight: 600; margin: 0">
               PanEU商品资格要求
             </h4>
@@ -879,7 +879,7 @@
                 <tbody>
                   <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
                     <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.metric }}</td>
-                    <td style="padding:10px 8px; border:1px solid #ddd; text-align:center; font-weight:bold; color:#FF6B35;">{{ row.count }}</td>
+                    <td style="padding:10px 8px; border:1px solid #ddd; text-align:center; font-weight:bold; color:#333;">{{ row.count }}</td>
                     <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.description }}</td>
                     <!-- <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.formula }}</td> -->
                   </tr>

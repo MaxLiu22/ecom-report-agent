@@ -28,17 +28,17 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 4px;
-            border-left: 4px solid #ff8c00;
+            border-left: 4px solid #333;
           "
         >
-          <span style="color: #ff8c00; font-size: 16px; font-weight: bold">▶</span>
+          <span style="color: #333; font-size: 16px; font-weight: bold">▶</span>
           <h4 style="color: #333; font-size: 16px; font-weight: 600; margin: 0; line-height: 1.4">
             英国和欧盟间物流方案的对比和建议
           </h4>
         </div>
         <div
           style="
-            background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);
+            background: linear-gradient(135deg, #333 0%, #333 100%);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -47,7 +47,7 @@
             text-align: center;
             margin: 15px auto 20px auto;
             width: fit-content;
-            box-shadow: 0 2px 4px rgba(255, 140, 0, 0.3);
+            box-shadow: 0 2px 4px rgba(51, 51, 51, 0.3);
           "
         >
           英欧双向双入驻 vs. 英国单收取2个间配送跨境运
@@ -58,7 +58,7 @@
             border-collapse: collapse;
             font-size: 11px;
             background: #ffffff;
-            border: 2px solid #ff8c00;
+            border: 2px solid #333;
             border-radius: 6px;
             margin-top: 15px;
           "
@@ -67,7 +67,7 @@
             <tr>
               <th
                 style="
-                  background: #e67e22;
+                  background: #333;
                   color: white;
                   font-weight: 600;
                   padding: 12px 10px;
@@ -81,7 +81,7 @@
               </th>
               <th
                 style="
-                  background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);
+                  background: linear-gradient(135deg, #333 0%, #333 100%);
                   color: white;
                   font-weight: 600;
                   padding: 12px 10px;
@@ -95,7 +95,7 @@
               </th>
               <th
                 style="
-                  background: linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);
+                  background: linear-gradient(135deg, #333 0%, #333 100%);
                   color: white;
                   font-weight: 600;
                   padding: 12px 10px;
@@ -333,7 +333,7 @@
           <h4 style="color: #333; font-size: 16px; margin: 10px 0;">{{ diResult.report_title }}</h4>
 
           <!-- 关键机会分析 -->
-            <div v-if="diResult.key_opportunity_analysis" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+            <div v-if="diResult.key_opportunity_analysis" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #333;">
               <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.title }}</h5>
               <p style="color: #666; font-size: 13px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.subtitle }}</p>
               <ul style="margin: 0; padding-left: 20px;">
@@ -344,11 +344,11 @@
             </div>
 
             <!-- 推荐行动 -->
-            <div v-if="diResult.recommended_actions" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #FF8C00;">
+            <div v-if="diResult.recommended_actions" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #333;">
               <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.recommended_actions.title }}</h5>
               <ol style="margin: 0; padding-left: 20px;">
                 <li v-for="action in diResult.recommended_actions.actions" :key="action.priority" style="color: #555; font-size: 13px; margin: 8px 0;">
-                  <span style="background: #FF6B35; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P{{ action.priority }}</span>
+                  <span style="background: #333; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P{{ action.priority }}</span>
                   {{ action.recommendation }}
                 </li>
               </ol>
@@ -368,7 +368,7 @@
                     <tr v-for="row in diResult.data_table.rows" :key="row['#']">
                       <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['#'] }}</td>
                       <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['UK<>EU ASIN'] }}</td>
-                      <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #FF6B35;">{{ row['数量'] }}</td>
+                      <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #333;">{{ row['数量'] }}</td>
                       <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['来源商城销售额(T30D)'] }}</td>
                       <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['机会点及操作'] }}</td>
                     </tr>

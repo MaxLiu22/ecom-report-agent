@@ -324,10 +324,10 @@ export default {
 }
 
 .note {
-  background: #fef5e7;
+  background: #f8f9fa;
   padding: 10px 12px;
   border-radius: 6px;
-  border-left: 4px solid #f6ad55;
+  border-left: 4px solid #333;
   margin-bottom: 10px;
   font-size:12px;
   line-height:1.45;
@@ -407,17 +407,17 @@ export default {
 }
 
 .case-study {
-  background: #fef5e7;
+  background: #f8f9fa;
   padding: 14px 16px;
   border-radius: 8px;
-  border-left: 4px solid #f6ad55;
+  border-left: 4px solid #333;
   margin-bottom: 14px;
   font-size:12px;
   line-height:1.5;
 }
 
 .case-study h4 {
-  color: #744210;
+  color: #333;
   margin-bottom: 6px;
   font-size:14px;
 }
