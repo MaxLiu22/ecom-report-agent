@@ -8,6 +8,7 @@ import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/D
 import CeeService from '@/services/CeeService.js';
 import DifyService from '@/services/DifyService.js';
 import {analyzeSingleEUChecklist} from '@/services/checkliService.js';
+import {analyzeSingleEUChecklistCSV} from '@/services/checkliServiceCsv.js';
 import ActionService from '@/services/actionService.js';
 
 const message = ref('');
@@ -429,9 +430,16 @@ const submitCEEForm = async () => {
       file.name.toLowerCase().includes('eu_expansion_checkli'.toLowerCase())
     );
     const EUExpansionCheckliFile = matchingFiles[0]
-    const analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile)
-    EUExpansionCheckli.value = analyzeResult.table_json
+    // 根据扩展名决定用哪个解析函数
+    let analyzeResult;
+    if (EUExpansionCheckliFile.name.toLowerCase().endsWith('.csv')) {
+      analyzeResult = await analyzeSingleEUChecklistCSV(EUExpansionCheckliFile);
+    } else {
+      analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile);
+    }
 
+    // const analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile)
+    EUExpansionCheckli.value = analyzeResult.table_json
     const panEUFiles = allFiles; // 传递所有文件给分析函数
     
     if (panEUFiles.length >= 2) {
