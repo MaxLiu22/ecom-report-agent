@@ -1,9 +1,11 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue';
-import ReportFrame from './ReportFrame.vue';
+import ReportTab from '@/components/Reports/ReportTab.vue';
 
 const message = ref('');
 const messageContainer = ref(null);
+// 控制 ReportTab 显示全部标签页
+const reportGenerated = ref(false);
 
 // 反馈表单数据
 const showFeedbackForm = ref(false);
@@ -61,6 +63,8 @@ const submitFeedbackForm = () => {
 // 组件挂载后滚动到底部
 onMounted(() => {
   scrollToBottom();
+  // 挂载后立即展示全部标签页（模拟报告已生成）
+  reportGenerated.value = true;
   
   // 监听DOM变化，自动滚动到底部
   if (messageContainer.value) {
@@ -317,7 +321,7 @@ onMounted(() => {
         </div>
         
         <div class="report-area">
-          <ReportFrame />
+          <ReportTab :reportGenerated="reportGenerated" />
         </div>
         <!-- 按键区域 -->
         <div class="button-area">
@@ -679,12 +683,38 @@ onMounted(() => {
 }
 
 .report-area {
+  /* 固定区域：填满除按钮区外的空间，内部再滚动 */
+  position: relative;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-  min-height: 0;
   width: 100%;
+  min-height: 0;
+  overflow: hidden; /* 自身不滚动，交由内部 tab-content 滚动 */
+}
+
+/* 让内部的 ReportTab 框架绝对填充，避免高度被内容撑开 */
+.report-area :deep(.report-frame) {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* 防止双重滚动 */
+}
+
+/* 仅内容区滚动 */
+.report-area :deep(.tab-content) {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+/* 去掉可能的双层滚动条影响 */
+.report-area :deep(.content-panel) {
+  box-sizing: border-box;
 }
 
 /* 报告区域滚动条样式 */
