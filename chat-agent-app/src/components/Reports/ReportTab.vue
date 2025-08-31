@@ -154,7 +154,7 @@
               "
             >
               <!-- PanEU 概览卡片 -->
-              <div v-if="panEUResult" class="overview-card" @click="switchTab(1)">
+              <div v-if="panEUResult" class="overview-card" >
                 <div class="card-header">
                   <h4>🌍 PanEU 分析</h4>
                   <span class="card-badge">已完成</span>
@@ -170,7 +170,7 @@
               </div>
 
               <!-- DI 概览卡片 -->
-              <div v-if="diResult" class="overview-card" @click="switchTab(2)">
+              <div v-if="diResult" class="overview-card" >
                 <div class="card-header">
                   <h4>🔄 DI 分析</h4>
                   <span class="card-badge">已完成</span>
@@ -186,7 +186,7 @@
               </div>
 
               <!-- CEE 概览卡片 -->
-              <div v-if="ceeResult" class="overview-card" @click="switchTab(3)">
+              <div v-if="ceeResult" class="overview-card" >
                 <div class="card-header">
                   <h4>💰 CEE 成本分析</h4>
                   <span class="card-badge">已完成</span>
@@ -893,7 +893,7 @@ export default {
 }
 
 .card-badge {
-  background-color: #28a745;
+  background-color: #232f3e;
   color: white;
   padding: 4px 8px;
   border-radius: 4px;
