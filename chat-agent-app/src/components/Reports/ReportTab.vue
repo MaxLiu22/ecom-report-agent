@@ -211,7 +211,7 @@ export default {
       { id: 5, title: '欧洲站拓展解决方案定制', key: 'europe_expansion_solution' },
       { id: 6, title: '合规政策', key: 'compliance_policy' },
       { id: 7, title: '行动计划', key: 'action_plan' },
-      { id: 8, title: '其他', key: 'others' }
+      { id: 8, title: 'AM指导话术', key: 'others' }
     ]
     
     // 根据报告生成状态过滤可用的标签页
