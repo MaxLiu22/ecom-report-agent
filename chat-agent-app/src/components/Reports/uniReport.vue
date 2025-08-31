@@ -144,7 +144,41 @@ export default {
 					reader.onload = () => {
 						const base64 = reader.result.split(',')[1]
 						// 构建 Outlook Web 说明页面
-						const helperHtml = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>发送邮件指引</title><style>body{font-family:system-ui;padding:32px;line-height:1.55;}code{background:#f4f4f4;padding:2px 4px;border-radius:4px;}textarea{width:100%;height:180px;}button{padding:6px 12px;margin-top:12px;}</style></head><body><h2>📨 发送 IntraEU 报告 (Outlook 指引)</h2><ol><li>已生成 HTML 报告文件: <strong>${fileName}</strong></li><li>点击下面“下载附件”获取文件；然后在 Outlook 新建邮件时 <em>拖拽</em> 或 <em>附件</em> 形式添加。</li><li>可复制下面推荐的邮件正文。</li></ol><p><button id='dl'>下载附件</button> <a id='mailto' href='mailto:?subject=IntraEU统一报告&body=请先点击下载按钮保存附件, 然后在邮件中手动添加该 HTML 文件为附件。'>打开邮件客户端</a></p><h3>推荐正文</h3><textarea id='body'>您好，\n\n附件为最新生成的 IntraEU 卖家统一分析报告（HTML 版本），包含：\n1. 欧洲站点拓展评估\n2. PanEU / DI 物流对比与分析\n3. CEE 成本节约测算\n4. 行动计划\n5. AM 指导话术（如适用）\n\n请下载后用浏览器打开查看。\n\n祝好\n</textarea><p><button id='copy'>复制正文</button></p><script>document.getElementById('copy').onclick=()=>{const ta=document.getElementById('body');ta.select();document.execCommand('copy');alert('已复制');};document.getElementById('dl').onclick=()=>{const b64='${base64}';const byteChars=atob(b64);const byteNumbers=new Array(byteChars.length);for(let i=0;i<byteChars.length;i++){byteNumbers[i]=byteChars.charCodeAt(i);}const blob=new Blob([new Uint8Array(byteNumbers)],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='${fileName}';a.click();};</scr` + `ipt></body></html>`
+						const helperHtml = `<!DOCTYPE html><html lang='zh'><head><meta charset='utf-8'><title>发送邮件指引 - IntraEU 统一报告</title><meta name='viewport' content='width=device-width,initial-scale=1'/><style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(135deg,#f5f7fa,#eef2f7);color:#1f2933;line-height:1.55;padding:40px 18px;}h1,h2,h3{margin:0 0 18px;font-weight:600;letter-spacing:.5px;}h2{font-size:22px;display:flex;align-items:center;gap:8px;color:#232f3e;}ol{margin:0 0 22px 22px;padding:0;counter-reset:step;}ol li{margin:0 0 10px;position:relative;padding-left:4px;}ol li strong{color:#ff7a00;}a{text-decoration:none;color:#0066c2;}a:hover{text-decoration:underline;}code{background:#272e35;color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;}textarea{width:100%;min-height:200px;resize:vertical;padding:12px 14px;font:13px/1.5 monospace;border:1px solid #d0d7de;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04);}textarea:focus{outline:2px solid #ff9900;border-color:#ff9900;} .card{max-width:880px;margin:0 auto;background:#ffffff;border:1px solid #e3e8ee;border-radius:18px;padding:40px 46px 48px;box-shadow:0 12px 28px -6px rgba(0,0,0,.12),0 4px 10px -2px rgba(0,0,0,.06);} .badge{display:inline-block;background:#ff9900;color:#232f3e;font-size:12px;padding:2px 10px;border-radius:20px;font-weight:600;letter-spacing:.5px;margin-left:6px;} .steps-head{margin-top:-4px;margin-bottom:4px;font-size:15px;color:#394b59;font-weight:500;} .btn-row{display:flex;flex-wrap:wrap;gap:12px;margin:6px 0 24px;} .btn{appearance:none;border:none;cursor:pointer;font-weight:600;letter-spacing:.5px;font-size:13px;padding:10px 18px;border-radius:10px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,.15);transition:.25s;background:#edf1f5;color:#1f2933;} .btn-primary{background:#ff9900;color:#232f3e;} .btn-primary:hover{background:#ffad33;} .btn-secondary:hover{background:#e2e8ee;} .btn:active{transform:translateY(1px);} .hint{background:#fff8eb;border:1px solid #ffe0b2;padding:12px 14px;border-radius:10px;font-size:12px;margin-top:4px;color:#5c3b00;} footer{margin-top:40px;font-size:11px;color:#6b7280;text-align:center;} .status{font-size:12px;margin-left:8px;color:#16a34a;font-weight:600;display:none;} .divider{height:1px;background:linear-gradient(90deg,rgba(0,0,0,.08),rgba(0,0,0,.02));margin:30px 0;} .file-badge{background:#232f3e;color:#fff;font-size:11px;border-radius:6px;padding:2px 8px;margin-left:6px;} @media (max-width:680px){.card{padding:28px 22px 34px;border-radius:14px;} .btn-row{flex-direction:column;align-items:stretch;} textarea{min-height:160px;} }
+</style></head><body><main class='card'>
+<h2>📨 发送 IntraEU 报告 <span class='badge'>辅助向导</span></h2>
+<p class='steps-head'>若浏览器暂不支持直接分享附件，可按以下步骤通过 Outlook / 邮件客户端发送：</p>
+<ol>
+	<li>系统已生成报告文件：<strong>${fileName}</strong> <span class='file-badge'>HTML</span></li>
+	<li>点击下方 <code>下载文件</code> 获取本地文件。</li>
+	<li>在 Outlook / 邮件客户端中新建邮件，<em>拖拽</em> 该文件或使用“添加附件”。</li>
+	<li>复制推荐正文并根据需要调整后发送。</li>
+</ol>
+<div class='btn-row'>
+	<button id='dl' class='btn btn-primary'>⬇ 下载文件</button>
+	<button id='copy' class='btn btn-secondary'>📋 复制正文</button>
+	<button id='openMail' class='btn btn-secondary'>✉ 打开邮件客户端</button>
+	<span class='status' id='statusOk'>已复制</span>
+</div>
+<label style='font-size:13px;font-weight:600;color:#232f3e;display:block;margin:0 0 8px;'>推荐邮件正文：</label>
+<textarea id='body'>您好，\n\n附件为最新生成的 IntraEU 卖家统一分析报告（HTML 版本），包含：\n1. 欧洲站点拓展评估\n2. PanEU / DI 物流对比与分析\n3. CEE 成本节约测算\n4. 行动计划\n5. AM 指导话术（如适用）\n\n请下载后用浏览器打开查看。\n\n祝好\n</textarea>
+<div class='hint'>提示：若 mailto 打开后正文未完整显示，请在邮件窗口中手动粘贴上面已复制的正文。</div>
+<div class='divider'></div>
+<footer>IntraEU Unified Report Helper • 本页面仅本地生成，数据不会上传服务器</footer>
+<script>
+	const decodeB64ToBlob=(b64,contentType)=>{const byteChars=atob(b64);const len=byteChars.length;const bytes=new Uint8Array(len);for(let i=0;i<len;i++){bytes[i]=byteChars.charCodeAt(i);}return new Blob([bytes],{type:contentType||'text/html'});} ;
+	const fileName='${fileName}';
+	const base64='${base64}';
+	const dlBtn=document.getElementById('dl');
+	const copyBtn=document.getElementById('copy');
+	const openMailBtn=document.getElementById('openMail');
+	const statusOk=document.getElementById('statusOk');
+	const ta=document.getElementById('body');
+	dlBtn.onclick=()=>{const blob=decodeB64ToBlob(base64,'text/html');const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fileName;a.click();};
+	copyBtn.onclick=()=>{ta.select();document.execCommand('copy');statusOk.style.display='inline';setTimeout(()=>statusOk.style.display='none',1800);} ;
+	openMailBtn.onclick=()=>{const subject=encodeURIComponent('IntraEU统一报告');const body=encodeURIComponent(ta.value+'\n\n(请记得添加附件: '+fileName+')');window.location.href='mailto:?subject='+subject+'&body='+body};
+<\/script></main></body></html>`
 						const helperBlob = new Blob([helperHtml], { type: 'text/html;charset=utf-8' })
 						const helperUrl = URL.createObjectURL(helperBlob)
 						window.open(helperUrl, '_blank')
