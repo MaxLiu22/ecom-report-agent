@@ -42,7 +42,7 @@ const feedbackForm = ref({
 // 打字机效果相关
 const displayedText = ref('');
 const isTyping = ref(false);
-const showInitialPrompts = ref(true);
+const showInitialPrompts = ref(false);
 
 // 文件上传状态跟踪
 const panEUFilesUploaded = ref(false);
@@ -52,6 +52,15 @@ const allFilesUploaded = computed(() => panEUFilesUploaded.value && diFilesUploa
 // 文件验证错误状态
 const panEUValidationError = ref('');
 const diValidationError = ref('');
+
+const props = defineProps({
+  // 从父组件传递的初始文件
+  initialText: {
+    type: String,
+    default: "请帮我生成一个 IntraEU 卖家分析报告"
+  }
+  })
+  
 
 // PanEU 报告文件上传提示
 const panEUText = `请上传以下文件以生成 PanEU 报告：
@@ -104,10 +113,23 @@ const diText = `请上传以下文件以生成 DI 分析报告：
    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载订单报告
    备注：卖家若未开启远程配送，则无下载页面`;
 
-// 初始化显示提示
-const initializePrompts = () => {
-  showInitialPrompts.value = true;
-  scrollToBottom();
+// 初始化显示
+const initializeMessages = async() => {
+  // 将初始文本作为用户消息添加到消息列表
+  // addUserMessage('text', props.initialText);
+  console.log('初始化消息列表');
+  console.log(props.initialText);
+  // 延迟一下再发送消息，确保UI已更新
+  await nextTick();
+  
+  // 模拟发送消息
+  if (props.initialText) {
+    message.value = props.initialText;
+  } else{
+    message.value = "请帮我生成一个 IntraEU 卖家分析报告"
+  }
+  
+  await sendMessage();
 };
 
 const scrollToBottom = () => {
@@ -120,7 +142,8 @@ const scrollToBottom = () => {
 
 const sendMessage = async () => {
   const messageText = message.value.trim();
-  
+      
+  message.value = '';
   // 检查是否有上传的文件且没有文本消息（纯文件发送）
   if (!messageText && uploadedFiles.value.length > 0) {
     // 添加用户文件消息
@@ -140,13 +163,7 @@ const sendMessage = async () => {
 
     if (messageText.includes("卖家报告") || messageText.includes("分析报告")) {
       console.log("包含关键词");
-      const tempMessageId = Date.now();
-      addAgentMessage(messageText, tempMessageId)
-
-      // // 延迟1秒后开始打字机效果
-      // setTimeout(() => {
-      //   typeWriter();
-      // }, 1000);
+      addPromptMessage()
 
     // 执行相关逻辑
     } else {
@@ -190,15 +207,13 @@ const sendMessage = async () => {
       }
     }
     
-    message.value = '';
-    
     // 如果有文件一起发送
-    if (uploadedFiles.value.length > 0) {
-      setTimeout(() => {
-        addAgentMessage('已收到您的消息和文件，接下来请输入 CEE 参数：');
-        uploadedFiles.value = [];
-      }, 500);
-    }
+    // if (uploadedFiles.value.length > 0) {
+    //   setTimeout(() => {
+    //     addAgentMessage('已收到您的消息和文件，接下来请输入 CEE 参数：');
+    //     uploadedFiles.value = [];
+    //   }, 500);
+    // }
   }
   
   // 发送消息后滚动到底部
@@ -234,6 +249,18 @@ const updateAgentMessage = (id, newContent) => {
     messages.value[messageIndex].content = newContent;
   }
 };
+
+const addPromptMessage = () => {
+  messages.value.push({
+    id: Date.now(),
+    type: 'agent',
+    messageType: 'prompt',
+    content: '',
+    timestamp: new Date().toLocaleTimeString()
+  });
+  nextTick(() => scrollToBottom());
+};
+
 
 const addCEEStatusMessage = () => {
   messages.value.push({
@@ -712,7 +739,7 @@ const addUploadMessage = (files) => {
 const checkAllFilesUploaded = () => {
   if (allFilesUploaded.value) {
     // 隐藏初始提示
-    showInitialPrompts.value = false;
+    // showInitialPrompts.value = false;
     
     // 延迟显示CEE状态询问
     setTimeout(() => {
@@ -775,9 +802,9 @@ onMounted(() => {
   }
 
   // 延迟显示初始提示
-  setTimeout(() => {
-    initializePrompts();
-  }, 500);
+  setTimeout(async() => {
+    await initializeMessages();
+  }, 200);
 });
 </script>
 
@@ -789,81 +816,6 @@ onMounted(() => {
       <!-- 左侧面板 -->
       <div class="left-panel">
         <div class="message-container" ref="messageContainer">
-          <!-- 初始用户消息 (右侧) -->
-          <div class="message-item user-message">
-            <div class="message-content">
-              <p>请帮我生成一个 IntraEU 卖家分析报告</p>
-              
-            </div>
-          </div>
-          
-          <!-- 初始Agent 消息 (左侧) - 文件上传提示 -->
-          <div v-if="showInitialPrompts" class="message-item agent-message">
-            <div class="message-content initial-prompts-container">
-              <!-- PanEU 报告文件上传提示 -->
-              <div class="upload-prompt-section">
-                <div class="title-button-row">
-                  <h3 class="prompt-title">
-                    📊 PanEU 报告分析
-                    <span v-if="panEUFilesUploaded" class="title-checkmark">✅</span>
-                  </h3>
-                  <button 
-                    class="upload-prompt-btn paneu-btn" 
-                    :class="{ 'uploaded': panEUFilesUploaded }"
-                    @click="triggerPanEUFileUpload"
-                    :disabled="panEUFilesUploaded"
-                  >
-                    <svg v-if="!panEUFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    {{ panEUFilesUploaded ? '已上传 PanEU' : '上传 PanEU 文件' }}
-                  </button>
-                </div>
-                <pre class="file-paths-text">{{ panEUText }}</pre>
-                <!-- PanEU 文件验证错误提示 -->
-                <div v-if="panEUValidationError" class="validation-error">
-                  <div class="error-icon">⚠️</div>
-                  <div class="error-text">{{ panEUValidationError }}</div>
-                </div>
-              </div>
-
-              <!-- 分隔线 -->
-              <div class="prompt-divider"></div>
-
-              <!-- DI 分析文件上传提示 -->
-              <div class="upload-prompt-section">
-                <div class="title-button-row">
-                  <h3 class="prompt-title">
-                    🔍 DI 分析报告
-                    <span v-if="diFilesUploaded" class="title-checkmark">✅</span>
-                  </h3>
-                  <button 
-                    class="upload-prompt-btn di-btn" 
-                    :class="{ 'uploaded': diFilesUploaded }"
-                    @click="triggerDIFileUpload"
-                    :disabled="diFilesUploaded"
-                  >
-                    <svg v-if="!diFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 715.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    {{ diFilesUploaded ? '已上传 DI' : '上传 DI 文件' }}
-                  </button>
-                </div>
-                <pre class="file-paths-text">{{ diText }}</pre>
-                <!-- DI 文件验证错误提示 -->
-                <div v-if="diValidationError" class="validation-error">
-                  <div class="error-icon">⚠️</div>
-                  <div class="error-text">{{ diValidationError }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- 动态消息列表 -->
           <div v-for="msg in messages" :key="msg.id" class="message-item" :class="msg.type === 'user' ? 'user-message' : 'agent-message'">
@@ -874,6 +826,75 @@ onMounted(() => {
             }">
               <!-- 普通文本消息 - 使用pre标签保留格式 -->
               <pre v-if="msg.messageType === 'text'" class="text-message">{{ msg.content }}</pre>
+              
+              <!-- 初始Agent 消息 (左侧) - 文件上传提示 -->
+              <div v-if="msg.messageType === 'prompt'" class="message-item agent-message">
+                <div class="message-content initial-prompts-container">
+                  <!-- PanEU 报告文件上传提示 -->
+                  <div class="upload-prompt-section">
+                    <div class="title-button-row">
+                      <h3 class="prompt-title">
+                        📊 PanEU 报告分析
+                        <span v-if="panEUFilesUploaded" class="title-checkmark">✅</span>
+                      </h3>
+                      <button 
+                        class="upload-prompt-btn paneu-btn" 
+                        :class="{ 'uploaded': panEUFilesUploaded }"
+                        @click="triggerPanEUFileUpload"
+                        :disabled="panEUFilesUploaded"
+                      >
+                        <svg v-if="!panEUFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ panEUFilesUploaded ? '已上传 PanEU' : '上传 PanEU 文件' }}
+                      </button>
+                    </div>
+                    <pre class="file-paths-text">{{ panEUText }}</pre>
+                    <!-- PanEU 文件验证错误提示 -->
+                    <div v-if="panEUValidationError" class="validation-error">
+                      <div class="error-icon">⚠️</div>
+                      <div class="error-text">{{ panEUValidationError }}</div>
+                    </div>
+                  </div>
+
+                  <!-- 分隔线 -->
+                  <div class="prompt-divider"></div>
+
+                  <!-- DI 分析文件上传提示 -->
+                  <div class="upload-prompt-section">
+                    <div class="title-button-row">
+                      <h3 class="prompt-title">
+                        🔍 DI 分析报告
+                        <span v-if="diFilesUploaded" class="title-checkmark">✅</span>
+                      </h3>
+                      <button 
+                        class="upload-prompt-btn di-btn" 
+                        :class="{ 'uploaded': diFilesUploaded }"
+                        @click="triggerDIFileUpload"
+                        :disabled="diFilesUploaded"
+                      >
+                        <svg v-if="!diFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 715.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ diFilesUploaded ? '已上传 DI' : '上传 DI 文件' }}
+                      </button>
+                    </div>
+                    <pre class="file-paths-text">{{ diText }}</pre>
+                    <!-- DI 文件验证错误提示 -->
+                    <div v-if="diValidationError" class="validation-error">
+                      <div class="error-icon">⚠️</div>
+                      <div class="error-text">{{ diValidationError }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
 
               <!-- CEE状态选择消息 -->
               <div v-if="msg.messageType === 'cee-status'" class="cee-status-container">
@@ -1003,19 +1024,9 @@ onMounted(() => {
             />
             <div class="button-group">
               <button 
-                class="attachment-btn" 
-                @click="triggerFileUpload" 
-                title="上传文件"
-                :disabled="showInitialPrompts"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <button 
                 class="send-btn" 
                 @click="sendMessage"
-                :disabled="showInitialPrompts || (!message.trim() && uploadedFiles.length === 0)"
+                :disabled="showInitialPrompts || !message.trim()"
                 :class="{ 'has-content': message.trim() || uploadedFiles.length > 0 }"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

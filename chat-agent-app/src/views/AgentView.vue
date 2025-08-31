@@ -177,7 +177,8 @@ const startChat = () => {
       </div>
 
       <div v-if="showNewChat" class="new-chat-content-wrapper">
-        <NewChat />
+        <NewChat 
+        :initialText="message"/>
       </div>
     </div>
   </div>
