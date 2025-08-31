@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <!-- 顶部导航 -->
-    <nav class="top-nav">
+    <!-- <nav class="top-nav">
       <div class="nav-container">
         <div class="logo-section">
           <div class="amazon-logo">🛒</div>
@@ -9,7 +9,7 @@
         </div>
         <div class="nav-time">{{ currentTime }}</div>
       </div>
-    </nav>
+    </nav> -->
 
     <!-- 主容器 -->
     <div class="main-container">
