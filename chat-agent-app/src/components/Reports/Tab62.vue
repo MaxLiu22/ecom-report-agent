@@ -316,6 +316,12 @@
         </table>
       </div>
     </div>
+
+    <!-- IntraEU 服务与机会指引（新增） -->
+    <div class="intraeu-wrapper">
+      <IntraEUService />
+    </div>
+
     <!-- DI 分析结果区块（追加） -->
     <div class="analysis-section">
       <div class="section-header">
@@ -379,6 +385,7 @@
   </div>
 </template>
 <script>
+import IntraEUService from './TianOffered/IntraEUService.vue'
 export default {
   name: 'Tab62',
   props: {
@@ -388,6 +395,7 @@ export default {
       default: null,
     },
   },
+  components: { IntraEUService }
 }
 </script>
 <style scoped>
@@ -397,6 +405,15 @@ export default {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
 }
+.intraeu-wrapper { margin: 30px 0 10px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; }
+.intraeu-wrapper :deep(.container){ background:#fff; padding:24px 24px 10px; max-width:100%; }
+.intraeu-wrapper :deep(.section){ box-shadow:none; border:1px solid #f1f3f5; border-radius:8px; margin-bottom:24px; }
+.intraeu-wrapper :deep(.section-title){ background:linear-gradient(90deg,#2d3748,#4a5568); padding:14px 18px; font-size:16px; }
+.intraeu-wrapper :deep(.section-content){ padding:18px 20px 22px; }
+.intraeu-wrapper :deep(.feature-box),
+.intraeu-wrapper :deep(.gift-package),
+.intraeu-wrapper :deep(.case-study){ background:#f8f9fa; }
+.intraeu-wrapper :deep(.container){ min-height:initial; }
 .sub-tab-panel h2 {
   margin: 0 0 12px;
   font-size: 22px;
