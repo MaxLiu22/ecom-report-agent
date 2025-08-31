@@ -415,12 +415,12 @@
 .compliance-table th,
 .process-table th,
 .notice-table th {
-  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+  background: #232f3e;
   color: white !important;
   font-weight: 600 !important;
   padding: 15px 12px !important;
   text-align: center !important;
-  border: 1px solid #357abd !important;
+  border: 1px solid #e0e0e0 !important;
   font-size: 13px !important;
   line-height: 1.4 !important;
 }
