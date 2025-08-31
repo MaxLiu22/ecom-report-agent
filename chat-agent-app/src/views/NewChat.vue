@@ -6,6 +6,8 @@ import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/serv
 import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
 import CeeService from '@/services/CeeService.js';
 import DifyService from '@/services/DifyService.js';
+import {analyzeSingleEUChecklist} from '@/services/checkliService.js';
+import ActionService from '@/services/actionService.js';
 
 const message = ref('');
 const messageContainer = ref(null);
@@ -20,6 +22,8 @@ const isGeneratingReport = ref(false);
 const panEUResult = ref(null);
 const diResult = ref(null);
 const ceeResult = ref(null);
+const EUExpansionCheckli = ref(null);
+const actionResult = ref(null);
 const reportGenerated = ref(false);
 
 // 反馈表单数据
@@ -50,50 +54,50 @@ const diValidationError = ref('');
 const panEUText = `请上传以下文件以生成 PanEU 报告：
 
 【PanEU 报告必需文件】
-1. ASIN list ✓
+1. 体检表 ✓
+   路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV 
+
+2. ASIN list ✓
    路径：CN Paid Service EU Expansion Dashboard → part2.ASIN list → export to CSV
 
-2. SKU report ✓
+3. SKU report ✓
    路径：卖家欧洲站后台 → 菜单 → 报告 → 销售成本和费用 → SKU成本报告
    → 商城选择英德法意西五国，数据汇总级别保持MSKU，日期范围设定义（建议选择过去365天）
    → 勾选"生成报告" → 在"库存基础费用和附加费"配送基础费用和附加费" → 生成报告 → 下载
 
-3. Pan-EU report ✓
+4. Pan-EU report ✓
    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 报告
    → 下载欧洲整合服务ASIN清单（第一个，此报告包含符合亚马逊物流欧洲整合服务注册条件的亚马逊物流 ASIN）
 
-4. 多国库存报告 ✓
+5. 多国库存报告 ✓
    路径：卖家欧洲站后台 → 报告 → 配送 → 在库存列表中点击"显示更多" → 多国库存 → 生成最新报告并下载
 
 【PanEU 报告可选文件】
-5. NL ASIN list ◯
+6. NL ASIN list ◯
    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list`;
 
 // DI 分析文件上传提示
 const diText = `请上传以下文件以生成 DI 分析报告：
 
 【DI 分析必需文件】
-1. 体检表 ✓
-   路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV 
-
-2. MPG report ✓
+1. MPG report ✓
    路径：卖家欧洲后台 → 菜单 → 增长 → 选品指南针 → 下载推荐 → 商品列表
    → 下载全部（分别下载UK→DE/FR/IT/ES, DE→UK共5份报告）
 
 【DI 分析可选文件】
-3. GSI Credit report (福利列表) ◯
+2. GSI Credit report (福利列表) ◯
    路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载福利列表
    备注：卖家若无GSI则无下载页面
 
-4. GSI Credit report (代金券明细) ◯
+3. GSI Credit report (代金券明细) ◯
    路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载代金券明细
    备注：卖家若无GSI则无下载页面
 
-5. Remote_Fulfillment_ASIN_Status_Report ◯
+4. Remote_Fulfillment_ASIN_Status_Report ◯
    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载ASIN资质报告
    备注：卖家若未开启远程配送，则无下载页面
 
-6. Remote_Fulfillment_Order_Report ◯
+5. Remote_Fulfillment_Order_Report ◯
    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载订单报告
    备注：卖家若未开启远程配送，则无下载页面`;
 
@@ -134,7 +138,7 @@ const sendMessage = async () => {
     if (messageText.includes("卖家报告") || messageText.includes("分析报告")) {
       console.log("包含关键词");
       const tempMessageId = Date.now();
-      addAgentMessage(fullText, tempMessageId)
+      addAgentMessage(messageText, tempMessageId)
 
       // // 延迟1秒后开始打字机效果
       // setTimeout(() => {
@@ -277,6 +281,8 @@ const startReportGeneration = async () => {
   panEUResult.value = null;
   diResult.value = null;
   ceeResult.value = null;
+  EUExpansionCheckli.value = null;
+  actionResult.value = null;
   reportGenerated.value = false;
   
   try {
@@ -295,6 +301,14 @@ const startReportGeneration = async () => {
       allFiles.push(...msg.content.map(f => f.file));
     });
     
+    // 找出 eu_expansion_checkli 表（体检表）
+    const matchingFiles = allFiles.filter(file => 
+      file.name.toLowerCase().includes('eu_expansion_checkli'.toLowerCase())
+    );
+    const EUExpansionCheckliFile = matchingFiles[0]
+    const analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile)
+    EUExpansionCheckli.value = analyzeResult.table_json
+
     const panEUFiles = allFiles; // 传递所有文件给分析函数
     
     if (panEUFiles.length >= 4) {
@@ -316,19 +330,29 @@ const startReportGeneration = async () => {
     }
     
     // 3. 调用 calculateCEECosts
-    console.log('开始 CEE 成本计算...');
-    addAgentMessage('正在计算 CEE 成本...');
+    // console.log('开始 CEE 成本计算...');
+    // addAgentMessage('正在计算 CEE 成本...');
     
-    // 从最后一个CEE表单消息中获取参数
-    const lastCEEMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'cee-form');
-    const soldCount = lastCEEMessage?.content?.germanSales || 10000;
-    const hasPolishVAT = lastCEEMessage?.content?.polandTax || false;
-    const hasCzechVAT = lastCEEMessage?.content?.czechTax || true;
+    // // 从最后一个CEE表单消息中获取参数
+    // const lastCEEMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'cee-form');
+    // const soldCount = lastCEEMessage?.content?.germanSales || 10000;
+    // const hasPolishVAT = lastCEEMessage?.content?.polandTax || false;
+    // const hasCzechVAT = lastCEEMessage?.content?.czechTax || true;
     
-    ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
-    addAgentMessage('CEE 成本计算完成 ✓');
+    // ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
+    // addAgentMessage('CEE 成本计算完成 ✓');
     
-    // 4. 标记报告生成完成
+    // 4. 生成行动总结
+    const actionService = new ActionService(
+      panEUResult,
+      diResult,
+      ceeResult,
+      EUExpansionCheckli.value
+    );
+    
+    actionResult.value = actionService.calculateAll();
+
+    // 5. 标记报告生成完成
     reportGenerated.value = true;
     addAgentMessage('📊 报告生成完成！请查看右侧报告区域。');
     
@@ -350,6 +374,8 @@ const submitCEEForm = async () => {
   panEUResult.value = null;
   diResult.value = null;
   ceeResult.value = null;
+  EUExpansionCheckli.value = null;
+  actionResult.value = null;
   reportGenerated.value = false;
   
   try {
@@ -368,6 +394,14 @@ const submitCEEForm = async () => {
       allFiles.push(...msg.content.map(f => f.file));
     });
     
+    // 找出 eu_expansion_checkli 表（体检表）
+    const matchingFiles = allFiles.filter(file => 
+      file.name.toLowerCase().includes('eu_expansion_checkli'.toLowerCase())
+    );
+    const EUExpansionCheckliFile = matchingFiles[0]
+    const analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile)
+    EUExpansionCheckli.value = analyzeResult.table_json
+
     const panEUFiles = allFiles; // 传递所有文件给分析函数
     
     if (panEUFiles.length >= 2) {
@@ -400,8 +434,18 @@ const submitCEEForm = async () => {
     
     ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
     addAgentMessage('CEE 成本计算完成 ✓');
-    
-    // 4. 标记报告生成完成
+
+    // 4. 生成行动总结
+    const actionService = new ActionService(
+        panEUResult,
+        diResult,
+        ceeResult,
+        EUExpansionCheckli.value
+      );
+      
+    actionResult.value = actionService.calculateAll();
+
+    // 5. 标记报告生成完成
     reportGenerated.value = true;
     addAgentMessage('📊 报告生成完成！请查看右侧报告区域。');
     
@@ -431,6 +475,7 @@ const triggerDIFileUpload = () => {
 const validatePanEUFiles = (files) => {
   const errors = [];
   const requiredFiles = {
+    masterSheet: { keywords: ['master', 'sheet', '体检表', 'EU_expansion_checkli'], found: false },
     asin: { keywords: ['asin', 'list'], found: false },
     sku: { keywords: ['sku', 'cost', '成本'], found: false },
     paneu: { keywords: ['pan-eu', 'paneu', '欧洲整合', 'inventory'], found: false },
@@ -469,8 +514,7 @@ const validatePanEUFiles = (files) => {
 const validateDIFiles = (files) => {
   const errors = [];
   const requiredFiles = {
-    masterSheet: { keywords: ['master', 'sheet', '体检表'], found: false },
-    mpg: { keywords: ['mpg', '选品指南针', 'marketplace'], found: false }
+    mpg: { keywords: ['mpg', '选品指南针', 'marketplace'], found: true }
   };
   
   // 检查文件格式
@@ -533,7 +577,7 @@ const handlePanEUFileUpload = (event) => {
   if (files.length > 0) {
     // 清空之前的错误信息
     panEUValidationError.value = '';
-    
+
     // 验证文件
     const validationErrors = validatePanEUFiles(files);
     if (validationErrors.length > 0) {
@@ -542,7 +586,7 @@ const handlePanEUFileUpload = (event) => {
       event.target.value = '';
       return;
     }
-    
+
     // 添加文件到上传列表，标记为PanEU类型
     const newFiles = files.map(file => ({
       id: Date.now() + Math.random(),
@@ -1051,6 +1095,8 @@ onMounted(() => {
           :pan-e-u-result="panEUResult"
           :di-result="diResult"
           :cee-result="ceeResult"
+          :action-result="actionResult"
+          :eu-expansion-checkli="EUExpansionCheckli"
         />
         <!-- 按键区域 -->
         <div class="button-area">

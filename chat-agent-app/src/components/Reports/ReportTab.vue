@@ -128,9 +128,7 @@
       
       <!-- Tab 5: 欧洲站点拓展评估 -->
       <Tab5 v-if="activeTab === 4" 
-            :panEUResult="panEUResult" 
-            :diResult="diResult" 
-            :ceeResult="ceeResult" />
+            :euExpansionCheckli="euExpansionCheckli" /> 
       
       <!-- Tab 6: 欧洲站拓展解决方案定制 -->
   <Tab6 v-if="activeTab === 5"
@@ -143,7 +141,8 @@
       <Tab7 v-if="activeTab === 6" />
       
       <!-- Tab 8: 行动计划 -->
-      <Tab8 v-if="activeTab === 7" />
+      <Tab8 v-if="activeTab === 7" 
+            :actionResult="actionResult" />
       
       <!-- Tab 9: 其他 -->
       <Tab9 v-if="activeTab === 8" />
@@ -187,6 +186,16 @@ export default {
     },
     // CEE 成本分析结果
     ceeResult: {
+      type: Object,
+      default: null
+    },
+    // 行动总结结果
+    actionResult: {
+      type: Object,
+      default: null
+    },
+    // EU 拓展检查表结果
+    euExpansionCheckli: {
       type: Object,
       default: null
     }

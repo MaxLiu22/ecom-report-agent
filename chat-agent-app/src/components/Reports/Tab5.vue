@@ -27,13 +27,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in EUExpansionCheckli" :key="item.指标">
+            <tr v-for="(item, index) in computedeuExpansionCheckli" :key="item.指标">
                 
               <!-- 只在第一行显示MCID和账户名称，并设置rowspan -->
-              <td v-if="index === 0" :rowspan="EUExpansionCheckli.length" class="mcid-cell">
+              <td v-if="index === 0" :rowspan="computedeuExpansionCheckli.length" class="mcid-cell">
                 {{ MCID }}
               </td>
-              <td v-if="index === 0" :rowspan="EUExpansionCheckli.length" class="account-cell">
+              <td v-if="index === 0" :rowspan="computedeuExpansionCheckli.length" class="account-cell">
                 {{ accountTitle }}
               </td>
               
@@ -64,9 +64,9 @@ export default {
   name: 'Tab5',
   props: {
     // defaultEUExpansionCheckli结果
-    EUExpansionCheckli: {
-      type: Array,
-      default: () => defaultEUExpansionCheckli
+    euExpansionCheckli: {
+      type: Object,
+      default: null
     },
     region: {
       type: Array,
@@ -81,6 +81,21 @@ export default {
       default: "Sinuolong Lighting"
     }
   },
+  data() {
+    return {
+      localeuExpansionCheckli: null
+    };
+  },
+  created() {
+    // 如果props中没有传入euExpansionCheckli，则使用默认参数
+    if (!this.euExpansionCheckli) {
+      console.log('使用默认参数计算');
+      this.localeuExpansionCheckli = defaultEUExpansionCheckli;
+    } else {
+      console.log('使用传入参数计算');
+      this.localeuExpansionCheckli = this.euExpansionCheckli;
+    }
+  },
   computed: {
     regions() {
       return this.region || ["0.英国和欧盟间物流", "1.EU5欧盟内物流"];
@@ -90,9 +105,12 @@ export default {
     },
     hasUKData() {
       // 检查是否有英国数据
-      return this.EUExpansionCheckli.some(item => 
+      return this.computedeuExpansionCheckli.some(item => 
         item.hasOwnProperty("英国") && item["英国"] !== null
       );
+    },
+    computedeuExpansionCheckli() {
+      return this.localeuExpansionCheckli || this.euExpansionCheckli;
     }
   }
 }
@@ -244,44 +262,6 @@ export default {
 
 .section-content {
   padding: 24px;
-}
-
-/* CEE 分析表格样式 */
-.cee-analysis-table {
-  margin-top: 20px;
-}
-
-.analysis-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.analysis-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.analysis-table tr:last-child td {
-  border-bottom: none;
-}
-
-.label-cell {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #333333;
-  width: 60%;
-  border-right: 1px solid #e0e0e0;
-}
-
-.value-cell {
-  background-color: #ffffff;
-  color: #232f3e;
-  font-weight: 500;
-  text-align: right;
 }
 
 /* 无数据状态 */
