@@ -11,9 +11,9 @@
           <thead>
             <tr>
               <th class="ranking-col">优先级</th>
-              <th class="action-col">行动</th>
+              <th class="action-col">主题</th>
               <th class="timeline-col">时间</th>
-              <th class="logic-col">读取判断逻辑</th>
+              <th class="logic-col">行动</th>
             </tr>
           </thead>
           <tbody>
