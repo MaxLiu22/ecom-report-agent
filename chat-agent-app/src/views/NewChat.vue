@@ -337,7 +337,12 @@ const startReportGeneration = async () => {
       file.name.toLowerCase().includes('eu_expansion_checkli'.toLowerCase())
     );
     const EUExpansionCheckliFile = matchingFiles[0]
-    const analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile)
+    let analyzeResult;
+    if (EUExpansionCheckliFile.name.toLowerCase().endsWith('.csv')) {
+      analyzeResult = await analyzeSingleEUChecklistCSV(EUExpansionCheckliFile);
+    } else {
+      analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile);
+    }
     EUExpansionCheckli.value = analyzeResult.table_json
 
     const panEUFiles = allFiles; // 传递所有文件给分析函数
@@ -437,8 +442,6 @@ const submitCEEForm = async () => {
     } else {
       analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile);
     }
-
-    // const analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile)
     EUExpansionCheckli.value = analyzeResult.table_json
     const panEUFiles = allFiles; // 传递所有文件给分析函数
     
