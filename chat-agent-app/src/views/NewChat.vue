@@ -2,6 +2,7 @@
 import { ref, nextTick, onMounted, computed } from 'vue';
 import ReportFrame from './ReportFrame.vue';
 import ReportTab from '@/components/Reports/ReportTab.vue';
+import UniReport from '@/components/Reports/uniReport.vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
 import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
 import CeeService from '@/services/CeeService.js';
@@ -25,6 +26,8 @@ const ceeResult = ref(null);
 const EUExpansionCheckli = ref(null);
 const actionResult = ref(null);
 const reportGenerated = ref(false);
+// 统一报告预览状态
+const showUniReport = ref(false);
 
 // 反馈表单数据
 const showFeedbackForm = ref(false);
@@ -457,6 +460,13 @@ const submitCEEForm = async () => {
     scrollToBottom();
   }
 };
+
+// 打开统一报告预览
+const openUniReport = () => {
+  if (!reportGenerated.value) return;
+  showUniReport.value = true;
+};
+const closeUniReport = () => { showUniReport.value = false; };
 
 // 文件上传相关函数
 const triggerFileUpload = () => {
@@ -1115,7 +1125,7 @@ onMounted(() => {
             </button>
           </div>
           <div class="button-right">
-            <button class="preview-btn">
+            <button class="preview-btn" @click="openUniReport" :disabled="!reportGenerated" :title="reportGenerated ? '预览统一报告' : '请先生成报告'">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1126,6 +1136,17 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <!-- 统一报告预览 Modal -->
+    <UniReport
+      v-model:visible="showUniReport"
+      :panEUResult="panEUResult"
+      :diResult="diResult"
+      :ceeResult="ceeResult"
+      :euExpansionCheckli="EUExpansionCheckli"
+      :actionResult="actionResult"
+      :showPitch="true"
+      @close="closeUniReport"
+    />
   </div>
 </template>
 
