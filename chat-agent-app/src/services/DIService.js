@@ -167,8 +167,6 @@ async function parseInputs(fileListOrMap) {
         }
     }
 
-	if (!roleMap.cost_saving) throw new Error('缺少必需文件: Cost saving model');
-
 	// Fetch buffers in parallel
 	const entries = Object.entries(roleMap);
 	const buffers = await Promise.all(
@@ -498,8 +496,6 @@ export async function analyzeDIOpportunitiesAuto(inputs){
 			warnings.push(`读取失败: ${(f.name||'unknown')} -> ${e.message}`);
 		}
 	}
-
-	if(!roleMap.cost_saving) throw new Error('缺少必需文件: Cost saving model (无法通过文件名或内容识别)');
 
 	const report = await analyzeDIOpportunities(roleMap);
 	report.meta = report.meta || {}; 

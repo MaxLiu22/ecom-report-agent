@@ -485,11 +485,31 @@ const triggerDIFileUpload = () => {
 const validatePanEUFiles = (files) => {
   const errors = [];
   const requiredFiles = {
-    masterSheet: { keywords: ['master', 'sheet', '体检表', 'EU_expansion_checkli'], found: false },
-    asin: { keywords: ['asin', 'list'], found: false },
-    sku: { keywords: ['sku', 'cost', '成本'], found: false },
-    paneu: { keywords: ['pan-eu', 'paneu', '欧洲整合', 'inventory'], found: false },
-    multicountry: { keywords: ['多国库存', 'multicountry', 'inventory'], found: false }
+    masterSheet: { 
+      keywords: ['EU_expansion_checkli'], 
+      found: false,
+      displayName: '体检表'
+    },
+    asin: { 
+      keywords: ['asin', 'list'], 
+      found: false,
+      displayName: 'ASIN list'
+    },
+    sku: { 
+      keywords: ['sku', 'cost', '成本'], 
+      found: false,
+      displayName: 'SKU report'
+    },
+    paneu: { 
+      keywords: ['pan-eu', 'paneu', '欧洲整合', 'inventory'], 
+      found: false,
+      displayName: 'Pan-EU report'
+    },
+    multicountry: { 
+      keywords: ['多国库存', 'multicountry', 'inventory'], 
+      found: false,
+      displayName: '多国库存报告'
+    }
   };
   
   // 检查文件格式
@@ -513,9 +533,12 @@ const validatePanEUFiles = (files) => {
     });
   });
   
-  const missingTypes = Object.keys(requiredFiles).filter(type => !requiredFiles[type].found);
-  if (missingTypes.length === Object.keys(requiredFiles).length) {
-    errors.push('未识别到必需的PanEU报告文件类型。请确认文件名包含关键词：ASIN list、SKU成本报告、Pan-EU报告、多国库存报告。');
+  const missingTypes = Object.keys(requiredFiles)
+    .filter(type => !requiredFiles[type].found)
+    .map(type => requiredFiles[type].displayName);
+    
+  if (missingTypes.length > 0) {
+    errors.push(`PanEU 缺少必要文件：${missingTypes.join('、')}`);
   }
   
   return errors;
@@ -524,7 +547,12 @@ const validatePanEUFiles = (files) => {
 const validateDIFiles = (files) => {
   const errors = [];
   const requiredFiles = {
-    mpg: { keywords: ['mpg', '选品指南针', 'marketplace'], found: true }
+    mpg: { 
+      keywords: ['List_of_recommendations'], 
+      foundCount: 0, // 改为计数而不是布尔值
+      displayName: 'MPG report',
+      requiredCount: 5 // 需要的文件数量
+    }
   };
   
   // 检查文件格式
@@ -543,15 +571,18 @@ const validateDIFiles = (files) => {
     const fileName = file.name.toLowerCase();
     Object.keys(requiredFiles).forEach(type => {
       if (requiredFiles[type].keywords.some(keyword => fileName.includes(keyword.toLowerCase()))) {
-        requiredFiles[type].found = true;
+        requiredFiles[type].foundCount++; // 增加计数而不是设置为true
       }
     });
   });
   
-  const missingTypes = Object.keys(requiredFiles).filter(type => !requiredFiles[type].found);
-  if (missingTypes.length === Object.keys(requiredFiles).length) {
-    errors.push('未识别到必需的DI分析文件类型。请确认文件名包含关键词：体检表(master sheet)、MPG报告(选品指南针)。');
-  }
+  // 检查每个文件类型是否满足数量要求
+  Object.keys(requiredFiles).forEach(type => {
+    const fileType = requiredFiles[type];
+    if (fileType.foundCount < fileType.requiredCount) {
+      errors.push(`DI 缺少必要文件：需要 ${fileType.requiredCount} 个 ${fileType.displayName}，但只找到 ${fileType.foundCount} 个`);
+    }
+  });
   
   return errors;
 };
