@@ -104,12 +104,7 @@ export default {
   box-sizing: border-box;
 }
 
-.app {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-  min-height: 100vh;
-  color: #333;
-}
+.app { font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background:linear-gradient(135deg,#f7fafc 0%,#edf2f7 100%); color:#333; }
 
 /* 顶部导航 */
 .top-nav {
@@ -118,14 +113,7 @@ export default {
   padding: 0 2rem;
 }
 
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 70px;
-}
+.nav-container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; height:54px; }
 
 .logo-section {
   display: flex;
@@ -149,89 +137,31 @@ export default {
 }
 
 /* 主容器 */
-.main-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-}
+.main-container { max-width:1200px; margin:0 auto; padding:1.6rem 1.25rem 2.2rem; }
 
 /* 标题区域 */
-.hero-section {
-  text-align: center;
-  margin-bottom: 3rem;
-}
+.hero-section { text-align:center; margin-bottom:1.6rem; }
 
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 0.5rem;
-}
+.hero-title { font-size:1.9rem; font-weight:600; color:#2d3748; margin-bottom:.35rem; letter-spacing:.5px; }
 
-.hero-subtitle {
-  font-size: 1.1rem;
-  color: #718096;
-}
+.hero-subtitle { font-size:.95rem; color:#718096; }
 
 /* 服务列表 */
-.services-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+.services-list { display:flex; flex-direction:column; gap:.6rem; }
 
-.service-item {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border-left: 4px solid #ed8936;
-}
+.service-item { background:#fff; border-radius:8px; padding:.75rem .85rem .8rem; display:flex; align-items:center; gap:.75rem; box-shadow:0 1px 5px rgba(0,0,0,.06); transition:.18s ease; border-left:4px solid #ed8936; position:relative; }
 
-.service-item:hover {
-  transform: translateX(8px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-}
+.service-item:hover { transform:translateY(-2px); box-shadow:0 4px 14px -4px rgba(0,0,0,.15),0 2px 5px rgba(0,0,0,.08); }
 
-.service-icon {
-  width: 48px;
-  height: 48px;
-  background-color: #0891b2;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  position: relative;
-}
+.service-icon { width:34px; height:34px; background:#0891b2; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; box-shadow:0 0 0 2px rgba(8,145,178,.15); }
 
-.service-icon::after {
-  content: '✓';
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-}
+.service-icon::after { content:'✓'; color:#fff; font-size:19px; font-weight:600; }
 
-.service-content {
-  flex: 1;
-}
+.service-content { flex:1; display:flex; flex-direction:column; gap:.25rem; }
 
-.service-title {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 0.5rem;
-}
+.service-title { font-size:1rem; font-weight:600; color:#2d3748; margin:0; line-height:1.2; }
 
-.service-desc {
-  color: #718096;
-  font-size: 1rem;
-  line-height: 1.4;
-}
+.service-desc { color:#5f6b7a; font-size:.72rem; line-height:1.25; letter-spacing:.2px; }
 
 .service-btn {
   padding: 1rem 2rem;
@@ -253,37 +183,16 @@ export default {
 }
 
 /* 底部 */
-.footer {
-  text-align: center;
-  margin-top: 3rem;
-  padding: 2rem 0;
-  color: #718096;
-  border-top: 1px solid #e2e8f0;
-}
+.footer { text-align:center; margin-top:.9rem; padding:.55rem 0 .4rem; color:#6b7280; border-top:1px solid #e2e8f0; font-size:.7rem; }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .main-container {
-    padding: 2rem 1rem;
-  }
-
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .service-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 1.5rem;
-    padding: 1.5rem;
-  }
-
-  .service-item:hover {
-    transform: translateY(-4px);
-  }
-
-  .service-content {
-    text-align: center;
-  }
+  .main-container { padding:1.25rem .9rem 1.6rem; }
+  .hero-title { font-size:1.55rem; }
+  .services-list { gap:.55rem; }
+  .service-item { padding:.65rem .7rem .7rem; gap:.6rem; }
+  .service-title { font-size:.95rem; }
+  .service-desc { font-size:.68rem; }
+  .service-icon { width:30px; height:30px; }
 }
 </style>
