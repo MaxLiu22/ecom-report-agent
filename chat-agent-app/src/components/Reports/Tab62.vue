@@ -38,7 +38,7 @@
         </div>
         <div
           style="
-            background: linear-gradient(135deg, #333 0%, #333 100%);
+            background: #232f3e;
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -81,7 +81,7 @@
               </th>
               <th
                 style="
-                  background: linear-gradient(135deg, #333 0%, #333 100%);
+                  background: #232f3e;
                   color: white;
                   font-weight: 600;
                   padding: 12px 10px;
@@ -95,7 +95,7 @@
               </th>
               <th
                 style="
-                  background: linear-gradient(135deg, #333 0%, #333 100%);
+                  background: #232f3e;
                   color: white;
                   font-weight: 600;
                   padding: 12px 10px;

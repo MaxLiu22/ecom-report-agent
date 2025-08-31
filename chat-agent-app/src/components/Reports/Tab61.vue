@@ -26,7 +26,7 @@
               align-items: center;
               gap: 10px;
               padding: 14px 18px;
-              background: linear-gradient(135deg, #333 0%, #666 100%);
+              background: #232f3e;
               border-bottom: 1px solid rgba(255, 255, 255, 0.25);
             "
           >
@@ -87,7 +87,7 @@
                     <th
                       rowspan="2"
                       style="
-                        background: linear-gradient(135deg, #333 0%, #666 100%);
+                        background: #232f3e;
                         color: white;
                         padding: 12px 8px;
                         border: 1px solid #ddd;
@@ -99,7 +99,7 @@
                     </th>
                     <th
                       style="
-                        background: linear-gradient(135deg, #333 0%, #333 100%);
+                        background: #232f3e;
                         color: white;
                         padding: 12px 8px;
                         border: 1px solid #ddd;
@@ -111,7 +111,7 @@
                     </th>
                     <th
                       style="
-                        background: linear-gradient(135deg, #333 0%, #333 100%);
+                        background: #232f3e;
                         color: white;
                         padding: 12px 8px;
                         border: 1px solid #ddd;
@@ -123,7 +123,7 @@
                     </th>
                     <th
                       style="
-                        background: linear-gradient(135deg, #333 0%, #333 100%);
+                        background: #232f3e;
                         color: white;
                         padding: 12px 8px;
                         border: 1px solid #ddd;
@@ -914,6 +914,6 @@ export default {
 .analysis-section + .analysis-section { margin-top:24px; }
 .analysis-section .section-header { background:#f8f9fa; padding:18px 20px; border-bottom:1px solid #e0e0e0; }
 .analysis-section .section-header h3 { font-size:18px; font-weight:600; color:#232f3e; margin:0; }
-.analysis-section .section-description { font-size:13px; color:#666; }
+.analysis-section .section-description { font-size:13px; color:#232f3e; }
 .analysis-section .section-content { padding:20px 24px; }
 </style>

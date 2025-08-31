@@ -212,7 +212,7 @@ const switchSubSection = (subId) => {
                         <table style="width:100%;border-collapse:collapse;font-size:11px;border:2px solid #ddd;margin-bottom:15px;background:#fff;" cellspacing="0" cellpadding="0">
                           <thead>
                             <tr>
-                              <th rowspan="2" style="background:linear-gradient(135deg, #333 0%, #666 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:80px;">方案类型</th>
+                              <th rowspan="2" style="background:#232f3e;color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:80px;">方案类型</th>
                               <th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:25%;">欧盟 FBA 的物流模式</th>
                               <th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:35%;">欧盟之间的远程配送网络<br/>European Fulfillment Network (EFN)</th>
                               <th style="background:linear-gradient(135deg, #ff8c00 0%, #ff8c00 100%);color:white;padding:12px 8px;border:1px solid #ddd;text-align:center;width:35%;">⭐亚马逊物流欧洲整合服务<br/>Pan European (PanEU)</th>
