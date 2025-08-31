@@ -18,7 +18,7 @@ class ActionService {
         return "意大利税号需注意";
       }
       
-      return null;
+      return '-';
     }
   
     // 逻辑2：合规 - 开了仓储没开税号
@@ -110,7 +110,7 @@ class ActionService {
       const opportunityData = this.panEUResult.value.opportunity_data;
       
       if (!opportunityData.rows || opportunityData.rows.length === 0) {
-        return null;
+        return '-';
       }
       
       // 获取第一行数据（可加入PanEU ASIN）
@@ -120,13 +120,17 @@ class ActionService {
         return `同步 ${firstRow.count} ASIN，获得配送费用节约€${firstRow.estimatedAnnualSavingsEUR}, ${firstRow.recommendation}`;
       }
       
-      return null;
+      return '-';
     }
   
     // 逻辑5：cost saving - CEE
     calculateCEECostSaving() {
       if (this.ceeResult.hasJoined) {
-        return null;
+        return '-';
+      }
+
+      if (!this.ceeResult.value) {
+        return '您已加入，无需操作';
       }
       
       const countries = [];
