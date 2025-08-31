@@ -14,6 +14,10 @@
           <div class="tab-indicator" v-if="activeTab === tab.id"></div>
         </div>
       </div>
+      <!-- 预览统一报告按钮 -->
+      <div class="nav-actions" v-if="reportGenerated">
+        <button class="preview-btn" @click="showUniReport = true">Preview</button>
+      </div>
       <!-- 解决方案 下拉子菜单 -->
       <transition name="dropdown-fade">
         <div v-if="showSolutionMenu" ref="solutionMenu" class="solution-dropdown compact centered" @click.stop>
@@ -148,6 +152,17 @@
       <Tab9 v-if="activeTab === 8" />
       
     </div>
+    <!-- 统一报告预览弹窗 -->
+    <UniReport
+      :visible="showUniReport"
+      :panEUResult="panEUResult"
+      :diResult="diResult"
+      :ceeResult="ceeResult"
+      :euExpansionCheckli="euExpansionCheckli"
+      :actionResult="actionResult"
+      :showPitch="true"
+      @update:visible="val => showUniReport = val"
+    />
   </div>
 </template>
 
@@ -158,6 +173,7 @@ import Tab6 from './Tab6.vue'
 import Tab7 from './Tab7.vue'
 import Tab8 from './Tab8.vue'
 import Tab9 from './Tab9.vue'
+import UniReport from './uniReport.vue'
 
 export default {
   name: 'ReportTab',
@@ -166,7 +182,8 @@ export default {
     Tab6,
     Tab7,
     Tab8,
-    Tab9
+    Tab9,
+    UniReport
   },
   props: {
     // 是否已生成报告
@@ -205,6 +222,7 @@ export default {
     const activeTab = ref(0)
     const showSolutionMenu = ref(false)
     const selectedSubTab = ref(61)
+    const showUniReport = ref(false)
 
     const solutionSubTabs = [
       { id: 61, title: '欧盟内部物流方案（PanEU）', desc: '解决方案子页面 1 概述' },
@@ -309,7 +327,8 @@ export default {
       solutionSubTabs,
       selectedSubTab,
       selectSubTab,
-      solutionMenu
+      solutionMenu,
+      showUniReport
     }
   }
 }
@@ -333,6 +352,8 @@ export default {
   padding: 0 12px;
   box-shadow: 0 2px 8px rgba(35, 47, 62, 0.15);
   position: relative;
+  display:flex;
+  align-items:center;
 }
 
 .tab-container {
@@ -348,6 +369,11 @@ export default {
 .tab-container::-webkit-scrollbar {
   display: none;
 }
+
+.nav-actions { margin-left:auto; display:flex; align-items:center; gap:10px; padding-left:12px; }
+.preview-btn { background:#ff9900; border:none; color:#232f3e; font-size:12px; font-weight:600; padding:8px 14px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 4px rgba(0,0,0,0.15); transition:.25s; letter-spacing:.5px; text-transform:lowercase; }
+.preview-btn:hover { background:#ffad33; }
+.preview-btn:active { transform:translateY(1px); }
 
 .tab-item {
   position: relative;
