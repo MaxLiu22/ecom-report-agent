@@ -47,17 +47,25 @@
 						</div>
 				</section>
 
-				<!-- 3. 行动计划 -->
+				<!-- 3. 合规政策 (Tab7) -->
+				<section class="report-section" id="section-compliance">
+					<h3 class="section-title">3. 🛡️ 合规政策</h3>
+					<div class="section-content">
+						<Tab7 />
+					</div>
+				</section>
+
+				<!-- 4. 行动计划 -->
 				<section class="report-section" id="section-action">
-					<h3 class="section-title">3. 📅 行动计划</h3>
+					<h3 class="section-title">4. 📅 行动计划</h3>
 					<div class="section-content">
 						<Tab8 :actionResult="actionResult" />
 					</div>
 				</section>
 
-				<!-- 4. AM 指导话术 (简化版 Tab9 内容) -->
+				<!-- 5. AM 指导话术 (简化版 Tab9 内容) -->
 				<section class="report-section" id="section-am" v-if="showPitch">
-					<h3 class="section-title">4. 💬 AM 指导话术（参考）</h3>
+					<h3 class="section-title">5. 💬 AM 指导话术（参考）</h3>
 					<div class="section-content">
 						<Tab9 />
 					</div>
@@ -73,12 +81,13 @@ import Tab5 from './Tab5.vue'
 import Tab61 from './Tab61.vue'
 import Tab62 from './Tab62.vue'
 import Tab63 from './Tab63.vue'
+import Tab7 from './Tab7.vue'
 import Tab8 from './Tab8.vue'
 import Tab9 from './Tab9.vue'
 
 export default {
 	name: 'UniReport',
-	components: { Tab5, Tab61, Tab62, Tab63, Tab8, Tab9 },
+	components: { Tab5, Tab61, Tab62, Tab63, Tab7, Tab8, Tab9 },
 	props: {
 		visible: { type: Boolean, default: false },
 		panEUResult: { type: Object, default: null },
@@ -162,7 +171,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helve
 	<span class='status' id='statusOk'>已复制</span>
 </div>
 <label style='font-size:13px;font-weight:600;color:#232f3e;display:block;margin:0 0 8px;'>推荐邮件正文：</label>
-<textarea id='body'>您好，\n\n附件为最新生成的 IntraEU 卖家统一分析报告（HTML 版本），包含：\n1. 欧洲站点拓展评估\n2. PanEU / DI 物流对比与分析\n3. CEE 成本节约测算\n4. 行动计划\n5. AM 指导话术（如适用）\n\n请下载后用浏览器打开查看。\n\n祝好\n</textarea>
+					<textarea id='body'>您好，\n\n附件为最新生成的 IntraEU 卖家统一分析报告（HTML 版本），包含：\n1. 欧洲站点拓展评估\n2. PanEU / DI 物流对比与分析\n3. CEE 成本节约测算\n4. 合规政策\n5. 行动计划\n6. AM 指导话术（如适用）\n\n请下载后用浏览器打开查看。\n\n祝好\n</textarea>
 <div class='hint'>提示：若 mailto 打开后正文未完整显示，请在邮件窗口中手动粘贴上面已复制的正文。</div>
 <div class='divider'></div>
 <footer>IntraEU Unified Report Helper • 本页面仅本地生成，数据不会上传服务器</footer>

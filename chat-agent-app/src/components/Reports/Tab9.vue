@@ -9,7 +9,7 @@
         <!-- <h3 class="section-title">AM Pitching 话术库</h3>
         <p class="section-subtitle">支持搜索、折叠、行高亮的内部使用脚本</p> -->
         <div class="pitching-embed">
-          <AMPitchingDI />
+          <AMPitchingApp />
         </div>
       </div>
     </div>
@@ -17,10 +17,10 @@
 </template>
 
 <script>
-import AMPitchingDI from './AM_Pitching_DI_New.vue'
+import AMPitchingApp from './AMPitchingApp.vue'
 export default {
   name: 'Tab9',
-  components: { AMPitchingDI }
+  components: { AMPitchingApp }
 }
 </script>
 
