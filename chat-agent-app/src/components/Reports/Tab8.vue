@@ -70,7 +70,7 @@
               <!-- 第六行: incentive - DI (GSI) -->
               <tr>
                 <td class="ranking">6</td>
-                <td class="action">incentive - DI (GSI)</td>
+                <td class="action">cost saving - DI</td>
                 <td class="timeline">1个月</td>
                 <td class="logic" rowspan="2">
                   <div v-for="(item, index) in computedActionResult.diIncentive" :key="index" class="growth-item">
@@ -80,12 +80,11 @@
               </tr>
               
               <!-- 第七行: sales uplift - DI (MPG) -->
-              <tr>
+              <!-- <tr>
                 <td class="ranking">7</td>
                 <td class="action">sales uplift - DI (MPG)</td>
                 <td class="timeline">3个月</td>
-                <!-- 逻辑单元格已在上方合并，此行不需要逻辑单元格 -->
-              </tr>
+              </tr> -->
             </template>
           </tbody>
         </table>

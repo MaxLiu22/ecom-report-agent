@@ -695,12 +695,14 @@ export async function analyzePanEUOpportunitiesAuto(inputs) {
 	if (!roleMap.skuReport) throw new Error('缺少 SKU Report 类型文件 (需包含 亚马逊商城 与 亚马逊物流配送费用（总计） 列)。');
 	// inventoryReport / asinList 可选
 
-	const report = await analyzePanEUOpportunities({
+	let report = await analyzePanEUOpportunities({
 		panEuReport: roleMap.panEuReport,
 		skuReport: roleMap.skuReport,
 		inventoryReport: roleMap.inventoryReport || roleMap.panEuReport, // 占位：若缺失，传一个已存在文件防止 fetch 失败再在分类中忽略
 		asinList: roleMap.asinList || roleMap.panEuReport
 	});
+	report = calculateReportMetrics(report);
+
 	if (warnings.length) {
 		report.meta = report.meta || {};
 		report.meta.warnings = warnings;
@@ -708,6 +710,28 @@ export async function analyzePanEUOpportunitiesAuto(inputs) {
 	report.meta.detection = Object.fromEntries(Object.entries(roleMap).map(([k,v]) => [k, !!v]));
 	return report;
 }
+
+
+function calculateReportMetrics(report) {
+	// 创建行的映射以便快速访问
+	const rowsMap = {};
+	report.excel_data.rows.forEach(row => {
+	  rowsMap[row.metric] = row;
+	});
+  
+	// 计算可加入PanEU ASIN的count
+	const missing1To2 = rowsMap['缺少1至2个报价']?.count || 0;
+	const missing3 = rowsMap['缺少3个报价']?.count || 0;
+	rowsMap['可加入PanEU ASIN'].count = missing1To2 + missing3;
+  
+	// 计算总计的count
+	const invalidPanEU = rowsMap['失效PanEU ASIN']?.count || 0;
+	rowsMap['总计'].count = missing1To2 + missing3 + invalidPanEU;
+  
+	return report;
+  }
+
+
 
 export default {
 	analyzePanEUOpportunities,

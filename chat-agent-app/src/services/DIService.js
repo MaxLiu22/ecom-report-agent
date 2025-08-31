@@ -463,6 +463,7 @@ export async function analyzeDIOpportunities(inputFiles) {
  */
 export async function analyzeDIOpportunitiesAuto(inputs){
 	const files = Array.isArray(inputs)? inputs : Object.values(inputs||{});
+
 	if(!files.length) throw new Error('未提供任何文件');
 	const roleMap = { cost_saving:null,incentive_eu:null,incentive_uk:null,rec_uk_de:null,rec_uk_fr:null,rec_uk_it:null,rec_uk_es:null,rec_de_uk:null,rf_status:null,rf_order:null };
 	const warnings=[];
@@ -500,6 +501,27 @@ export async function analyzeDIOpportunitiesAuto(inputs){
 	const report = await analyzeDIOpportunities(roleMap);
 	report.meta = report.meta || {}; 
 	report.meta.detection = Object.fromEntries(Object.entries(roleMap).map(([k,v])=>[k, !!v]));
+
+	// 找出 eligibleASINs 表
+	const matchingFiles = inputs.filter(file => 
+		file.name.toLowerCase().includes('eligibleASINs'.toLowerCase())
+		);
+	if (matchingFiles.length > 0) {
+		report.hasEligibleASINs = true;
+	} else {
+		report.hasEligibleASINs = false;
+	}
+
+	// 找出 eligibleASINs 表
+	const matchingFiles2 = inputs.filter(file => 
+		file.name.toLowerCase().includes('Fulfillment'.toLowerCase())
+		);
+	if (matchingFiles2.length > 0) {
+		report.hasFulfillment = true;
+	} else {
+		report.hasFulfillment = false;
+	}
+
 	if(warnings.length) report.meta.warnings = warnings;
 	return report;
 }
