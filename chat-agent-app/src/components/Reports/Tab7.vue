@@ -19,34 +19,17 @@
           </a>
           <div class="img-caption">点击图片查看原文（微信公众平台）</div>
         </div>
-        <!-- <div class="policy-card" style="margin-top: 24px"></div> -->
       </div>
+
+
+      
+        <h2>📣 合规风险</h2>
+        <p class="content-description">下列模块展示物流方案、PanEU政策、产品与VAT合规信息</p>
+        <ProductComplianceComponent />
+    
     </div>
 
-    <div class="content-header second-block">
-      <h2>📣 合规风险</h2>
-      <p class="content-description">下列模块展示物流方案、PanEU政策、产品与VAT合规信息</p>
-    </div>
-
-    <div class="content-body">
-      <div class="compliance-modules">
-        <!-- <div class="module-item">
-          <EUInternalSolutionsComponent />
-        </div> -->
-        <!-- <div class="module-item">
-          <PanEUPolicyUpdateComponent />
-        </div> -->
-        <div class="module-item">
-          <ProductComplianceComponent />
-        </div>
-        <!-- <div class="module-item">
-          <VATComplianceComponent />
-        </div>
-        <div class="module-item">
-          <VATInfoComponent />
-        </div> -->
-      </div>
-    </div>
+    
   </div>
 </template>
 <script>
@@ -73,7 +56,10 @@ export default {
   background-color: #ffffff;
   margin: 0;
   padding: 24px;
-  min-height: 100%;
+  height: fit-content;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  box-sizing: border-box;
 }
 
 .content-header {
@@ -106,6 +92,7 @@ export default {
 
 .content-body {
   color: #333333;
+  height: fit-content;
 }
 
 /* 政策更新图片区域 */

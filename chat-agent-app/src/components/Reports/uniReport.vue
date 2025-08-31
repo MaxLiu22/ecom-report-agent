@@ -11,6 +11,7 @@
 			</div>
 			<div class="uni-report-body" ref="scrollBody">
 				<!-- 概览提示 -->
+				<div class="download-body-one">
 				<div class="intro-box">
 					<p>本报告整合了各分析子模块（站点拓展评估、欧盟内部物流、英欧物流方案、CEE 成本节约、行动计划与 AM 指导话术）。以下为生成版本的静态预览（互动元素已最小化以便打印/导出）。</p>
 				</div>
@@ -46,7 +47,9 @@
 							<Tab63 :ceeResult="ceeResult" />
 						</div>
 				</section>
+				</div>
 
+				<div class="download-body-two">
 				<!-- 3. 合规政策 (Tab7) -->
 				<section class="report-section" id="section-compliance">
 					<h3 class="section-title">3. 🛡️ 合规政策</h3>
@@ -54,7 +57,9 @@
 						<Tab7 />
 					</div>
 				</section>
+				</div>
 
+				<div class="download-body-third">
 				<!-- 4. 行动计划 -->
 				<section class="report-section" id="section-action">
 					<h3 class="section-title">4. 📅 行动计划</h3>
@@ -62,6 +67,7 @@
 						<Tab8 :actionResult="actionResult" />
 					</div>
 				</section>
+				</div>
 
 				<!-- 5. AM 指导话术 (简化版 Tab9 内容) -->
 				<section class="report-section" id="section-am" v-if="showPitch">
@@ -105,12 +111,18 @@ export default {
 		},
 			// 统一生成导出 HTML 文档字符串 & Blob
 			_buildHtmlBlob() {
-				const original = this.$el.querySelector('.uni-report-body')
+				const original = this.$el.querySelector('.download-body-one')
+				const original2 = this.$el.querySelector('.download-body-two')
+				const original3 = this.$el.querySelector('.download-body-third')
 				if (!original) return null
 				const clone = original.cloneNode(true)
+				const clone2 = original2.cloneNode(true)
+				const clone3 = original3.cloneNode(true)
 				this.normalizeContent(clone)
+				this.normalizeContent(clone2)
+				this.normalizeContent(clone3)
 				const styles = this.collectStylesProcessed()
-				const docHtml = `<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"/><title>IntraEU统一报告</title><meta name="viewport" content="width=device-width,initial-scale=1"/><style>${styles}</style></head><body class="export-body"><div class="export-stack">${clone.innerHTML}</div></body></html>`
+				const docHtml = `<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"/><title>IntraEU统一报告</title><meta name="viewport" content="width=device-width,initial-scale=1"/><style>${styles}</style></head><body class="export-body"><div class="export-stack">${clone.innerHTML}${clone2.innerHTML}<div style="height: 1900px;"></div>${clone3.innerHTML} </div></body></html>`
 				return new Blob([docHtml], { type: 'text/html;charset=utf-8' })
 			},
 		exportHtml() {
@@ -264,7 +276,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helve
 .report-section + .report-section { margin-top:30px; }
 .section-title { margin:0 0 16px; font-size:18px; font-weight:600; color:#232f3e; position:relative; padding-left:10px; }
 .section-title:before { content:''; position:absolute; left:0; top:2px; bottom:2px; width:4px; border-radius:2px; background:#ff9900; }
-.section-content { background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:18px 20px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
+.section-content { height: fit-content; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:18px 20px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
 /* 精简嵌套组件的外层间距 */
 .section-content :deep(.content-panel) { padding:0; box-shadow:none; }
 .section-content :deep(.content-header) { display:none; }
