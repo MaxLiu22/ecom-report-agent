@@ -81,15 +81,23 @@
             <div class="fhdds-links">
               <div class="link-item">
                 <span class="checkmark">✓</span>
-                <span class="link-text">了解详细 FHDDS <span class="link">合规步骤</span></span>
+                  <span class="link-text">
+                    了解详细 FHDDS 
+                    <a
+                      href="https://m.media-amazon.com/images/G/01/Central-compliance-team/FHDDSComplianceguidance.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link"
+                    >合规步骤</a>
+                  </span>
               </div>
               <div class="link-item">
                 <span class="checkmark">✓</span>
-                <span class="link-text">FHDDS <span class="link">常见问题</span></span>
+                <span class="link-text">FHDDS <a href="https://m.media-amazon.com/images/G/01/Central-compliance-team/FHDDS_Seller_FAQ.pdf" target="_blank" rel="noopener noreferrer" class="link">常见问题</a></span>
               </div>
               <div class="link-item">
                 <span class="checkmark">✓</span>
-                <span class="link-text">FHDDS <span class="link">帮助页面</span></span>
+                <span class="link-text">FHDDS <a href="https://sellercentral.amazon.de/help/hub/reference/external/G97ZA85WXA334DR2?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">帮助页面</a></span>
               </div>
             </div>
           </div>
