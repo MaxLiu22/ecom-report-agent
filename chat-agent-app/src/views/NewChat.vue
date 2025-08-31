@@ -1239,6 +1239,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 50%;
 }
 
 .message-container {
@@ -1539,6 +1540,11 @@ onMounted(() => {
 
 .checkbox-group {
   margin-bottom: 10px;
+}
+
+.text-message {
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .checkbox-item {
