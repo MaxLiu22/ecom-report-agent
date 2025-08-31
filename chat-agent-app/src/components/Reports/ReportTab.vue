@@ -1,5 +1,5 @@
 <template>
-  <div class="report-frame" :class="{ 'floating-mode': showUniReport }">
+  <div class="report-frame" :class="{ 'floating-mode': showUniReport && !disablePreview }">
     <!-- Tab 导航栏 -->
     <div class="tab-navigation">
       <div class="tab-container">
@@ -15,7 +15,7 @@
         </div>
       </div>
       <!-- 预览统一报告按钮 -->
-      <div class="nav-actions" v-if="reportGenerated">
+  <div class="nav-actions" v-if="reportGenerated && !disablePreview">
         <button
           class="preview-btn"
           :class="{ active: showUniReport }"
@@ -45,7 +45,7 @@
       </transition>
     </div>
     <!-- 浮层标题栏，仅在悬浮模式下显示 -->
-    <div v-if="showUniReport" class="floating-header uni-report-header">
+  <div v-if="showUniReport && !disablePreview" class="floating-header uni-report-header">
       <!-- <h2 class="title">📊 IntraEU 卖家统一报告预览</h2> -->
       <div class="actions">
         <button class="export-btn" @click="exportHtmlWrapper">导出HTML</button>
@@ -249,7 +249,7 @@
   </div>
 
   <!-- 背景遮罩 -->
-  <div v-if="showUniReport" class="floating-backdrop" @click.self="closeFloating"></div>
+  <div v-if="showUniReport && !disablePreview" class="floating-backdrop" @click.self="closeFloating"></div>
 </template>
 
 <script>
@@ -276,6 +276,11 @@ export default {
   props: {
     // 是否已生成报告
     reportGenerated: {
+      type: Boolean,
+      default: false,
+    },
+    // 是否禁用预览功能
+    disablePreview: {
       type: Boolean,
       default: false,
     },
@@ -403,9 +408,9 @@ export default {
     }
 
     // 打开浮层预览
-    const openFloatingPreview = () => { showUniReport.value = true }
+    const openFloatingPreview = () => { if (!props.disablePreview) showUniReport.value = true }
     const closeFloating = () => { showUniReport.value = false }
-    const togglePreview = () => { showUniReport.value ? closeFloating() : openFloatingPreview() }
+    const togglePreview = () => { if (props.disablePreview) return; showUniReport.value ? closeFloating() : openFloatingPreview() }
 
     // 包装导出与邮件发送（调用隐藏 UniReport 实例）
     // 多标签导出（排除 AM 指导话术 id=8），生成与当前 ReportTab 相似的可切换页面

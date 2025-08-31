@@ -321,7 +321,7 @@ onMounted(() => {
         </div>
         
         <div class="report-area">
-          <ReportTab :reportGenerated="reportGenerated" />
+          <ReportTab :reportGenerated="reportGenerated" :disablePreview="true" />
         </div>
         <!-- 按键区域 -->
         <div class="button-area">
