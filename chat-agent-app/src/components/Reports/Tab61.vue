@@ -7,8 +7,8 @@
     <div class="solution-details">
       <!-- 欧盟内部方案介绍与对比 -->
       <div style="margin: 20px 0">
-        <h4 style="color: #333; font-size: 16px; margin: 10px 0">欧洲站点拓展解决方案</h4>
-        <h5 style="color: #666; font-size: 14px; margin: 10px 0">欧盟内部物流方案</h5>
+        <!-- <h4 style="color: #333; font-size: 16px; margin: 10px 0">欧洲站点拓展解决方案</h4>
+        <h5 style="color: #666; font-size: 14px; margin: 10px 0">欧盟内部物流方案</h5> -->
         <div
           style="
             margin: 18px 0 24px 0;

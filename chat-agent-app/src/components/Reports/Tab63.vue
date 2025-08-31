@@ -4,11 +4,11 @@
     <h2 style="margin:0 0 16px; font-size:24px; font-weight:600; color:#232f3e;">2.3 更多成本节约</h2>
     <!-- 成本节约折叠卡片 -->
     <div :class="['card-wrapper']" id="cost-savings">
-      <div class="card-header" @click="toggleMain()">
+      <!-- <div class="card-header" @click="toggleMain()">
         <div style="font-size:24px; margin-right:10px;">📋</div>
         <h3 style="margin:0; color:#007bff; font-size:18px; font-weight:600;">更多成本节约</h3>
         <div :style="arrowStyle" class="arrow">▶</div>
-      </div>
+      </div> -->
       <transition name="fade-slide">
         <div v-show="open" id="cost-savings-content" style="display:flex; flex-direction:column; gap:12px;">
           <div class="section-head" @mouseenter="hoverHead=true" @mouseleave="hoverHead=false" :style="headStyle">
