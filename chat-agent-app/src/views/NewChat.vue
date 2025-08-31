@@ -1,6 +1,5 @@
 <script setup>
 import { ref, nextTick, onMounted, computed } from 'vue';
-import ReportFrame from './ReportFrame.vue';
 import ReportTab from '@/components/Reports/ReportTab.vue';
 import UniReport from '@/components/Reports/uniReport.vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
