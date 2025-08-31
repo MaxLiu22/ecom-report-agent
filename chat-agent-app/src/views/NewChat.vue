@@ -460,7 +460,7 @@ const submitCEEForm = async () => {
     const lastCEEMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'cee-form');
     const soldCount = lastCEEMessage?.content?.germanSales || 10000;
     const hasPolishVAT = lastCEEMessage?.content?.polandTax || false;
-    const hasCzechVAT = lastCEEMessage?.content?.czechTax || true;
+    const hasCzechVAT = lastCEEMessage?.content?.czechTax || false;
     
     ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
     addAgentMessage('CEE 成本计算完成 ✓');
@@ -571,14 +571,14 @@ const validatePanEUFiles = (files) => {
   return errors;
 };
 
+
 const validateDIFiles = (files) => {
   const errors = [];
   const requiredFiles = {
     mpg: { 
       keywords: ['List_of_recommendations'], 
-      foundCount: 0, // 改为计数而不是布尔值
-      displayName: 'MPG report',
-      requiredCount: 5 // 需要的文件数量
+      found: false,
+      displayName: 'MPG report'
     }
   };
   
@@ -598,21 +598,22 @@ const validateDIFiles = (files) => {
     const fileName = file.name.toLowerCase();
     Object.keys(requiredFiles).forEach(type => {
       if (requiredFiles[type].keywords.some(keyword => fileName.includes(keyword.toLowerCase()))) {
-        requiredFiles[type].foundCount++; // 增加计数而不是设置为true
+        requiredFiles[type].found = true;
       }
     });
   });
   
-  // 检查每个文件类型是否满足数量要求
-  Object.keys(requiredFiles).forEach(type => {
-    const fileType = requiredFiles[type];
-    if (fileType.foundCount < fileType.requiredCount) {
-      errors.push(`DI 缺少必要文件：需要 ${fileType.requiredCount} 个 ${fileType.displayName}，但只找到 ${fileType.foundCount} 个`);
-    }
-  });
+  const missingTypes = Object.keys(requiredFiles)
+    .filter(type => !requiredFiles[type].found)
+    .map(type => requiredFiles[type].displayName);
+    
+  if (missingTypes.length > 0) {
+    errors.push(`DI 缺少必要文件：${missingTypes.join('、')}`);
+  }
   
   return errors;
 };
+
 
 const handleFileUpload = (event) => {
   const files = Array.from(event.target.files);
