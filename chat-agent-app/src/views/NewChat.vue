@@ -347,7 +347,7 @@ const startReportGeneration = async () => {
     const panEUFiles = allFiles; // 传递所有文件给分析函数
     
     if (panEUFiles.length >= 4) {
-      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles);
+      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
       addAgentMessage('PanEU 分析完成 ✓');
     } else {
       addAgentMessage('PanEU 分析跳过（文件不足）');
@@ -445,7 +445,7 @@ const submitCEEForm = async () => {
     const panEUFiles = allFiles; // 传递所有文件给分析函数
     
     if (panEUFiles.length >= 2) {
-      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles);
+      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
       addAgentMessage('PanEU 分析完成 ✓');
     } else {
       addAgentMessage('PanEU 分析跳过（文件不足）');
