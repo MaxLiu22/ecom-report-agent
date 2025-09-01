@@ -7,6 +7,7 @@
           v-for="tab in tabs"
           :key="tab.id"
           class="tab-item"
+          :data-tab="tab.id"
           :class="{ active: activeTab === tab.id }"
           @click="onMainTabClick(tab)"
         >
@@ -374,14 +375,17 @@ export default {
       const nav = document.querySelector('.tab-navigation')
       const tabsEl = nav?.querySelector('.tab-container')
       if (!tabsEl) return
-      // 找到“解决方案” tab DOM
-      const target = [...tabsEl.children].find((child) => child.textContent.trim() === '解决方案')
       const menuEl = solutionMenu.value
+      // 使用 data-tab 精确定位 id=5 的主标签项
+      const target = tabsEl.querySelector('.tab-item[data-tab="5"]')
       if (target && menuEl) {
         const targetRect = target.getBoundingClientRect()
         const navRect = nav.getBoundingClientRect()
-        const centerX = targetRect.left + targetRect.width / 2 - navRect.left
+        // 考虑横向滚动偏移
+        const scrollLeft = tabsEl.scrollLeft || 0
+        const centerX = (targetRect.left - navRect.left) + targetRect.width / 2 + scrollLeft
         menuEl.style.left = centerX + 'px'
+        menuEl.style.transform = 'translateX(-50%)' // 居中对齐主标签
       }
     }
 
