@@ -414,7 +414,7 @@ export default {
 
     // 包装导出与邮件发送（调用隐藏 UniReport 实例）
     // 多标签导出（排除 AM 指导话术 id=8），生成与当前 ReportTab 相似的可切换页面
-    // 构建导出数据（多标签 HTML），排除 AM 指导话术
+    // 构建导出数据（多标签 HTML + 解决方案子菜单交互），排除 AM 指导话术
     const buildMultiTabHtml = async () => {
       const inst = uniReportRef.value
       let styles = ''
@@ -426,26 +426,56 @@ export default {
       }
       const exportTabs = (props.reportGenerated ? tabs.value : tabs.value.filter(t=>t.id===0)).filter(t => t.id !== 8)
       if (!exportTabs.length) return null
-      const original = activeTab.value
+      const originalMain = activeTab.value
+      const originalSub = selectedSubTab.value
       const captured = []
       for (const t of exportTabs) {
         activeTab.value = t.id
         await nextTick()
-        const contentRoot = document.querySelector('.tab-content')
-        if (!contentRoot) continue
-        let html = contentRoot.innerHTML
-        html = html.replace(/<button[\s\S]*?<\/button>/g, m => {
-          const text = m.replace(/<[^>]+>/g,'').trim()
-          return `<span class=\"export-static-label\">${text}</span>`
-        })
-        captured.push({ id: t.id, title: t.title, html })
+        if (t.id === 5) { // 解决方案：采集所有子页
+          const subPanels = []
+          for (const sub of solutionSubTabs) {
+            selectedSubTab.value = sub.id
+            await nextTick()
+            const subRoot = document.querySelector('.tab-content')
+            if (!subRoot) continue
+            let subHtml = subRoot.innerHTML
+            subHtml = subHtml.replace(/<button[\s\S]*?<\/button>/g, m => {
+              const text = m.replace(/<[^>]+>/g,'').trim()
+              return `<span class=\"export-static-label\">${text}</span>`
+            })
+            subPanels.push({ subId: sub.id, title: sub.title, html: subHtml })
+          }
+          captured.push({ id: t.id, title: t.title, _solution: true, subPanels })
+        } else {
+          const contentRoot = document.querySelector('.tab-content')
+          if (!contentRoot) continue
+          let html = contentRoot.innerHTML
+          html = html.replace(/<button[\s\S]*?<\/button>/g, m => {
+            const text = m.replace(/<[^>]+>/g,'').trim()
+            return `<span class=\"export-static-label\">${text}</span>`
+          })
+          captured.push({ id: t.id, title: t.title, html })
+        }
       }
-      activeTab.value = original
+      // 还原状态
+      activeTab.value = originalMain
+      selectedSubTab.value = originalSub
       await nextTick()
-      styles += `\n/* Export Frame */\nhtml,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;}*{box-sizing:border-box;}\n.tab-export-root{display:flex;flex-direction:column;min-height:100vh;}\n.export-nav{background:#232f3e;padding:0 12px;display:flex;align-items:center;gap:0;box-shadow:0 2px 8px rgba(35,47,62,.15);position:sticky;top:0;z-index:10;}\n.export-nav .nav-item{color:#fff;padding:12px 16px;cursor:pointer;font-size:13px;position:relative;user-select:none;transition:.25s;border-bottom:3px solid transparent;}\n.export-nav .nav-item.active{color:#ff9900;border-bottom-color:#ff9900;background:rgba(255,153,0,.1);}\n.export-nav .nav-item:hover{background:rgba(255,255,255,.1);}\n.export-panels{flex:1;overflow:auto;background:#f5f5f5;}\n.export-panel{display:none;animation:fadeIn .25s ease;}\n.export-panel.active{display:block;}\n@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}\n.export-static-label{display:inline-block;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px;color:#555;}\n.content-panel{background:#fff;margin:0;padding:24px;min-height:100%;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #d9d9d9;padding:6px 8px;font-size:12px;}th{background:#232f3e;color:#fff;}\n`
-      const navHtml = captured.map((c,i)=>`<div class=\"nav-item${i===0?' active':''}\" data-tab=\"${c.id}\">${c.title}</div>`).join('')
-      const panelsHtml = captured.map((c,i)=>`<div class=\"export-panel${i===0?' active':''}\" data-tab=\"${c.id}\">${c.html}</div>`).join('\n')
-      const script = `<script>(()=>{const navItems=document.querySelectorAll('.nav-item');const panels=document.querySelectorAll('.export-panel');navItems.forEach(it=>it.addEventListener('click',()=>{const id=it.getAttribute('data-tab');navItems.forEach(n=>n.classList.remove('active'));it.classList.add('active');panels.forEach(p=>p.classList.toggle('active',p.getAttribute('data-tab')===id));}));})();</`+`script>`
+      // 样式（含子菜单）
+      styles += `\n/* Export Frame + Solution SubMenu */\nhtml,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;}*{box-sizing:border-box;}\n.tab-export-root{display:flex;flex-direction:column;min-height:100vh;}\n.export-nav{background:#232f3e;padding:0 12px;display:flex;align-items:center;gap:0;box-shadow:0 2px 8px rgba(35,47,62,.15);position:sticky;top:0;z-index:30;}\n.export-nav .nav-item{color:#fff;padding:12px 16px;cursor:pointer;font-size:13px;position:relative;user-select:none;transition:.25s;border-bottom:3px solid transparent;}\n.export-nav .nav-item.active{color:#ff9900;border-bottom-color:#ff9900;background:rgba(255,153,0,.1);}\n.export-nav .nav-item:hover{background:rgba(255,255,255,.1);}\n.export-nav .nav-item.solution-has-sub:after{content:'▾';font-size:10px;margin-left:6px;opacity:.85;}\n.export-nav .nav-item.solution-has-sub.open:after{content:'▴';}\n.export-submenu{position:absolute;top:100%;left:0;background:#fff;border:1px solid #e5e7eb;box-shadow:0 8px 18px -4px rgba(0,0,0,.15),0 4px 8px -2px rgba(0,0,0,.08);border-radius:8px;padding:6px 0;min-width:300px;z-index:40;display:none;}\n.export-submenu .sub-item{padding:8px 14px;font-size:12px;line-height:1.3;cursor:pointer;border-left:3px solid transparent;white-space:normal;transition:.25s;}\n.export-submenu .sub-item:hover{background:#fff8ec;border-left-color:#ff9900;}\n.export-submenu .sub-item.active{background:#fff3e0;border-left-color:#ff9900;color:#c25600;}\n.export-panels{flex:1;overflow:auto;background:#f5f5f5;}\n.export-panel{display:none;animation:fadeIn .25s ease;position:relative;}\n.export-panel.active{display:block;}\n@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}\n.export-static-label{display:inline-block;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px;color:#555;}\n.solution-panel-wrapper{position:relative;padding:0;margin:0;}\n.sub-panels{position:relative;}\n.sub-panel{display:none;}\n.sub-panel.active{display:block;}\n.content-panel{background:#fff;margin:0;padding:24px;min-height:100%;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #d9d9d9;padding:6px 8px;font-size:12px;}th{background:#232f3e;color:#fff;}\n`
+      const solution = captured.find(c=>c._solution)
+      const navHtml = captured
+        .map((c,i)=>`<div class="nav-item${c._solution ? ' solution-has-sub' : ''}${i===0 ? ' active' : ''}" data-tab="${c.id}">${c.title}</div>`)
+        .join('') + (solution ? `<div class="export-submenu" id="exportSubMenu">${solution.subPanels.map((sp,i)=>`<div class="sub-item${i===0?' active':''}" data-sub="${sp.subId}">${sp.title}</div>`).join('')}</div>` : '')
+      const panelsHtml = captured.map((c,i)=>{
+        if (c._solution) {
+          const inner = c.subPanels.map((sp,j)=>`<div class="sub-panel${j===0?' active':''}" data-sub="${sp.subId}">${sp.html}</div>`).join('\n')
+          return `<div class="export-panel${i===0?' active':''}" data-tab="${c.id}"><div class="solution-panel-wrapper"><div class="sub-panels">${inner}</div></div></div>`
+        }
+        return `<div class="export-panel${i===0?' active':''}" data-tab="${c.id}">${c.html}</div>`
+      }).join('\n')
+      const script = `<script>(()=>{const navItems=[...document.querySelectorAll('.export-nav .nav-item')];const panels=[...document.querySelectorAll('.export-panel')];const submenu=document.getElementById('exportSubMenu');let currentTab=navItems.find(n=>n.classList.contains('active'))?.getAttribute('data-tab');function activateTab(id){currentTab=id;navItems.forEach(n=>n.classList.toggle('active',n.getAttribute('data-tab')===id));panels.forEach(p=>p.classList.toggle('active',p.getAttribute('data-tab')===id));if(id!=='5'){hideSub();}}function hideSub(){if(submenu){submenu.style.display='none';}navItems.forEach(n=>n.classList.remove('open'));}navItems.forEach(it=>{it.addEventListener('click',()=>{const id=it.getAttribute('data-tab');if(it.classList.contains('solution-has-sub')){if(currentTab==='5' && id==='5'){submenu.style.display = (submenu.style.display==='none'||!submenu.style.display)?'block':'none';it.classList.toggle('open');positionSub(it);return;}activateTab('5');submenu.style.display='block';it.classList.add('open');positionSub(it);} else {activateTab(id);}});});function positionSub(trigger){if(!submenu) return;const rect=trigger.getBoundingClientRect();submenu.style.left=rect.left+'px';submenu.style.top=(rect.bottom)+'px';}document.addEventListener('click',e=>{if(!submenu) return; if(!submenu.contains(e.target) && !e.target.closest('.nav-item.solution-has-sub')) hideSub();});const subItems=[...(submenu?submenu.querySelectorAll('.sub-item'):[])];const panel5=document.querySelector('.export-panel[data-tab="5"]');const subPanels=panel5?panel5.querySelectorAll('.sub-panel'):[];function activateSub(id){subItems.forEach(s=>s.classList.toggle('active',s.getAttribute('data-sub')===id));subPanels.forEach(p=>p.classList.toggle('active',p.getAttribute('data-sub')===id));}subItems.forEach(it=>it.addEventListener('click',()=>{activateSub(it.getAttribute('data-sub'));}));})();</`+`script>`
       const html = `<!DOCTYPE html><html lang=\"zh\"><head><meta charset=\"utf-8\"/><title>ReportTab导出</title><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/><style>${styles}</style></head><body><div class=\"tab-export-root\"><div class=\"export-nav\">${navHtml}</div><div class=\"export-panels\">${panelsHtml}</div></div>${script}</body></html>`
       return new Blob([html], { type:'text/html;charset=utf-8' })
     }
