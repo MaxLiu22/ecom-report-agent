@@ -176,7 +176,7 @@
             <div class="epr-item">
               <span class="bullet">•</span>
               <span class="epr-text">
-                <strong><a href="https://sellercentral.amazon.es/help/hub/reference/external/GPVDATLHQ6PRQNSW?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">欧盟电池法规（EU Batteries）</a></strong><br>
+                <strong>欧盟电池法规（<a href="https://sellercentral.amazon.es/help/hub/reference/external/GPVDATLHQ6PRQNSW?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">EU Batteries</a>）</strong><br>
                 自2025年8月18日起，亚马逊将停售在【德国、典典、波兰、荷兰】的不合规商品。【法国】可通过亚马逊提供的代付服务完成合规，其他欧盟国家未来可能会允许亚马逊提供代付服务（具体待定）。
               </span>
             </div>
