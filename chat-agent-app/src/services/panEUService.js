@@ -697,6 +697,7 @@ export async function analyzePanEUOpportunitiesAuto(inputs) {
 	});
 	report = updateReport(report)
 	report = calculateReportMetrics(report);
+	report = updateOpportunity(report);
 
 	if (warnings.length) {
 		report.meta = report.meta || {};
@@ -751,7 +752,7 @@ function generateCostSave() {
   
 
 
-function updateReport(report) {
+  function updateReport(report) {
 	const rows = report.excel_data.rows;
   
 	rows.forEach(row => {
@@ -793,6 +794,37 @@ function updateReport(report) {
 	return report;
   }
 
+
+function updateOpportunity(report) { 
+	const rows = report.excel_data.rows;
+  
+	// 同步 opportunity_data
+	const oppRows = report.opportunity_data.rows;
+	const lastExcelRow = rows[rows.length - 1]; // excel_data.rows[-1] → 最后一行
+  
+	// 更新 opportunity_data.rows[0].count
+	oppRows[0].count = lastExcelRow.count;
+  
+	// 从 description 中提取数字（小数可能带 "k RMB"）
+	function extractNum(text) {
+	  const match = text.match(/([\d.]+)k/);
+	  return match ? parseFloat(match[1]) * 1000 : 0;
+	}
+  
+	const val1 = extractNum(rows[1].description); // 缺少1至2个报价
+	const val2 = extractNum(rows[2].description); // 缺少3个报价
+	const val3 = extractNum(rows[3].description); // 失效PanEU ASIN
+  
+	const total = val1 + val2 + val3;
+	oppRows[0].estimatedAnnualSavingsEUR = `${total.toFixed(2)}`;
+  
+	return report;
+	
+}
+
+
+
+  
   
 function calculateReportMetrics(report) {
 	// 创建行的映射以便快速访问
