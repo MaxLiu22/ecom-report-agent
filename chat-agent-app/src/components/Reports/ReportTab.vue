@@ -421,13 +421,20 @@ export default {
     // 构建导出数据（多标签 HTML + 解决方案子菜单交互），排除 AM 指导话术
     const buildMultiTabHtml = async () => {
       const inst = uniReportRef.value
-      let styles = ''
+      // 收集样式：即便有 UniReport，也一并收集页面其余组件样式，避免“合规政策”(Tab 6) 丢失格式
+      const styleBlocks = new Set()
       if (inst && typeof inst.collectStylesProcessed === 'function') {
-        styles = inst.collectStylesProcessed()
-      } else {
-        document.querySelectorAll('style').forEach(s => { if (s.innerHTML) styles += s.innerHTML + '\n' })
-        styles = styles.replace(/\[data-v-[^\]]+\]/g, '')
+        const uniStyles = inst.collectStylesProcessed()
+        if (uniStyles) styleBlocks.add(uniStyles)
       }
+      document.querySelectorAll('style').forEach(s => {
+        if (s && s.innerHTML) {
+          styleBlocks.add(s.innerHTML)
+        }
+      })
+      let styles = Array.from(styleBlocks).join('\n')
+      // 去掉 scoped data-v 选择器，保证导出后仍生效
+      styles = styles.replace(/\[data-v-[^\]]+\]/g, '')
       const exportTabs = (props.reportGenerated ? tabs.value : tabs.value.filter(t=>t.id===0)).filter(t => t.id !== 8)
       if (!exportTabs.length) return null
       const originalMain = activeTab.value
