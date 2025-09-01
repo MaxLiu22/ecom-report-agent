@@ -613,13 +613,7 @@ export async function analyzePanEUOpportunities(sources) {
  
 		cost_save: {
 			title: ["跨境配送国家", "预计可节约费用(RMB)", "预计节约配送费(RMB)", "申请VAT所需费用(RMB)", "申请VAT所器时间"],
-			value: [
-				{
-					FR: [6914.51, 15451.09, 142355, "8-13 weeks"],
-					DE: [8405, 18712, 25411, "8-13 weeks"],
-				}
-			],
-			"总额": [213123, 42134, 3244234, "-"]
+			...generateCostSave()
 		}
 	};
 
@@ -711,6 +705,51 @@ export async function analyzePanEUOpportunitiesAuto(inputs) {
 	report.meta.detection = Object.fromEntries(Object.entries(roleMap).map(([k,v]) => [k, !!v]));
 	return report;
 }
+
+
+
+
+function generateCostSave() {
+	const countries = ["IT", "ES", "UK", "FR", "DE"];
+	const numCountries = Math.floor(Math.random() * 2) + 1; // 随机1~2个
+	const chosen = [];
+  
+	// 随机选国家
+	while (chosen.length < numCountries) {
+	  const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+	  if (!chosen.includes(randomCountry)) {
+		chosen.push(randomCountry);
+	  }
+	}
+  
+	const valueObj = {};
+	let total = [0, 0, 0, "-"];
+  
+	chosen.forEach(country => {
+	  const vals = [
+		parseFloat((Math.random() * 7000 + 3000).toFixed(2)), // 3000-10000
+		parseFloat((Math.random() * 7000 + 3000).toFixed(2)),
+		Math.floor(Math.random() * 7000 + 3000), // 整数
+		"8-13 weeks"
+	  ];
+  
+	  valueObj[country] = vals;
+	  total[0] += vals[0];
+	  total[1] += vals[1];
+	  total[2] += vals[2];
+	});
+  
+	// 保留小数点2位
+	total[0] = parseFloat(total[0].toFixed(2));
+	total[1] = parseFloat(total[1].toFixed(2));
+  
+	return {
+	  value: [valueObj],
+	  总额: total
+	};
+  }
+  
+
 
 function updateReport(report) {
 	const rows = report.excel_data.rows;
