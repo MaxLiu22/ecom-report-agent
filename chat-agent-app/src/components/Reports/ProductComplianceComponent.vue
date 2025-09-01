@@ -133,7 +133,7 @@
 
         <!-- GPSR通用产品安全法规 -->
         <div class="gpsr-section">
-          <h4 class="regulation-title">✓ 通用产品安全法规（GPSR）</h4>
+          <h4 class="regulation-title">✓ 通用产品安全法规（<a href="https://m.media-amazon.com/images/G/01/Central-compliance-team/GPSR_Guide_Book.pdf" target="_blank" rel="noopener noreferrer" class="link">GPSR</a>）</h4>
           
           <table class="compliance-table">
             <thead>
@@ -170,35 +170,35 @@
 
         <!-- EPR欧盟生产者责任延伸 -->
         <div class="epr-section">
-          <h4 class="regulation-title">✓ 欧盟生产者责任延伸（EPR）</h4>
+          <h4 class="regulation-title">✓ 欧盟生产者责任延伸（<a href="https://sellercentral.amazon.de/help/hub/reference/external/GYDCAK9ZR6VJH2X3?locale=zh-CN&ld=ASCNAGSDirect&ldStackingCodes=ASCNAGSDirect" target="_blank" rel="noopener noreferrer" class="link">EPR</a>）</h4>
           
           <div class="epr-items">
             <div class="epr-item">
               <span class="bullet">•</span>
               <span class="epr-text">
-                <strong>欧盟电池法规（EU Batteries）</strong><br>
+                <strong><a href="https://sellercentral.amazon.es/help/hub/reference/external/GPVDATLHQ6PRQNSW?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">欧盟电池法规（EU Batteries）</a></strong><br>
                 自2025年8月18日起，亚马逊将停售在【德国、典典、波兰、荷兰】的不合规商品。【法国】可通过亚马逊提供的代付服务完成合规，其他欧盟国家未来可能会允许亚马逊提供代付服务（具体待定）。
               </span>
             </div>
             
             <div class="epr-item">
               <span class="bullet">•</span>
-              <span class="epr-text"><strong>德国包装法（LUCID）</strong></span>
+              <span class="epr-text"><strong>德国包装法（<a href="https://sellercentral.amazon.de/help/hub/reference/external/G6SQMSCSKWJQEPJQ?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">LUCID</a>）</strong></span>
             </div>
             
             <div class="epr-item">
               <span class="bullet">•</span>
-              <span class="epr-text"><strong>德国电气与电子设备废料指令（WEEE）</strong></span>
+              <span class="epr-text"><strong>德国电气与电子设备废料指令（<a href="https://sellercentral.amazon.de/help/hub/reference/external/GY97WLQDLFH2SNBY?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">WEEE</a>）</strong></span>
             </div>
             
             <div class="epr-item">
               <span class="bullet">•</span>
-              <span class="epr-text"><strong>法国（FR EPR，可代付）</strong></span>
+              <span class="epr-text"><strong>法国（<a href="https://sellercentral.amazon.de/help/hub/reference/external/GAZUTQC8RXT769H7?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">FR EPR</a>，可代付）</strong></span>
             </div>
             
             <div class="epr-item">
               <span class="bullet">•</span>
-              <span class="epr-text"><strong>西班牙（ES EPR，可代付）</strong></span>
+              <span class="epr-text"><strong>西班牙（<a href="https://sellercentral.amazon.de/help/hub/reference/external/GZPPCN666MQJ9PQ8?locale=zh-CN" target="_blank" rel="noopener noreferrer" class="link">ES EPR</a>，可代付）</strong></span>
             </div>
           </div>
         </div>
