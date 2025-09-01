@@ -315,6 +315,8 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
 import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
 import { analyzeEUExpansionChecklist } from '@/services/checkliService.js';
+import {analyzeSingleEUChecklist} from '@/services/checkliService.js';
+import {analyzeSingleEUChecklistCSV} from '@/services/checkliServiceCsv.js';
 
 // PanEU state (新版自动识别示例)
 const panEURawFiles = ref([]);            // 用户原始选择的文件
@@ -355,7 +357,22 @@ async function analyzePanEU(){
   panEULoading.value=true;
   try {
     if(panEUAutoMode.value){
-      panEUReport.value = await analyzePanEUOpportunitiesAuto(panEURawFiles.value);
+
+    const matchingFiles = panEURawFiles.value.filter(file => 
+      file.name.toLowerCase().includes('eu_expansion_checkli'.toLowerCase())
+    );
+    const EUExpansionCheckliFile = matchingFiles[0]
+    // 根据扩展名决定用哪个解析函数
+    let analyzeResult;
+    if (EUExpansionCheckliFile.name.toLowerCase().endsWith('.csv')) {
+      analyzeResult = await analyzeSingleEUChecklistCSV(EUExpansionCheckliFile);
+    } else {
+      analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile);
+    }
+    const EUExpansionCheckli = analyzeResult.table_json
+
+
+      panEUReport.value = await analyzePanEUOpportunitiesAuto(panEURawFiles.value, EUExpansionCheckli);
     } else {
       const manual = classifyManual(panEURawFiles.value);
       panEUReport.value = await analyzePanEUOpportunities(manual);
