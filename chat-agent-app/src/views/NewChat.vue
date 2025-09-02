@@ -69,23 +69,20 @@ const panEUText = `请上传以下文件以生成 PanEU 报告：
 1. 体检表 ✓
    路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV 
 
-2. ASIN list ✓
-   路径：CN Paid Service EU Expansion Dashboard → part2.ASIN list → export to CSV
-
-3. SKU report ✓
+2. SKU report ✓
    路径：卖家欧洲站后台 → 菜单 → 报告 → 销售成本和费用 → SKU成本报告
    → 商城选择英德法意西五国，数据汇总级别保持MSKU，日期范围设定义（建议选择过去365天）
    → 勾选"生成报告" → 在"库存基础费用和附加费"配送基础费用和附加费" → 生成报告 → 下载
 
-4. Pan-EU report ✓
+3. Pan-EU report ✓
    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 报告
    → 下载欧洲整合服务ASIN清单（第一个，此报告包含符合亚马逊物流欧洲整合服务注册条件的亚马逊物流 ASIN）
 
-5. 多国库存报告 ✓
+4. 多国库存报告 ✓
    路径：卖家欧洲站后台 → 报告 → 配送 → 在库存列表中点击"显示更多" → 多国库存 → 生成最新报告并下载
 
 【PanEU 报告可选文件】
-6. NL ASIN list ◯
+5. NL ASIN list ◯
    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list`;
 
 // DI 分析文件上传提示
@@ -96,20 +93,29 @@ const diText = `请上传以下文件以生成 DI 分析报告：
    路径：卖家欧洲后台 → 菜单 → 增长 → 选品指南针 → 下载推荐 → 商品列表
    → 下载全部（分别下载UK→DE/FR/IT/ES, DE→UK共5份报告）
 
+2. ASIN list ✓
+   路径：CN Paid Service EU Expansion Dashboard → part2.ASIN list → export to CSV
+
+3. SKU report ✓
+   路径：卖家欧洲站后台 → 菜单 → 报告 → 销售成本和费用 → SKU成本报告
+   → 商城选择英德法意西五国，数据汇总级别保持MSKU，日期范围设定义（建议选择过去365天）
+   → 勾选"生成报告" → 在"库存基础费用和附加费"配送基础费用和附加费" → 生成报告 → 下载
+
+
 【DI 分析可选文件】
-2. GSI Credit report (福利列表) ◯
+4. GSI Credit report (福利列表) ◯
    路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载福利列表
    备注：卖家若无GSI则无下载页面
 
-3. GSI Credit report (代金券明细) ◯
+5. GSI Credit report (代金券明细) ◯
    路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载代金券明细
    备注：卖家若无GSI则无下载页面
 
-4. Remote_Fulfillment_ASIN_Status_Report ◯
+6. Remote_Fulfillment_ASIN_Status_Report ◯
    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载ASIN资质报告
    备注：卖家若未开启远程配送，则无下载页面
 
-5. Remote_Fulfillment_Order_Report ◯
+7. Remote_Fulfillment_Order_Report ◯
    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载订单报告
    备注：卖家若未开启远程配送，则无下载页面`;
 
@@ -364,18 +370,6 @@ const startReportGeneration = async () => {
       addAgentMessage('DI 分析跳过（文件不足）');
     }
     
-    // 3. 调用 calculateCEECosts
-    // console.log('开始 CEE 成本计算...');
-    // addAgentMessage('正在计算 CEE 成本...');
-    
-    // // 从最后一个CEE表单消息中获取参数
-    // const lastCEEMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'cee-form');
-    // const soldCount = lastCEEMessage?.content?.germanSales || 10000;
-    // const hasPolishVAT = lastCEEMessage?.content?.polandTax || false;
-    // const hasCzechVAT = lastCEEMessage?.content?.czechTax || true;
-    
-    // ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
-    // addAgentMessage('CEE 成本计算完成 ✓');
     
     // 4. 生成行动总结
     const actionService = new ActionService(
@@ -527,11 +521,6 @@ const validatePanEUFiles = (files) => {
       found: false,
       displayName: '体检表'
     },
-    asin: { 
-      keywords: ['asin', 'list'], 
-      found: false,
-      displayName: 'ASIN list'
-    },
     sku: { 
       keywords: ['sku', 'cost', '成本'], 
       found: false,
@@ -589,6 +578,16 @@ const validateDIFiles = (files) => {
       keywords: ['List_of_recommendations'], 
       found: false,
       displayName: 'MPG report'
+    },
+    asin: { 
+      keywords: ['asin', 'list'], 
+      found: false,
+      displayName: 'ASIN list'
+    },
+    sku: { 
+      keywords: ['sku', 'cost', '成本'], 
+      found: false,
+      displayName: 'SKU report'
     }
   };
   

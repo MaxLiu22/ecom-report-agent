@@ -1,51 +1,4 @@
-/**
- * PanEU Opportunity Analysis Service
- * ----------------------------------
- * This service ingests four Excel files (provided as URLs or File/Blob objects),
- * analyzes PanEU listing synchronization status across DE/FR/IT/ES, and produces
- * a summarized opportunity report similar to the user provided JSON example.
- *
- * NOTE: The original Python scripts included in the repository (PanEU_Placement_Calculator_final.py / .txt)
- * focus on placement optimization & VAT cost saving per country (authorization perspective).
- * The desired output example from the user is a categorization of ASIN level listing coverage.
- * Therefore this implementation adapts the spirit of the logic and constructs reasonable
- * assumptions about column names and calculation methodology. These assumptions are marked with TODO.
- *
- * Inputs (expected 4 Excel files) – assumed mapping (adjust as needed):
- *   1. panEuReport:      Contains ASIN, offer status per country (DE/FR/IT/ES) and maybe historical PanEU flag
- *   2. skuReport:        Contains ASIN + annual fulfillment cost (column example: "亚马逊物流配送费用（总计）") per country code (DE/FR/IT/ES)
- *   3. inventoryReport:  (Optional for current classification) Could include FNSKU / inventory presence; used to filter active ASINs
- *   4. asinList:         A master list of ASINs to constrain scope (optional)
- *
- * Core Country Set: ['DE','FR','IT','ES']  (UK/NL excluded per user's table categories)
- * Classification Categories (heuristic – align with provided Chinese labels):
- *   - total: "总计" union of unique ASINs across all categories needing action (excluding those already fully synchronized)
- *   - can_join (可以加入PanEU的Asin): ASINs missing ALL Four? or not yet PanEU but have sales in >=1? (Assumption: missing >=2 countries & not previously flagged PanEU)
- *   - missing_1_2 (缺少1-2个国家的选品同步): Active in 2-3 countries (i.e., missing 1 or 2)
- *   - missing_3 (缺少3个国家的选品同步 (仅在德国销售)): Only 1 active country AND that country is DE
- *   - benefit_lost (PanEU福利失效的Asin): Previously had all 4 but now missing at least 1 (Assumption: has historicalPanEUFlag===true & current activeCountries <4 & >=1)
- *
- * Savings Estimation:
- *   We don't have the exact per-ASIN delta; approximate using skuReport costs:
- *     - Aggregate annual fulfillment cost for each ASIN across its listed countries.
- *     - Potential savings if fully synchronized assumed: cost * 0.5 * (missingCountries / 4)
- *     - Category savings = sum of potential savings for ASINs in category.
- *   This is a placeholder heuristic; replace with real logistics differential when available.
- *
- * Result Object Shape:
- * {
- *   report_title: 'PanEU选品拓展机会分析报告',
- *   report_subtitle: `基于您的PanEU Report自动生成 | 共分析 ${asinCount} 个ASIN`,
- *   note: '点击蓝色数字可查看对应的ASIN详情',
- *   opportunity_data: {
- *     headers: ['opportunityType','count','detail','recommendation','estimatedAnnualSavingsEUR'],
- *     rows: [ { ...categoryRow } ]
- *   },
- *   asin_details: { categoryKey: [ASIN,...] } // optional for drill-down
- * }
- *
- * External Dependency: 'xlsx' library (added in package.json)
- */
+
 
 import * as XLSX from 'xlsx';
 // 新增: 允许传入任意顺序的 4 个文件 (Excel / CSV)，自动根据列头识别角色。
@@ -87,8 +40,6 @@ const OFFER_COLS = {
 	ES: 'ES offer status'
 };
 
-// Historical PanEU flag (if exists). If not found we will infer from having all 4 active historically – omitted in this version
-const HISTORICAL_PAN_EU_FLAG = 'Historical PanEU'; // TODO adjust or remove if absent
 
 // -------------------- Utility Functions -------------------- //
 
@@ -120,10 +71,6 @@ function normalizeCost(value) {
 	return Number.isFinite(num) ? num : 0;
 }
 
-function formatCurrencyEUR(value) {
-	return `€${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
 // Determine active offer status (heuristic: contains '€' or numeric content)
 function isActiveOffer(cell) {
 	if (cell == null) return false;
@@ -139,7 +86,7 @@ function isActiveOffer(cell) {
 /**
  * 创建数据透视表结构，模拟 Excel 中的数据透视表
  */
-function createPivotTables(panEuRows, skuRows) {
+function createPivotTables(panEuRows) {
 	// Pan-EU status 透视表
 	const panEUStatus = new Map();
 	// Offer counts 透视表
@@ -360,7 +307,8 @@ function saveGetUnauthorizedCountries(expansionCheckli) {
 function saveCalculateCostSave(pvCost, unauthorizedCountries) {
 	const title = ["跨境配送国家", "预计可节约费用(RMB)", "预计节约配送费(RMB)", "申请VAT所需费用(RMB)", "申请VAT所需时间"];
   
-	const value = unauthorizedCountries.map(country => {
+	// 合并成一个对象
+	const valueObj = unauthorizedCountries.reduce((acc, country) => {
 	  const pv = pvCost[country] ?? 0;
 	  const saveUSD = pv / 2;
 	  const fbaFee = saveUSD * 2; // = pv
@@ -369,22 +317,23 @@ function saveCalculateCostSave(pvCost, unauthorizedCountries) {
 	  const vatTime = VAT_RATES[country]?.time ?? "-";
 	  const netSave = saveRMB - vatCost;
   
-	  return {
-		[country]: [netSave, saveRMB, vatCost, vatTime]
-	  };
-	});
+	  acc[country] = [netSave, saveRMB, vatCost, vatTime];
+	  return acc;
+	}, {});
   
 	// 计算总额
-	const totalNetSave = value.reduce((sum, item) => sum + Object.values(item)[0][0], 0);
-	const totalSaveRMB = value.reduce((sum, item) => sum + Object.values(item)[0][1], 0);
-	const totalVat = value.reduce((sum, item) => sum + Object.values(item)[0][2], 0);
+	const totalNetSave = Object.values(valueObj).reduce((sum, arr) => sum + arr[0], 0);
+	const totalSaveRMB = Object.values(valueObj).reduce((sum, arr) => sum + arr[1], 0);
+	const totalVat = Object.values(valueObj).reduce((sum, arr) => sum + arr[2], 0);
   
 	return {
 	  title,
-	  value,
+	  value: [valueObj], // 包装成数组
 	  总额: [totalNetSave, totalSaveRMB, totalVat, "-"]
 	};
   }
+  
+
 
 
   function oppAggregateIncRows(rows) {
@@ -567,20 +516,18 @@ function oppEnrichPanEuRows(panEuRows, aggregateInc) {
  * @param {string|File|Blob} sources.panEuReport
  * @param {string|File|Blob} sources.skuReport
  * @param {string|File|Blob} sources.inventoryReport
- * @param {string|File|Blob} sources.asinList
  * @returns {Promise<Object>} structured report object
  */
 export async function analyzePanEUOpportunities(sources) {
-	const { panEuReport, skuReport, inventoryReport, asinList, expansionCheckli } = sources;
+	const { panEuReport, skuReport, inventoryReport, expansionCheckli } = sources;
 	// Fetch and parse workbooks in parallel
 	const buffers = await Promise.all([
 		fetchArrayBuffer(panEuReport),
 		fetchArrayBuffer(skuReport),
 		fetchArrayBuffer(inventoryReport),
-		fetchArrayBuffer(asinList)
 	]);
 
-	const [wbPanEu, wbSku, wbInv, wbAsin] = buffers.map(readWorkbook);
+	const [wbPanEu, wbSku, wbInv] = buffers.map(readWorkbook);
 	const panEuRows = sheetToJson(wbPanEu);
 	const skuRows = sheetToJson(wbSku);
 	const IncRows = sheetToJson(wbInv);
@@ -612,7 +559,7 @@ export async function analyzePanEUOpportunities(sources) {
 	// 模拟 Cost saving model.xlsx 中 PanEU ASIN opp 页的计算逻辑
 
 	// 创建数据透视表数据结构
-	const pivotData = createPivotTables(panEuRows, skuRows);
+	const pivotData = createPivotTables(panEuRows);
 
 	// 分类统计（基于实际分析逻辑）- 需要先定义，因为后面计算H3和H6要用到
 	const categories = classifyASINsByExcelLogic(panEuRows);
@@ -645,42 +592,6 @@ export async function analyzePanEUOpportunities(sources) {
 	// J5: Dashboard!A18 * GETPIVOTDATA("成本节约",$A$23,"Missing Offer类型","失效PanEU ASIN")
 	const J5 = costSavingsData.dashboardA18 * costSavingsData.expiredPanEUCostSaving;
 
-	// 构建 Excel 风格的输出数据
-	// const excelData = {
-	// 	headers: ['EU4 ASIN', '#', '机会点及操作', '公式'],
-	// 	rows: [
-	// 		{
-	// 			metric: '可加入PanEU ASIN',
-	// 			count: H2, // 所有Eligible ASIN数量 = 134
-	// 			description: '',
-	// 			formula: ''
-	// 		},
-	// 		{
-	// 			metric: '缺少1至2个报价',
-	// 			count: categories.missing1to2.size,
-	// 			description: `同步ASIN预计可节省${(J3 * 7.4 / 1000).toFixed(1)}k RMB/年`,
-	// 			formula: J3.toFixed(2)
-	// 		},
-	// 		{
-	// 			metric: '缺少3个报价',
-	// 			count: categories.missing3.size,
-	// 			description: `同步ASIN预计可获得${(J4 * 7.4 / 1000).toFixed(1)}k RMB销售额`,
-	// 			formula: '-'
-	// 		},
-	// 		{
-	// 			metric: '失效PanEU ASIN',
-	// 			count: categories.expiredPanEU.size,
-	// 			description: `修复ASIN预计可节省${(J5 * 7.4 / 1000).toFixed(1)}k RMB/年`,
-	// 			formula: J5.toFixed(2)
-	// 		},
-	// 		{
-	// 			metric: '总计',
-	// 			count: H6,
-	// 			description: '',
-	// 			formula: ''
-	// 		}
-	// 	]
-	// };
 
 	// 向后兼容的数据结构
 	const legacyRows = excelData.rows.map(row => ({
@@ -782,11 +693,7 @@ export async function analyzePanEUOpportunitiesAuto(inputs, EUExpansionCheckli) 
 			role = 'skuReport';
 		} else if ((hasHeader(hs, 'quantity-for-local-fulfillment') || hasHeader(hs, 'fulfillment-channel-sku')) && (hasHeader(hs, 'asin') || hasHeader(hs, 'ASIN'))) {
 			role = 'inventoryReport';
-		} else if (hasHeader(hs, 'ASIN')) {
-			// 剩余作为 asinList 候选: 限制列数 <= 5 或不包含核心判定关键字
-			const suspicious = headerArr.filter(h => /offer status|亚马逊商城|物流配送费用|quantity-for-local-fulfillment/i.test(h));
-			if (suspicious.length === 0 && headerArr.length <= 10) role = 'asinList';
-		}
+		} 
 
 		if (!role) {
 			warnings.push('无法识别文件角色，已忽略一个文件。');
@@ -809,9 +716,7 @@ export async function analyzePanEUOpportunitiesAuto(inputs, EUExpansionCheckli) 
 		asinList: roleMap.asinList || roleMap.panEuReport, 
 		expansionCheckli: EUExpansionCheckli
 	});
-	// report = updateReport(report)
-	// report = calculateReportMetrics(report);
-	// report = updateOpportunity(report);
+
 
 	if (warnings.length) {
 		report.meta = report.meta || {};
@@ -821,143 +726,6 @@ export async function analyzePanEUOpportunitiesAuto(inputs, EUExpansionCheckli) 
 	return report;
 }
 
-
-
-
-function generateCostSave() {
-	const countries = ["IT", "ES", "UK", "FR", "DE"];
-	const numCountries = Math.floor(Math.random() * 2) + 1; // 随机1~2个
-	const chosen = [];
-  
-	// 随机选国家
-	while (chosen.length < numCountries) {
-	  const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-	  if (!chosen.includes(randomCountry)) {
-		chosen.push(randomCountry);
-	  }
-	}
-  
-	const valueObj = {};
-	let total = [0, 0, 0, "-"];
-  
-	chosen.forEach(country => {
-	  const vals = [
-		parseFloat((Math.random() * 7000 + 3000).toFixed(2)), // 3000-10000
-		parseFloat((Math.random() * 7000 + 3000).toFixed(2)),
-		Math.floor(Math.random() * 7000 + 3000), // 整数
-		"8-13 weeks"
-	  ];
-  
-	  valueObj[country] = vals;
-	  total[0] += vals[0];
-	  total[1] += vals[1];
-	  total[2] += vals[2];
-	});
-  
-	// 保留小数点2位
-	total[0] = parseFloat(total[0].toFixed(2));
-	total[1] = parseFloat(total[1].toFixed(2));
-  
-	return {
-	  value: [valueObj],
-	  总额: total
-	};
-  }
-  
-
-
-  function updateReport(report) {
-	const rows = report.excel_data.rows;
-  
-	rows.forEach(row => {
-	  // 逻辑1：count 为 0 时替换随机 10-100
-	  if (
-		(row.metric === "缺少1至2个报价" && row.count === 0) ||
-		(row.metric === "缺少3个报价" && row.count === 0) ||
-		(row.metric === "失效PanEU ASIN" && row.count === 0)
-	  ) {
-		row.count = Math.floor(Math.random() * 91) + 10; // 10~100
-	  }
-  
-	  // 逻辑2：description 中的 0.0 替换
-	  if (
-		row.metric === "缺少1至2个报价" &&
-		row.description.includes("同步ASIN预计可节省0.0k RMB/年")
-	  ) {
-		const val = (Math.random() * 5).toFixed(1); // 0.0~5.0
-		row.description = `同步ASIN预计可节省${val}k RMB/年`;
-	  }
-  
-	  if (
-		row.metric === "缺少3个报价" &&
-		row.description.includes("同步ASIN预计可获得0.0k RMB销售额")
-	  ) {
-		const val = (Math.random() * 5).toFixed(1);
-		row.description = `同步ASIN预计可获得${val}k RMB销售额`;
-	  }
-  
-	  if (
-		row.metric === "失效PanEU ASIN" &&
-		row.description.includes("修复ASIN预计可节省0.0k RMB/年")
-	  ) {
-		const val = (Math.random() * 5).toFixed(1);
-		row.description = `修复ASIN预计可节省${val}k RMB/年`;
-	  }
-	});
-  
-	return report;
-  }
-
-
-function updateOpportunity(report) { 
-	const rows = report.excel_data.rows;
-  
-	// 同步 opportunity_data
-	const oppRows = report.opportunity_data.rows;
-	const lastExcelRow = rows[rows.length - 1]; // excel_data.rows[-1] → 最后一行
-  
-	// 更新 opportunity_data.rows[0].count
-	oppRows[0].count = lastExcelRow.count;
-  
-	// 从 description 中提取数字（小数可能带 "k RMB"）
-	function extractNum(text) {
-	  const match = text.match(/([\d.]+)k/);
-	  return match ? parseFloat(match[1]) * 1000 : 0;
-	}
-  
-	const val1 = extractNum(rows[1].description); // 缺少1至2个报价
-	const val2 = extractNum(rows[2].description); // 缺少3个报价
-	const val3 = extractNum(rows[3].description); // 失效PanEU ASIN
-  
-	const total = val1 + val2 + val3;
-	oppRows[0].estimatedAnnualSavingsEUR = `${total.toFixed(2)}`;
-  
-	return report;
-	
-}
-
-
-
-  
-  
-function calculateReportMetrics(report) {
-	// 创建行的映射以便快速访问
-	const rowsMap = {};
-	report.excel_data.rows.forEach(row => {
-	  rowsMap[row.metric] = row;
-	});
-  
-	// 计算可加入PanEU ASIN的count
-	const missing1To2 = rowsMap['缺少1至2个报价']?.count || 0;
-	const missing3 = rowsMap['缺少3个报价']?.count || 0;
-	rowsMap['可加入PanEU ASIN'].count = missing1To2 + missing3;
-  
-	// 计算总计的count
-	const invalidPanEU = rowsMap['失效PanEU ASIN']?.count || 0;
-	rowsMap['总计'].count = missing1To2 + missing3 + invalidPanEU;
-  
-	return report;
-  }
 
 
 
