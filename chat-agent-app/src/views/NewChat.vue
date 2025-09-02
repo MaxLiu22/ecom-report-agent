@@ -351,13 +351,7 @@ const startReportGeneration = async () => {
     EUExpansionCheckli.value = analyzeResult.table_json
 
     const panEUFiles = allFiles; // 传递所有文件给分析函数
-    
-    if (panEUFiles.length >= 4) {
-      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
-      addAgentMessage('PanEU 分析完成 ✓');
-    } else {
-      addAgentMessage('PanEU 分析跳过（文件不足）');
-    }
+    panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
     
     // 2. 调用 analyzeDI
     console.log('开始 DI 分析...');
@@ -437,14 +431,9 @@ const submitCEEForm = async () => {
     }
     EUExpansionCheckli.value = analyzeResult.table_json
     const panEUFiles = allFiles; // 传递所有文件给分析函数
-    
-    if (panEUFiles.length >= 2) {
-      panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
-      addAgentMessage('PanEU 分析完成 ✓');
-    } else {
-      addAgentMessage('PanEU 分析跳过（文件不足）');
-    }
-    
+
+    panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
+   
     // 2. 调用 analyzeDI
     console.log('开始 DI 分析...');
     addAgentMessage('正在进行 DI 分析...');

@@ -244,24 +244,6 @@ function getRecommendation(metric) {
 }
 
 // -------------------- Core Analysis Logic -------------------- //
-
-function extractAsinOfferMatrix(panEuRows) {
-	const map = new Map(); // ASIN -> { ASIN, activeCountries:Set, rawRow }
-	for (const row of panEuRows) {
-		const asin = row[COL_ASIN];
-		if (!asin) continue;
-		const entry = map.get(asin) || { ASIN: asin, activeCountries: new Set(), row };
-		for (const cc of CORE_COUNTRIES) {
-			const col = OFFER_COLS[cc];
-			if (col in row && isActiveOffer(row[col])) {
-				entry.activeCountries.add(cc);
-			}
-		}
-		map.set(asin, entry);
-	}
-	return map; // Map of ASIN -> entry
-}
-
 function buildCostIndex(skuRows) {
 	// returns Map(ASIN -> { totalCostEUR, perCountry: { DE: cost,... } })
 	const index = new Map();
@@ -403,27 +385,73 @@ function oppEnrichPanEuRows(panEuRows, aggregateInc) {
 }
 
 
-  function oppAddCostSaving(panEuRows, skuRows) {
+
+  
+
+//   function oppAddCostSaving(panEuRows, skuRows) {
+// 	const countries = ["DE", "FR", "IT", "ES"];
+  
+// 	return panEuRows.map(row => {
+// 	  let total = 0;
+  
+// 	  if (row["Missing Offer类型"] !== "其他") {
+// 		countries.forEach(country => {
+// 		  const offer = row[`${country} offer status`];
+// 		  if (typeof offer === "number") {
+// 			// 找到 skuRows 中匹配的记录
+// 			const sum = skuRows
+// 			  .filter(sku => sku.ASIN === row.ASIN && sku["亚马逊商城"] === country)
+// 			  .reduce((acc, sku) => {
+// 				const fee = sku["亚马逊物流移除订单费用（总计）"];
+// 				return acc + (fee ?? 0);
+// 			  }, 0);
+// 			total += sum;
+// 		  }
+// 		});
+// 	  }
+  
+// 	  return {
+// 		...row,
+// 		"成本节约": 0.5 * total
+// 	  };
+// 	});
+//   }
+
+
+
+
+
+function oppAddCostSaving(panEuRows, skuRows) {
 	const countries = ["DE", "FR", "IT", "ES"];
   
 	return panEuRows.map(row => {
-	  let total = 0;
-  
-	  if (row["Missing Offer类型"] !== "其他") {
-		countries.forEach(country => {
-		  const offer = row[`${country} offer status`];
-		  if (typeof offer === "number") {
-			// 找到 skuRows 中匹配的记录
-			const sum = skuRows
-			  .filter(sku => sku.ASIN === row.ASIN && sku["亚马逊商城"] === country)
-			  .reduce((acc, sku) => {
-				const fee = sku["亚马逊物流移除订单费用（总计）"];
-				return acc + (fee ?? 0);
-			  }, 0);
-			total += sum;
-		  }
-		});
+	  // 如果 Missing Offer类型 是 "其他"，直接 0
+	  if (row["Missing Offer类型"] === "其他") {
+		return {
+		  ...row,
+		  "成本节约": 0
+		};
 	  }
+  
+	  // 遍历 DE/FR/IT/ES
+	  let total = 0;
+	  countries.forEach(country => {
+		const offerStatus = row[`${country} offer status`];
+  
+		if (typeof offerStatus === "number") {
+		  // 找 skuRows 里 ASIN 相同 + 商城相同的记录
+		  const sum = skuRows
+			.filter(
+			  sku => sku.ASIN === row.ASIN && sku["亚马逊商城"] === country
+			)
+			.reduce((acc, sku) => {
+			  const fee = sku["亚马逊物流移除订单费用（总计）"];
+			  return acc + (fee ?? 0);
+			}, 0);
+  
+		  total += sum;
+		}
+	  });
   
 	  return {
 		...row,
@@ -431,23 +459,97 @@ function oppEnrichPanEuRows(panEuRows, aggregateInc) {
 	  };
 	});
   }
+  
 
 
-  function buildExcelData(panEuRows) {
+//   function oppAddCostSaving(skuRows, panEuRows) {
+// 	// 遍历 panEuRows
+// 	return panEuRows.map(panEu => {
+// 	  let costSaving = 0;
+  
+// 	  // 如果 Missing Offer 类型 不是 "其他"，才计算
+// 	  if (panEu["Missing Offer类型"] !== "其他") {
+// 		// 四个国家的循环检查
+// 		const countryMap = {
+// 		  "DE": "DE offer status",
+// 		  "FR": "FR offer status",
+// 		  "IT": "IT offer status",
+// 		  "ES": "ES offer status"
+// 		};
+  
+// 		for (const [country, offerField] of Object.entries(countryMap)) {
+// 		  const offerVal = panEu[offerField];
+  
+// 		  // 逻辑1：如果 offer status 是数字
+// 		  if (typeof offerVal === "number" && !isNaN(offerVal)) {
+// 			// 逻辑2：去 skuRows 查对应 ASIN + 国家，取 "亚马逊物流移除订单费用（总计）" 求和
+// 			const sum = skuRows
+// 			  .filter(
+// 				sku =>
+// 				  sku["ASIN"] === panEu["ASIN"] &&
+// 				  sku["亚马逊商城"] === country &&
+// 				  typeof sku["亚马逊物流移除订单费用（总计）"] === "number"
+// 			  )
+// 			  .reduce((acc, sku) => acc + sku["亚马逊物流移除订单费用（总计）"], 0);
+  
+// 			costSaving += sum;
+// 		  }
+// 		}
+  
+// 		// 最后乘 0.5
+// 		costSaving *= 0.5;
+// 	  }
+  
+// 	  // 在 panEuRows 每个对象后加上新字段
+// 	  return { ...panEu, 成本节约: costSaving };
+// 	});
+//   }
+
+  
+// 逻辑1
+function logic1(skuRows, panEuRows) {
+	// 第一步：筛选 ASIN
+	const asins = panEuRows
+	  .filter(row => row["Pan-EU status"] === "Eligible" && [2, 3].includes(row["有offer的国家数量"]))
+	  .map(row => row.ASIN);
+  
+	// 第二步 + 第三步
+	const total = skuRows
+	  .filter(sku => asins.includes(sku.ASIN))
+	  .reduce((acc, sku) => acc + (sku["亚马逊物流移除订单费用（总计）"] ?? 0), 0);
+  
+	return (total * 0.5).toFixed(2);
+  }
+  
+  // 逻辑2
+  function logic2(skuRows, panEuRows) {
+	// 第一步：筛选 ASIN
+	const asins = panEuRows
+	  .filter(row => row["Pan-EU status"] === "Enrolment ended")
+	  .map(row => row.ASIN);
+  
+	// 第二步 + 第三步
+	const total = skuRows
+	  .filter(sku => asins.includes(sku.ASIN))
+	  .reduce((acc, sku) => acc + (sku["亚马逊物流移除订单费用（总计）"] ?? 0), 0);
+  
+	return (total * 0.5).toFixed(2);
+  }
+
+
+  function buildExcelData(panEuRows, missing1to2_formula, expiredPanEU_formula) {
 	// helper: 计数
 	const countASIN = (filterFn) =>
 	  panEuRows.filter(filterFn).map(r => r.ASIN).length;
-  
+
 	// 更安全的求和：传 rows + 条件
-	const sumSaving = (rows, predicate) => {
-		const arr = Array.isArray(rows) ? rows : [];  // 确保是数组
-		return arr.reduce((sum, r) => {
-		  if (!predicate(r)) return sum;
-		  const saving = Number(r["成本节约"] ?? r.costSaving ?? 0);
-		  return sum + (Number.isFinite(saving) ? saving : 0);
+	const sumSaving = (predicate) => {
+		return panEuRows.reduce((sum, r) => {
+		if (!predicate(r)) return sum;
+		const saving = Number(r["成本节约"] ?? r.costSaving ?? 0);
+		return sum + (Number.isFinite(saving) ? saving : 0);
 		}, 0);
-	  };
-	  
+	};
   
 	// 1. 可加入PanEU ASIN
 	const joinPanEU_count = countASIN(r => r["Pan-EU status"] === "Eligible" && r.Inv !== 0);
@@ -456,42 +558,50 @@ function oppEnrichPanEuRows(panEuRows, aggregateInc) {
 	const missing3_count = countASIN(r => r["Pan-EU status"] === "Eligible" && r["有offer的国家数量"] === 1);
   
 	// 3. 缺少1至2个报价 → 公式 = sum(成本节约【缺少1至2个报价】) * RATE
-	const missing1to2_formula = sumSaving(r => r["Missing Offer类型"] === "缺少1至2个报价") * RATE;
+	// const missing1to2_formula = sumSaving(r => r["Missing Offer类型"] === "缺少1至2个报价") * RATE;
   
 	// 缺少1至2个报价 → count = 可加入PanEU ASIN.count - 缺少3个报价.count
 	const missing1to2_count = joinPanEU_count - missing3_count;
   
 	// 4. 失效PanEU ASIN
 	const expiredPanEU_count = countASIN(r => r["Pan-EU status"] === "Enrolment ending soon");
-	const expiredPanEU_formula = sumSaving(r => r["Missing Offer类型"] === "失效PanEU ASIN") * RATE;
+	// const expiredPanEU_formula = sumSaving(r => r["Missing Offer类型"] === "失效PanEU ASIN") * RATE;
   
 	// 5. 总计
 	const total_formula = joinPanEU_count + expiredPanEU_count;
   
 	const excelData = {
-	  headers: ['EU4 ASIN', '#', '机会点及操作', '公式'],
+	  headers: ['EU4 ASIN', '#', '机会点', '行动建议', '操作', '公式'],
 	  rows: [
 		{
 		  metric: '可加入PanEU ASIN',
 		  count: joinPanEU_count,
+		  operationPoint: "没有同步选品，导致：1. 未同步选品的国家产生远程配送费，不能享受本地配送费 2. 转化率低于本地配送的Asin",
+		  action: '在德法意西四国荷同步选品，以获取PanEU福利（本地配送费）',
 		  description: '',
 		  formula: ''
 		},
 		{
 		  metric: '缺少1至2个报价',
 		  count: missing1to2_count,
+		  operationPoint: "",
+		  action: '仅需同步1-2国选品',
 		  description: `同步ASIN预计可节省${missing1to2_formula} RMB/年`,
 		  formula: missing1to2_formula
 		},
 		{
 		  metric: '缺少3个报价',
 		  count: missing3_count,
+		  operationPoint: "",
+		  action: '需同步3国选品',
 		  description: `同步ASIN预计可获得- RMB销售额`,
 		  formula: '-'
 		},
 		{
 		  metric: '失效PanEU ASIN',
 		  count: expiredPanEU_count,
+		  operationPoint: "部分国家offer失效，面临失去泛欧福利的风险。\n（泛欧资格中断后有14天宽限期，需在期限内恢复四国销售状态）",
+		  action: '尽快恢复失效offer，通过LOSG/BIL工具快速实现ASIN同步',
 		  description: `修复ASIN预计可节省${expiredPanEU_formula} RMB/年`,
 		  formula: expiredPanEU_formula
 		},
@@ -551,7 +661,10 @@ export async function analyzePanEUOpportunities(sources) {
 	const cost_saving = oppAddCostSaving(enrichPanEuRows, skuRows)
 	
 
-	const excelData = buildExcelData(cost_saving)
+	const missing1to2_formula = logic1(skuRows, cost_saving)
+	const expiredPanEU_formula = logic2(skuRows, cost_saving)
+
+	const excelData = buildExcelData(cost_saving, missing1to2_formula, expiredPanEU_formula)
 
 
 

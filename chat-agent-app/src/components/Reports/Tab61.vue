@@ -880,13 +880,15 @@
               <table style="width:100%; border-collapse:collapse; font-size:12px; background:#ffffff; border:1px solid #ddd; border-radius:4px;">
                 <thead>
                   <tr>
-                    <th v-for="header in panEUResult.excel_data.headers.slice(0, 3)" :key="header" style="background:#333; color:white; padding:12px 8px; text-align:center; border-right:1px solid #555;">{{ header }}</th>
+                    <th v-for="header in panEUResult.excel_data.headers.slice(0, 5)" :key="header" style="background:#333; color:white; padding:12px 8px; text-align:center; border-right:1px solid #555;">{{ header }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
                     <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.metric }}</td>
                     <td style="padding:10px 8px; border:1px solid #ddd; text-align:center; font-weight:bold; color:#333;">{{ row.count }}</td>
+                    <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.operationPoint }}</td>
+                    <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.action }}</td>
                     <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.description }}</td>
                     <!-- <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.formula }}</td> -->
                   </tr>
