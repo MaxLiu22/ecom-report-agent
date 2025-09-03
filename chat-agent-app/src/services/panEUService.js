@@ -516,7 +516,7 @@ function logic1(skuRows, panEuRows) {
 	// 第二步 + 第三步
 	const total = skuRows
 	  .filter(sku => asins.includes(sku.ASIN))
-	  .reduce((acc, sku) => acc + (sku["亚马逊物流移除订单费用（总计）"] ?? 0), 0);
+	  .reduce((acc, sku) => acc + (sku["亚马逊物流配送费用（总计）"] ?? 0), 0);
   
 	return (total * 0.5).toFixed(2);
   }
@@ -531,7 +531,7 @@ function logic1(skuRows, panEuRows) {
 	// 第二步 + 第三步
 	const total = skuRows
 	  .filter(sku => asins.includes(sku.ASIN))
-	  .reduce((acc, sku) => acc + (sku["亚马逊物流移除订单费用（总计）"] ?? 0), 0);
+	  .reduce((acc, sku) => acc + (sku["亚马逊物流配送费用（总计）"] ?? 0), 0);
   
 	return (total * 0.5).toFixed(2);
   }
