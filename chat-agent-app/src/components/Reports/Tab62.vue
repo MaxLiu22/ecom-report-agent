@@ -36,7 +36,7 @@
             英国和欧盟间物流方案的对比和建议
           </h4>
         </div>
-        <div
+        <!-- <div
           style="
             background: #232f3e;
             color: white;
@@ -313,7 +313,16 @@
               </td>
             </tr>
           </tbody>
-        </table>
+        </table> -->
+        <!-- 插入双边入库图片 -->
+        <div class="logistics-image-container">
+          <img
+            src="@/assets/双边入库.jpg"
+            alt="英国和欧盟间双边入库物流方案示意图"
+            class="logistics-diagram"
+          />
+          <!-- <p class="image-caption">英国和欧盟间双边入库物流方案示意图</p> -->
+        </div>
       </div>
     </div>
 
@@ -330,52 +339,134 @@
       </div>
       <div class="section-content">
         <div v-if="diResult">
-          <h4 style="color: #333; font-size: 16px; margin: 10px 0;">{{ diResult.report_title }}</h4>
+          <h4 style="color: #333; font-size: 16px; margin: 10px 0">{{ diResult.report_title }}</h4>
 
           <!-- 关键机会分析 -->
-            <div v-if="diResult.key_opportunity_analysis" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #333;">
-              <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.title }}</h5>
-              <p style="color: #666; font-size: 13px; margin: 0 0 10px 0;">{{ diResult.key_opportunity_analysis.subtitle }}</p>
-              <ul style="margin: 0; padding-left: 20px;">
-                <li v-for="point in diResult.key_opportunity_analysis.points" :key="point.title" style="color: #555; font-size: 13px; margin: 5px 0;">
-                  <strong>{{ point.title }}:</strong> {{ point.description }}
-                </li>
-              </ul>
-            </div>
+          <div
+            v-if="diResult.key_opportunity_analysis"
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: #f8f9fa;
+              border-radius: 6px;
+              border-left: 4px solid #333;
+            "
+          >
+            <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0">
+              {{ diResult.key_opportunity_analysis.title }}
+            </h5>
+            <p style="color: #666; font-size: 13px; margin: 0 0 10px 0">
+              {{ diResult.key_opportunity_analysis.subtitle }}
+            </p>
+            <ul style="margin: 0; padding-left: 20px">
+              <li
+                v-for="point in diResult.key_opportunity_analysis.points"
+                :key="point.title"
+                style="color: #555; font-size: 13px; margin: 5px 0"
+              >
+                <strong>{{ point.title }}:</strong> {{ point.description }}
+              </li>
+            </ul>
+          </div>
 
-            <!-- 推荐行动 -->
-            <div v-if="diResult.recommended_actions" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #333;">
-              <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">{{ diResult.recommended_actions.title }}</h5>
-              <ol style="margin: 0; padding-left: 20px;">
-                <li v-for="action in diResult.recommended_actions.actions" :key="action.priority" style="color: #555; font-size: 13px; margin: 8px 0;">
-                  <span style="background: #333; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 8px;">P{{ action.priority }}</span>
-                  {{ action.recommendation }}
-                </li>
-              </ol>
-            </div>
+          <!-- 推荐行动 -->
+          <div
+            v-if="diResult.recommended_actions"
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: #f8f9fa;
+              border-radius: 6px;
+              border-left: 4px solid #333;
+            "
+          >
+            <h5 style="color: #333; font-size: 14px; margin: 0 0 10px 0">
+              {{ diResult.recommended_actions.title }}
+            </h5>
+            <ol style="margin: 0; padding-left: 20px">
+              <li
+                v-for="action in diResult.recommended_actions.actions"
+                :key="action.priority"
+                style="color: #555; font-size: 13px; margin: 8px 0"
+              >
+                <span
+                  style="
+                    background: #333;
+                    color: white;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 10px;
+                    font-weight: bold;
+                    margin-right: 8px;
+                  "
+                  >P{{ action.priority }}</span
+                >
+                {{ action.recommendation }}
+              </li>
+            </ol>
+          </div>
 
-            <!-- 数据表 -->
-            <div v-if="diResult.data_table" style="margin: 20px 0;">
-              <h5 style="color: #333; font-size: 14px; margin-bottom: 15px;">数据表</h5>
-              <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border: 1px solid #ddd; border-radius: 4px;">
-                  <thead>
-                    <tr>
-                      <th v-for="header in diResult.data_table.headers" :key="header" style="background: #333; color: white; padding: 12px 8px; text-align: center; border-right: 1px solid #555;">{{ header }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="row in diResult.data_table.rows" :key="row['#']">
-                      <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['#'] }}</td>
-                      <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['UK<>EU ASIN'] }}</td>
-                      <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: #333;">{{ row['数量'] }}</td>
-                      <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center;">{{ row['来源商城销售额(T30D)'] }}</td>
-                      <td style="padding: 10px 8px; border: 1px solid #ddd;">{{ row['机会点及操作'] }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          <!-- 数据表 -->
+          <div v-if="diResult.data_table" style="margin: 20px 0">
+            <h5 style="color: #333; font-size: 14px; margin-bottom: 15px">数据表</h5>
+            <div style="overflow-x: auto">
+              <table
+                style="
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 12px;
+                  background: #ffffff;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                "
+              >
+                <thead>
+                  <tr>
+                    <th
+                      v-for="header in diResult.data_table.headers"
+                      :key="header"
+                      style="
+                        background: #333;
+                        color: white;
+                        padding: 12px 8px;
+                        text-align: center;
+                        border-right: 1px solid #555;
+                      "
+                    >
+                      {{ header }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in diResult.data_table.rows" :key="row['#']">
+                    <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center">
+                      {{ row['#'] }}
+                    </td>
+                    <td style="padding: 10px 8px; border: 1px solid #ddd">
+                      {{ row['UK<>EU ASIN'] }}
+                    </td>
+                    <td
+                      style="
+                        padding: 10px 8px;
+                        border: 1px solid #ddd;
+                        text-align: center;
+                        font-weight: bold;
+                        color: #333;
+                      "
+                    >
+                      {{ row['数量'] }}
+                    </td>
+                    <td style="padding: 10px 8px; border: 1px solid #ddd; text-align: center">
+                      {{ row['来源商城销售额(T30D)'] }}
+                    </td>
+                    <td style="padding: 10px 8px; border: 1px solid #ddd">
+                      {{ row['机会点及操作'] }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+          </div>
         </div>
         <div v-else class="no-data">
           <p>暂无 DI 分析数据</p>
@@ -395,7 +486,7 @@ export default {
       default: null,
     },
   },
-  components: { IntraEUService }
+  components: { IntraEUService },
 }
 </script>
 <style scoped>
@@ -405,15 +496,40 @@ export default {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
 }
-.intraeu-wrapper { margin: 30px 0 10px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; }
-.intraeu-wrapper :deep(.container){ background:#fff; padding:24px 24px 10px; max-width:100%; }
-.intraeu-wrapper :deep(.section){ box-shadow:none; border:1px solid #f1f3f5; border-radius:8px; margin-bottom:24px; }
-.intraeu-wrapper :deep(.section-title){ background:linear-gradient(90deg,#2d3748,#4a5568); padding:14px 18px; font-size:16px; }
-.intraeu-wrapper :deep(.section-content){ padding:18px 20px 22px; }
+.intraeu-wrapper {
+  margin: 30px 0 10px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.intraeu-wrapper :deep(.container) {
+  background: #fff;
+  padding: 24px 24px 10px;
+  max-width: 100%;
+}
+.intraeu-wrapper :deep(.section) {
+  box-shadow: none;
+  border: 1px solid #f1f3f5;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+.intraeu-wrapper :deep(.section-title) {
+  background: linear-gradient(90deg, #2d3748, #4a5568);
+  padding: 14px 18px;
+  font-size: 16px;
+}
+.intraeu-wrapper :deep(.section-content) {
+  padding: 18px 20px 22px;
+}
 .intraeu-wrapper :deep(.feature-box),
 .intraeu-wrapper :deep(.gift-package),
-.intraeu-wrapper :deep(.case-study){ background:#f8f9fa; }
-.intraeu-wrapper :deep(.container){ min-height:initial; }
+.intraeu-wrapper :deep(.case-study) {
+  background: #f8f9fa;
+}
+.intraeu-wrapper :deep(.container) {
+  min-height: initial;
+}
 .sub-tab-panel h2 {
   margin: 0 0 12px;
   font-size: 22px;
@@ -450,7 +566,90 @@ export default {
   font-size: 14px;
   line-height: 1.5;
 }
-.section-content { padding: 24px; }
-.no-data { text-align: center; padding: 40px; color: #999; font-size: 14px; }
-.no-data p { margin: 0; }
+.section-content {
+  padding: 24px;
+}
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 14px;
+}
+.no-data p {
+  margin: 0;
+}
+/* 图片容器样式 */
+.logistics-image-container {
+  margin: 30px 0;
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transition: all 0.3s ease;
+}
+
+.logistics-image-container:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* 图片样式 */
+.logistics-diagram {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border: 2px solid #ffffff;
+}
+
+.logistics-diagram:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* 图片说明文字样式 */
+.image-caption {
+  margin: 16px 0 0 0;
+  font-size: 14px;
+  color: #495057;
+  font-weight: 500;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+  backdrop-filter: blur(5px);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .logistics-image-container {
+    margin: 20px 0;
+    padding: 15px;
+  }
+  
+  .logistics-diagram {
+    border-radius: 6px;
+  }
+  
+  .image-caption {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logistics-image-container {
+    margin: 15px 0;
+    padding: 12px;
+  }
+  
+  .image-caption {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
 </style>
