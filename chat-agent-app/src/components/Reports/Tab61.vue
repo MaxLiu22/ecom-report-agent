@@ -446,241 +446,239 @@
         </div>
         <!-- PanEU 成本节约 -->
         <div
+          style="
+            margin-top: 20px;
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+          "
+        >
+          <h5
+            style="
+              color: #333;
+              font-size: 14px;
+              font-weight: 600;
+              margin: 0 0 15px 0;
+              padding-bottom: 8px;
+              border-bottom: 2px solid #333;
+            "
+          >
+            启用PanEU国家仓储获得配送费用节约
+          </h5>
+          <div v-if="panEUResult && panEUResult.cost_save">
+            <table
               style="
-                margin-top: 20px;
-                padding: 20px;
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 10px;
                 background: #ffffff;
                 border: 1px solid #ddd;
-                border-radius: 6px;
+                border-radius: 4px;
+                margin-bottom: 10px;
               "
             >
-              <h5
-                style="
-                  color: #333;
-                  font-size: 14px;
-                  font-weight: 600;
-                  margin: 0 0 15px 0;
-                  padding-bottom: 8px;
-                  border-bottom: 2px solid #333;
-                "
-              >
-                启用PanEU国家仓储获得配送费用节约
-              </h5>
-              <div v-if="panEUResult && panEUResult.cost_save">
-                <table
-                  style="
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 10px;
-                    background: #ffffff;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    margin-bottom: 10px;
-                  "
-                >
-                  <thead>
-                    <tr>
-                      <th
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          padding: 10px 8px;
-                          text-align: center;
-                          border-right: 1px solid #555;
-                          font-size: 9px;
-                        "
-                      >
-                        跨境配送国家
-                      </th>
-                      <th
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          padding: 10px 8px;
-                          text-align: center;
-                          border-right: 1px solid #555;
-                          font-size: 9px;
-                        "
-                      >
-                        预计可节约费用(RMB)
-                      </th>
-                      <th
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          padding: 10px 8px;
-                          text-align: center;
-                          border-right: 1px solid #555;
-                          font-size: 9px;
-                        "
-                      >
-                        预计节约配送费(RMB)
-                      </th>
-                      <th
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          padding: 10px 8px;
-                          text-align: center;
-                          border-right: 1px solid #555;
-                          font-size: 9px;
-                        "
-                      >
-                        申请VAT所需费用(RMB)**
-                      </th>
-                      <th
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          padding: 10px 8px;
-                          text-align: center;
-                          font-size: 9px;
-                        "
-                      >
-                        申请VAT所需时间
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- 动态生成国家行 -->
-                    <tr v-for="(data, country) in panEUResult.cost_save.value[0]" :key="country">
-                      <td
-                        style="
-                          background: #f8f9fa;
-                          color: #333;
-                          font-weight: 600;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ country }}
-                      </td>
-                      <td
-                        style="
-                          color: #333;
-                          font-weight: 500;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ formatNumber(data[0]) }}
-                      </td>
-                      <td
-                        style="
-                          color: #333;
-                          font-weight: 500;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ formatNumber(data[1]) }}
-                      </td>
-                      <td
-                        style="
-                          color: #333;
-                          font-weight: 500;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ formatNumber(data[2]) }}
-                      </td>
-                      <td
-                        style="
-                          color: #333;
-                          font-size: 9px;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ data[3] }}
-                      </td>
-                    </tr>
-                    <!-- 总额行 -->
-                    <tr style="background: #333">
-                      <td
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          font-size: 11px;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        总额
-                      </td>
-                      <td
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          font-size: 11px;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ formatNumber(panEUResult.cost_save['总额'][0]) }}
-                      </td>
-                      <td
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          font-size: 11px;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ formatNumber(panEUResult.cost_save['总额'][1]) }}
-                      </td>
-                      <td
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          font-size: 11px;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ formatNumber(panEUResult.cost_save['总额'][2]) }}
-                      </td>
-                      <td
-                        style="
-                          background: #333;
-                          color: white;
-                          font-weight: 600;
-                          font-size: 11px;
-                          padding: 8px;
-                          border: 1px solid #ddd;
-                          text-align: center;
-                        "
-                      >
-                        {{ panEUResult.cost_save['总额'][3] }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div v-else style="text-align: center; padding: 20px; color: #999;">
-                暂无成本节约数据
-              </div>
-            </div>
+              <thead>
+                <tr>
+                  <th
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      padding: 10px 8px;
+                      text-align: center;
+                      border-right: 1px solid #555;
+                      font-size: 9px;
+                    "
+                  >
+                    跨境配送国家
+                  </th>
+                  <th
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      padding: 10px 8px;
+                      text-align: center;
+                      border-right: 1px solid #555;
+                      font-size: 9px;
+                    "
+                  >
+                    预计可节约费用(RMB)
+                  </th>
+                  <th
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      padding: 10px 8px;
+                      text-align: center;
+                      border-right: 1px solid #555;
+                      font-size: 9px;
+                    "
+                  >
+                    预计节约配送费(RMB)
+                  </th>
+                  <th
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      padding: 10px 8px;
+                      text-align: center;
+                      border-right: 1px solid #555;
+                      font-size: 9px;
+                    "
+                  >
+                    申请VAT所需费用(RMB)**
+                  </th>
+                  <th
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      padding: 10px 8px;
+                      text-align: center;
+                      font-size: 9px;
+                    "
+                  >
+                    申请VAT所需时间
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- 动态生成国家行 -->
+                <tr v-for="(data, country) in panEUResult.cost_save.value[0]" :key="country">
+                  <td
+                    style="
+                      background: #f8f9fa;
+                      color: #333;
+                      font-weight: 600;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ country }}
+                  </td>
+                  <td
+                    style="
+                      color: #333;
+                      font-weight: 500;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ formatNumber(data[0]) }}
+                  </td>
+                  <td
+                    style="
+                      color: #333;
+                      font-weight: 500;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ formatNumber(data[1]) }}
+                  </td>
+                  <td
+                    style="
+                      color: #333;
+                      font-weight: 500;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ formatNumber(data[2]) }}
+                  </td>
+                  <td
+                    style="
+                      color: #333;
+                      font-size: 9px;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ data[3] }}
+                  </td>
+                </tr>
+                <!-- 总额行 -->
+                <tr style="background: #333">
+                  <td
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      font-size: 11px;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    总额
+                  </td>
+                  <td
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      font-size: 11px;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ formatNumber(panEUResult.cost_save['总额'][0]) }}
+                  </td>
+                  <td
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      font-size: 11px;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ formatNumber(panEUResult.cost_save['总额'][1]) }}
+                  </td>
+                  <td
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      font-size: 11px;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ formatNumber(panEUResult.cost_save['总额'][2]) }}
+                  </td>
+                  <td
+                    style="
+                      background: #333;
+                      color: white;
+                      font-weight: 600;
+                      font-size: 11px;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      text-align: center;
+                    "
+                  >
+                    {{ panEUResult.cost_save['总额'][3] }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else style="text-align: center; padding: 20px; color: #999">暂无成本节约数据</div>
+        </div>
         <!-- 商品资格说明 -->
         <div
           style="
@@ -735,7 +733,7 @@
                     width: 35%;
                   "
                 >
-                  禁售
+                  举例
                 </th>
                 <th
                   style="
@@ -747,7 +745,7 @@
                     width: 50%;
                   "
                 >
-                  限制
+                  原因
                 </th>
               </tr>
             </thead>
@@ -763,13 +761,15 @@
                     border: 1px solid #ddd;
                   "
                 >
-                  酒类<br />Food
+                  食品<br />Food
                 </td>
                 <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  一般人烹调类、春节小杂、篱笆看台
+                  一般人类食品、食品补充剂、婴儿食品
                 </td>
                 <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  除非获得EU的相关食品安全认证，否则无法在欧盟销售；<br />如果注册EU的相关认证，存在专业工厂专业生产线认证，运输总价29周的，<br />总价值限制为2000欧元，上述限制内商品可在全欧盟内销售。
+                  欧盟法规(包括EUI0等)要求食品必须有当地语言标签。<br />
+                  由于目前无法确保规模合规，所有食品(更广义上的可食用品)默认被排除在泛欧销售之外。<br />
+                  含馆饮料、酒待和加啡因额外税收要求而被排除
                 </td>
               </tr>
               <tr style="background: #f8f9fa">
@@ -783,13 +783,13 @@
                     border: 1px solid #ddd;
                   "
                 >
-                  汽车零件<br />Auto motive
+                  子类别产品<br />Subcat
                 </td>
                 <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  电子产品、车外后视镜(WK连接)、安规气外后电器、高正压(WK连接)、门锁(WK连接)、连接线(WK连接)、汽车工具(WK连接)、高压、安规线(WK连接)、咖啡工、基础润滑(WK连接)、门连线、下滑、工程主体
+                  医疗设备、婴儿汽车座椅(仅限英国)、BB枪/气枪/彩单枪、自电子烟配件、化肥、家具(仅限美国)、燃气烧烤炉、礼品卡、用药品、宠物药品、机油、金刚石切制片
                 </td>
                 <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  汽车零件需要，手动制与当地的实验室认证，生产过程注册统一认证标识，各国最新认证文件一致性登录认证平台数据
+                  欧盟国家法律差异非本地库存可能带来家全和客户信任/公关风险，目无可扩展机制确保符合相关国内要求
                 </td>
               </tr>
               <tr>
@@ -803,13 +803,13 @@
                     border: 1px solid #ddd;
                   "
                 >
-                  玩具<br />Toys
+                  危险品<br />Hazmat
                 </td>
                 <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  儿童用品、蒙古用、灯具、安规、轮胎、室内娱乐等
+                  清洁剂、医疗设备、化肥、衣药、粘合剂、害虫控制设备
                 </td>
                 <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  玩具大类产品都需要REACH/LVD等认证，包括各类成套塑料等的测试
+                  无法大规模验证REACH/CLP合规性，包括多语言安全数据表和本地语言标签要求
                 </td>
               </tr>
               <tr style="background: #f8f9fa">
@@ -823,16 +823,16 @@
                     border: 1px solid #ddd;
                   "
                 >
-                  喷雾类<br />Sprays
+                  物理特性<br />physical(H&B)
                 </td>
                 <td style="color: #333; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  喷雾类化学、化妆品、清洁类、定制类
+                  重型非分类、轻型大件、真正重型大件
                 </td>
                 <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd">
-                  空气方面的危险品认定REACH/LVD认证，包括各类专业技术条件销售数据
+                  成本和运输眼制排除重型大件物品，标准因国家而异(如荷兰周长>300cm，其他>360cm)
                 </td>
               </tr>
-              <tr>
+              <!-- <tr>
                 <td
                   style="
                     background: #f8f9fa;
@@ -851,7 +851,7 @@
                 <td style="color: #555; font-size: 10px; padding: 10px; border: 1px solid #ddd">
                   需要达际到商务认证和相关证书，标识要符号等于产品功效现实定义，带磁类物<br />受限，商关和欧盟等经营产品功等期效期平<300克，高度<360mm
                 </td>
-              </tr>
+              </tr> -->
             </tbody>
           </table>
         </div>
@@ -865,31 +865,71 @@
     </div>
     <!-- 内容结束 -->
     <!-- PanEU 分析结果（追加展示） -->
-    <div class="analysis-section" style="margin-top:32px;" v-if="panEUResult">
+    <div class="analysis-section" style="margin-top: 32px" v-if="panEUResult">
       <div class="section-header">
-        <h3 style="margin:0;">🌍 PanEU 分析结果</h3>
-        <p class="section-description" style="margin:6px 0 0;">欧洲泛欧计划机会分析详情</p>
+        <h3 style="margin: 0">🌍 PanEU 分析结果</h3>
+        <p class="section-description" style="margin: 6px 0 0">欧洲泛欧计划机会分析详情</p>
       </div>
       <div class="section-content">
         <div>
-          <h4 style="color:#333; font-size:16px; margin:10px 0;" v-if="panEUResult.report_title">{{ panEUResult.report_title }}</h4>
-          <p style="color:#666; font-size:14px; margin:10px 0;" v-if="panEUResult.report_subtitle">{{ panEUResult.report_subtitle }}</p>
-          <div v-if="panEUResult.excel_data" style="margin:20px 0;">
-            <h5 style="color:#333; font-size:14px; margin-bottom:15px;">PanEU ASIN 机会概览</h5>
-            <div style="overflow-x:auto;">
-              <table style="width:100%; border-collapse:collapse; font-size:12px; background:#ffffff; border:1px solid #ddd; border-radius:4px;">
+          <h4 style="color: #333; font-size: 16px; margin: 10px 0" v-if="panEUResult.report_title">
+            {{ panEUResult.report_title }}
+          </h4>
+          <p
+            style="color: #666; font-size: 14px; margin: 10px 0"
+            v-if="panEUResult.report_subtitle"
+          >
+            {{ panEUResult.report_subtitle }}
+          </p>
+          <div v-if="panEUResult.excel_data" style="margin: 20px 0">
+            <h5 style="color: #333; font-size: 14px; margin-bottom: 15px">PanEU ASIN 机会概览</h5>
+            <div style="overflow-x: auto">
+              <table
+                style="
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 12px;
+                  background: #ffffff;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                "
+              >
                 <thead>
                   <tr>
-                    <th v-for="header in panEUResult.excel_data.headers.slice(0, 5)" :key="header" style="background:#333; color:white; padding:12px 8px; text-align:center; border-right:1px solid #555;">{{ header }}</th>
+                    <th
+                      v-for="header in panEUResult.excel_data.headers.slice(0, 5)"
+                      :key="header"
+                      style="
+                        background: #333;
+                        color: white;
+                        padding: 12px 8px;
+                        text-align: center;
+                        border-right: 1px solid #555;
+                      "
+                    >
+                      {{ header }}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
-                    <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.metric }}</td>
-                    <td style="padding:10px 8px; border:1px solid #ddd; text-align:center; font-weight:bold; color:#333;">{{ row.count }}</td>
-                    <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.operationPoint }}</td>
-                    <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.action }}</td>
-                    <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.description }}</td>
+                    <td style="padding: 10px 8px; border: 1px solid #ddd">{{ row.metric }}</td>
+                    <td
+                      style="
+                        padding: 10px 8px;
+                        border: 1px solid #ddd;
+                        text-align: center;
+                        font-weight: bold;
+                        color: #333;
+                      "
+                    >
+                      {{ row.count }}
+                    </td>
+                    <td style="padding: 10px 8px; border: 1px solid #ddd">
+                      {{ row.operationPoint }}
+                    </td>
+                    <td style="padding: 10px 8px; border: 1px solid #ddd">{{ row.action }}</td>
+                    <td style="padding: 10px 8px; border: 1px solid #ddd">{{ row.description }}</td>
                     <!-- <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.formula }}</td> -->
                   </tr>
                 </tbody>
@@ -899,11 +939,13 @@
         </div>
       </div>
     </div>
-    <div class="analysis-section" v-else style="margin-top:32px;">
+    <div class="analysis-section" v-else style="margin-top: 32px">
       <div class="section-header">
-        <h3 style="margin:0;">🌍 PanEU 分析结果</h3>
+        <h3 style="margin: 0">🌍 PanEU 分析结果</h3>
       </div>
-      <div class="section-content" style="text-align:center; color:#999; font-size:13px;">暂无 PanEU 分析数据</div>
+      <div class="section-content" style="text-align: center; color: #999; font-size: 13px">
+        暂无 PanEU 分析数据
+      </div>
     </div>
   </div>
 </template>
@@ -911,28 +953,63 @@
 export default {
   name: 'Tab61',
   props: {
-    panEUResult: { type: Object, default: null }
+    panEUResult: { type: Object, default: null },
   },
   methods: {
     // 格式化数字，添加千位分隔符
     formatNumber(num) {
-      if (typeof num !== 'number') return num;
+      if (typeof num !== 'number') return num
       return num.toLocaleString('zh-CN', {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-  }
+        maximumFractionDigits: 2,
+      })
+    },
+  },
 }
 </script>
 <style scoped>
-.sub-tab-panel { background:#fff; padding:24px; border:1px solid #e5e7eb; border-radius:10px; }
-.sub-tab-panel h2 { margin:0 0 12px; font-size:22px; color:#232f3e; }
-.sub-tab-panel p { margin:0; font-size:14px; line-height:1.6; color:#444; }
-.analysis-section { background:#ffffff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden; }
-.analysis-section + .analysis-section { margin-top:24px; }
-.analysis-section .section-header { background:#f8f9fa; padding:18px 20px; border-bottom:1px solid #e0e0e0; }
-.analysis-section .section-header h3 { font-size:18px; font-weight:600; color:#232f3e; margin:0; }
-.analysis-section .section-description { font-size:13px; color:#232f3e; }
-.analysis-section .section-content { padding:20px 24px; }
+.sub-tab-panel {
+  background: #fff;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+.sub-tab-panel h2 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  color: #232f3e;
+}
+.sub-tab-panel p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
+}
+.analysis-section {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.analysis-section + .analysis-section {
+  margin-top: 24px;
+}
+.analysis-section .section-header {
+  background: #f8f9fa;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.analysis-section .section-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #232f3e;
+  margin: 0;
+}
+.analysis-section .section-description {
+  font-size: 13px;
+  color: #232f3e;
+}
+.analysis-section .section-content {
+  padding: 20px 24px;
+}
 </style>
