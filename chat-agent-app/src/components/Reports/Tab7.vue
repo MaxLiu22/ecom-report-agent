@@ -105,14 +105,24 @@
           <span class="acc-icon" aria-hidden="true"></span>
         </button>
         <div class="acc-body" id="panel-itCompliance" v-show="openSections.itCompliance">
-          <p class="acc-text">重点关注意大利境内的包装、环保与税务相关要求。以下为常见关注点：</p>
-          <ol class="acc-list ordered">
-            <li>生产者责任 (EPR)：包装/电子电器/WEEE/电池分类</li>
-            <li>意大利增值税发票合规（电子发票 e-invoicing）</li>
-            <li>产品标签：能效标签、意大利语说明、安全警示标识</li>
-            <li>食品/化妆品类：卫生注册或通知 (Reg. (EC) 1223/2009 等)</li>
-          </ol>
-          <p class="acc-tip">建议：建立合规文件清单 → 每季度复核 → 缺失项建立 owner。</p>
+          <!-- 复用 Tab3 的政策更新图片板块，调整为本组件适配的样式 -->
+          <div class="content-header">
+            <h2>📣 政策更新</h2>
+            <p class="content-description">最新的欧盟政策变化、官方来源与业务影响提示</p>
+          </div>
+          <div class="policy-updates" style="margin-top: 10px">
+            <div class="policy-card">
+              <a
+                href="https://mp.weixin.qq.com/s?__biz=MzkxNzI4NjI5OQ==&mid=2247619861&idx=1&sn=817af8fb84f74681699dc32d95cd6f30&chksm=c0faaf330e446a2765b87002bde225f90919cd3ce9a9cebcc32ddbddfa2a48421e1c89592081&from=industrynews&version=4.1.7.6056&platform=win#rd"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="policy-link"
+              >
+                <img src="/src/assets/政策更新.png" alt="政策更新" class="policy-image" />
+              </a>
+              <div class="img-caption">点击图片查看原文（微信公众平台）</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -157,45 +167,13 @@
           <span class="acc-icon" aria-hidden="true"></span>
         </button>
         <div class="acc-body" id="panel-otherCompliance" v-show="openSections.otherCompliance">
-          <p class="acc-text">可根据实际行业和品类扩展的通用合规关注点：</p>
-          <ul class="acc-list">
-            <li>扩展 EPR 范围：法国/德国包装、WEEE、纺织、LUCID 注册</li>
-            <li>化学品 REACH / CLP 标签与 SVHC 物质监测</li>
-            <li>玩具 / 儿童用品：EN71, CE 标识, 年龄分级警示</li>
-            <li>电商平台透明度码 / 品牌备案资料系统化</li>
-            <li>可持续相关：回收标识，材料追踪，碳足迹声明（自愿）</li>
-          </ul>
-          <p class="acc-tip">
-            建议：建立“合规台账（字段：法规/品类/状态/责任人/证据文档链接/下次复查日期）”。
-          </p>
+          <h2>📣 合规风险</h2>
+          <p class="content-description">下列模块展示物流方案、PanEU政策、产品与VAT合规信息</p>
+          <ProductComplianceComponent />
         </div>
       </div>
     </div>
-    <div class="content-header">
-      <h2>📣 政策更新</h2>
-      <p class="content-description">最新的欧盟政策变化、官方来源与业务影响提示</p>
-    </div>
 
-    <div class="content-body">
-      <!-- 复用 Tab3 的政策更新图片板块，调整为本组件适配的样式 -->
-      <div class="policy-updates" style="margin-top: 10px">
-        <div class="policy-card">
-          <a
-            href="https://mp.weixin.qq.com/s?__biz=MzkxNzI4NjI5OQ==&mid=2247619861&idx=1&sn=817af8fb84f74681699dc32d95cd6f30&chksm=c0faaf330e446a2765b87002bde225f90919cd3ce9a9cebcc32ddbddfa2a48421e1c89592081&from=industrynews&version=4.1.7.6056&platform=win#rd"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="policy-link"
-          >
-            <img src="/src/assets/政策更新.png" alt="政策更新" class="policy-image" />
-          </a>
-          <div class="img-caption">点击图片查看原文（微信公众平台）</div>
-        </div>
-      </div>
-
-      <h2>📣 合规风险</h2>
-      <p class="content-description">下列模块展示物流方案、PanEU政策、产品与VAT合规信息</p>
-      <ProductComplianceComponent />
-    </div>
   </div>
 </template>
 <script>
@@ -394,31 +372,37 @@ export default {
   flex: 1;
 }
 .acc-icon {
+  position: relative;
   width: 14px;
   height: 14px;
-  position: relative;
+  flex-shrink: 0;
 }
 .acc-icon:before,
 .acc-icon:after {
   content: '';
   position: absolute;
-  inset: 0;
-  margin: auto;
+  top: 50%;
+  left: 50%;
   background: currentColor;
-  transition: 0.3s;
+  border-radius: 1px;
+  transition: transform 0.28s ease, opacity 0.28s ease;
 }
+/* 水平线 */
 .acc-icon:before {
   width: 100%;
   height: 2px;
-  top: 6px;
+  transform: translate(-50%, -50%);
 }
+/* 垂直线 */
 .acc-icon:after {
-  width: 2px;
   height: 100%;
-  left: 6px;
+  width: 2px;
+  transform: translate(-50%, -50%);
 }
+/* 展开时收起竖线，形成减号 */
 .acc-item.open .acc-icon:after {
-  transform: scaleY(0);
+  transform: translate(-50%, -50%) scaleY(0);
+  opacity: 0;
 }
 .acc-body {
   padding: 16px 20px 20px;
@@ -459,26 +443,40 @@ export default {
   border: 1px solid #e3e6ea;
   border-radius: 14px;
   padding: 26px 28px 30px;
-  box-shadow: 0 4px 14px -4px rgba(0,0,0,0.12), 0 2px 6px -2px rgba(0,0,0,0.08);
-  transition: box-shadow .35s ease, transform .35s ease, border-color .35s ease;
+  box-shadow:
+    0 4px 14px -4px rgba(0, 0, 0, 0.12),
+    0 2px 6px -2px rgba(0, 0, 0, 0.08);
+  transition:
+    box-shadow 0.35s ease,
+    transform 0.35s ease,
+    border-color 0.35s ease;
   overflow: hidden;
 }
 .policy-update-card:before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 85% 15%, rgba(255,153,0,0.18), transparent 60%),
-              linear-gradient(135deg, rgba(255,153,0,0.08), rgba(35,47,62,0));
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 153, 0, 0.18), transparent 60%),
+    linear-gradient(135deg, rgba(255, 153, 0, 0.08), rgba(35, 47, 62, 0));
   pointer-events: none;
-  opacity: .85;
+  opacity: 0.85;
 }
-.policy-update-card:hover { border-color:#ff9900; box-shadow:0 10px 28px -6px rgba(0,0,0,0.18),0 4px 12px -3px rgba(0,0,0,0.12); transform: translateY(-2px); }
-.policy-update-card:active { transform: translateY(0); }
+.policy-update-card:hover {
+  border-color: #ff9900;
+  box-shadow:
+    0 10px 28px -6px rgba(0, 0, 0, 0.18),
+    0 4px 12px -3px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+.policy-update-card:active {
+  transform: translateY(0);
+}
 
 .policy-update-card .main-title {
   margin: 0 0 18px;
   font-size: 22px;
-  letter-spacing: .5px;
+  letter-spacing: 0.5px;
   font-weight: 600;
   color: #232f3e;
   display: inline-flex;
@@ -491,18 +489,30 @@ export default {
   content: '';
   height: 4px;
   width: 46px;
-  background: linear-gradient(90deg,#ff9900,#ffb84d);
+  background: linear-gradient(90deg, #ff9900, #ffb84d);
   border-radius: 4px;
   display: block;
   margin-top: 8px;
 }
 
-.policy-update-card .content-area { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 20px; }
-.policy-update-card .sub-title { margin: 0; font-size: 18px; font-weight: 600; color:#ff9900; letter-spacing:.3px; }
+.policy-update-card .content-area {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.policy-update-card .sub-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ff9900;
+  letter-spacing: 0.3px;
+}
 
 /* 信息盒 - 黄色 */
 .info-box-yellow {
-  background: linear-gradient(135deg,#fff8eb,#fff3db 55%, #ffe8bd);
+  background: linear-gradient(135deg, #fff8eb, #fff3db 55%, #ffe8bd);
   border: 1px solid #ffdca0;
   border-radius: 12px;
   padding: 16px 18px 18px;
@@ -510,10 +520,19 @@ export default {
   flex-direction: column;
   gap: 10px;
   position: relative;
-  box-shadow: 0 2px 6px -2px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow:
+    0 2px 6px -2px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.06);
 }
 .info-box-yellow:before {
-  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit; background:linear-gradient(140deg,rgba(255,153,0,0.22),rgba(255,186,73,0) 55%); mix-blend-mode:multiply; opacity:.55;
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(140deg, rgba(255, 153, 0, 0.22), rgba(255, 186, 73, 0) 55%);
+  mix-blend-mode: multiply;
+  opacity: 0.55;
 }
 
 /* 信息盒 - 绿色提示 */
@@ -523,39 +542,101 @@ export default {
   gap: 8px;
   font-size: 12px;
   color: #256c37;
-  background: linear-gradient(90deg,#e8f5e9,#d8f0df);
+  background: linear-gradient(90deg, #e8f5e9, #d8f0df);
   border: 1px solid #b2e2c1;
   padding: 8px 12px;
   border-radius: 10px;
   width: fit-content;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-.info-box-green .icon { color:#1d5f30; }
+.info-box-green .icon {
+  color: #1d5f30;
+}
 
-.info-line { display:flex; align-items:center; gap:10px; font-size:13px; color:#604a20; letter-spacing:.2px; line-height:1.4; }
-.info-line .icon { flex-shrink:0; color:#cc7a00; }
+.info-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #604a20;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+}
+.info-line .icon {
+  flex-shrink: 0;
+  color: #cc7a00;
+}
 
-.asin-badge { background:#232f3e; color:#ffb84d; padding:2px 10px; border-radius:14px; font-size:12px; font-weight:600; letter-spacing:.5px; box-shadow:0 2px 4px rgba(0,0,0,0.15); }
-.highlight-text { color:#d9480f; font-weight:600; background:linear-gradient(90deg,#ffe1cc,#ffd4b3); padding:2px 6px; border-radius:6px; }
+.asin-badge {
+  background: #232f3e;
+  color: #ffb84d;
+  padding: 2px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.highlight-text {
+  color: #d9480f;
+  font-weight: 600;
+  background: linear-gradient(90deg, #ffe1cc, #ffd4b3);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
 
-.policy-update-card .description { margin:0; font-size:13px; line-height:1.55; color:#333; letter-spacing:.2px; background:#fafafa; border:1px solid #ececec; padding:14px 16px; border-radius:10px; box-shadow: inset 0 0 0 1px #f5f5f5; }
+.policy-update-card .description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #333;
+  letter-spacing: 0.2px;
+  background: #fafafa;
+  border: 1px solid #ececec;
+  padding: 14px 16px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px #f5f5f5;
+}
 
 /* 轻量缩略模式（后期可复用） */
-.policy-update-card.compact { padding:20px 22px 24px; }
-.policy-update-card.compact .main-title { font-size:20px; }
-.policy-update-card.compact .sub-title { font-size:16px; }
+.policy-update-card.compact {
+  padding: 20px 22px 24px;
+}
+.policy-update-card.compact .main-title {
+  font-size: 20px;
+}
+.policy-update-card.compact .sub-title {
+  font-size: 16px;
+}
 
 @media (max-width: 992px) {
-  .policy-update-card { padding:22px 22px 26px; }
-  .policy-update-card .main-title { font-size:20px; }
-  .policy-update-card .sub-title { font-size:17px; }
+  .policy-update-card {
+    padding: 22px 22px 26px;
+  }
+  .policy-update-card .main-title {
+    font-size: 20px;
+  }
+  .policy-update-card .sub-title {
+    font-size: 17px;
+  }
 }
 @media (max-width: 768px) {
-  .policy-update-card { padding:18px 18px 22px; }
-  .policy-update-card .main-title { font-size:18px; }
-  .policy-update-card .sub-title { font-size:16px; }
-  .info-line { flex-wrap:wrap; gap:6px; }
-  .policy-update-card .description { font-size:12.5px; }
+  .policy-update-card {
+    padding: 18px 18px 22px;
+  }
+  .policy-update-card .main-title {
+    font-size: 18px;
+  }
+  .policy-update-card .sub-title {
+    font-size: 16px;
+  }
+  .info-line {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .policy-update-card .description {
+    font-size: 12.5px;
+  }
 }
 
 @media (max-width: 768px) {
