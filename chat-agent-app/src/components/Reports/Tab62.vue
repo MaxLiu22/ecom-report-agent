@@ -36,7 +36,7 @@
             英国和欧盟间物流方案的对比和建议
           </h4>
         </div>
-        <!-- <div
+        <div
           style="
             background: #232f3e;
             color: white;
@@ -50,270 +50,71 @@
             box-shadow: 0 2px 4px rgba(51, 51, 51, 0.3);
           "
         >
-          英欧双向双入驻 vs. 英国单收取2个间配送跨境运
+          英国欧盟双向双入库 vs. 英国和欧盟之间的远程配送
         </div>
-        <table
-          style="
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            background: #ffffff;
-            border: 2px solid #333;
-            border-radius: 6px;
-            margin-top: 15px;
-          "
-        >
+        <table class="logi-compare-table">
           <thead>
             <tr>
-              <th
-                style="
-                  background: #333;
-                  color: white;
-                  font-weight: 600;
-                  padding: 12px 10px;
-                  text-align: center;
-                  border-right: 1px solid #fff;
-                  font-size: 11px;
-                  width: 25%;
-                "
-              >
-                UK<->EU FBA 物流模式
-              </th>
-              <th
-                style="
-                  background: #232f3e;
-                  color: white;
-                  font-weight: 600;
-                  padding: 12px 10px;
-                  text-align: center;
-                  border-right: 1px solid #fff;
-                  font-size: 11px;
-                  width: 37.5%;
-                "
-              >
-                英国收获双选入驻<br />Dual Inbound (DI)
-              </th>
-              <th
-                style="
-                  background: #232f3e;
-                  color: white;
-                  font-weight: 600;
-                  padding: 12px 10px;
-                  text-align: center;
-                  font-size: 11px;
-                  width: 37.5%;
-                "
-              >
-                英国与欧盟2个间的远程配送<br />Remote Fulfillment between the UK and EU (EURF)
+              <th class="col-name">UK<->EU FBA 物流模式</th>
+              <th class="col-di">英国欧盟双边入库<br />Dual Inbound (DI)</th>
+              <th class="col-eurf">
+                英国与欧盟之间的远程配送<br />Remote Fulfilment between the UK and EU (EURF)
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr style="background: #f8f9fa">
-              <td
-                style="
-                  background: #f8f9fa;
-                  color: #333;
-                  font-weight: 600;
-                  text-align: center;
-                  padding: 10px 8px;
-                  border: 1px solid #ddd;
-                  border-right: 2px solid #ddd;
-                "
-              >
-                介绍
-              </td>
-              <td
-                style="
-                  background: #f8f9fa;
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                卖家能够将货物入列,选至英国EU配送链运营
-              </td>
-              <td
-                style="
-                  background: #f8f9fa;
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                卖家入驻合欧盟欧选收后任一成本国。<br />即可以欧盟侧位者定者向任和到联欧洲盟通过当当和和
+            <tr class="logi-row light">
+              <td class="logi-cell-label">介绍</td>
+              <td class="logi-cell-text light-bg">卖家将货物分别入库至英国和欧盟国家</td>
+              <td class="logi-cell-text light-bg">
+                卖家入仓到英国或欧盟任一国家后<br />即可由此国的仓库远程配送到对侧其他国家
               </td>
             </tr>
-            <tr style="background: #fafafa">
-              <td
-                style="
-                  background: #f8f9fa;
-                  color: #333;
-                  font-weight: 600;
-                  text-align: center;
-                  padding: 10px 8px;
-                  border: 1px solid #ddd;
-                  border-right: 2px solid #ddd;
-                "
-              >
-                头程物流 (CN->EU FBA FCs)
+            <tr class="logi-row alt">
+              <td class="logi-cell-label">头程物流 (CN->EU FBA FCs)</td>
+              <td class="logi-cell-text">需发货至英国和欧盟双边国家，成本相对较高</td>
+              <td class="logi-cell-text">需发货至英国或欧盟某个国家，成本相对较低</td>
+            </tr>
+            <tr class="logi-row">
+              <td class="logi-cell-label">尾程配送 (FBA)</td>
+              <td class="logi-cell-text">英国及欧盟均为本地配送费用节约高至53%，1-2天送达</td>
+              <td class="logi-cell-text">跨境配送：费用高，5-7天送达</td>
+            </tr>
+            <!-- <tr>
+              <td colspan="3" class="logi-section-head">加入条件</td>
+            </tr> -->
+            <tr class="logi-row alt">
+              <td class="logi-cell-label">ASIN 设置</td>
+              <td class="logi-cell-text">
+                无强制要求建议使用相同ASIN, 以享受评论和销售数据同步, 且缺货时可开启远程配送补充销售
               </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                需要保齐英国/EU仓都要发送成本高, 成本偏对应
-              </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                需要保齐英国/EU仓都要发送成本高, 成本偏对应
+              <td class="logi-cell-text">
+                在英国和欧盟需使用相同 ASIN/FNSKU#需要满足英国和欧盟的进出口限定，部分 ASIN
+                无法通过远程配送销售
               </td>
             </tr>
-            <tr>
-              <td
-                style="
-                  background: #f8f9fa;
-                  color: #333;
-                  font-weight: 600;
-                  text-align: center;
-                  padding: 10px 8px;
-                  border: 1px solid #ddd;
-                  border-right: 2px solid #ddd;
-                "
-              >
-                尾程配送 (FBA)
-              </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                需即到及优缺费见卖水电配送选供下优程收商品. 1-2天送达
-              </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                有销运费, 客期间, 5-7天送达
-              </td>
+            <tr class="logi-row">
+              <td class="logi-cell-label">VAT 要求</td>
+              <td class="logi-cell-text">需要至少2个 VAT<br />英国和欧盟都需要注册 VAT</td>
+              <td class="logi-cell-text">仅需要1个VAT<br />远程销售国无需 VAT</td>
             </tr>
-            <tr>
-              <td
-                colspan="3"
-                style="
-                  background: #e9ecef;
-                  color: #495057;
-                  font-weight: 600;
-                  text-align: center;
-                  padding: 8px;
-                  font-size: 12px;
-                  border: 1px solid #ddd;
-                "
-              >
-                加入条件
-              </td>
+
+            <tr class="logi-row">
+              <td class="logi-cell-label">优势</td>
+              <td class="logi-cell-text">低配送费，高配送时效，高转化率</td>
+              <td class="logi-cell-text">门槛低，库存压力小</td>
             </tr>
-            <tr style="background: #fafafa">
-              <td
-                style="
-                  background: #f8f9fa;
-                  color: #333;
-                  font-weight: 600;
-                  text-align: center;
-                  padding: 10px 8px;
-                  border: 1px solid #ddd;
-                  border-right: 2px solid #ddd;
-                "
-              >
-                ASIN 设置
+            <tr class="logi-row">
+              <td class="logi-cell-label">建议使用场景</td>
+              <td class="logi-cell-text">
+                头部及腰部选品高潜力选品<br />
+                (MPG / GSI recommended)
               </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                应收收市已的英国DI，以设收下及环费欧提综收都配配配，具其优可<br />可可可该中欧中是最在的优
-              </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                需要配重设网英国/欧盟的DI的配配配. 部分 ASIN 无法除以设在欧应有或
-              </td>
-            </tr>
-            <tr>
-              <td
-                style="
-                  background: #f8f9fa;
-                  color: #333;
-                  font-weight: 600;
-                  text-align: center;
-                  padding: 10px 8px;
-                  border: 1px solid #ddd;
-                  border-right: 2px solid #ddd;
-                "
-              >
-                VAT 要求
-              </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                需要配置2个VAT<br />或申请提调及者收欧盟的 VAT
-              </td>
-              <td
-                style="
-                  color: #333;
-                  text-align: left;
-                  padding: 10px 12px;
-                  border: 1px solid #ddd;
-                  font-size: 10px;
-                "
-              >
-                仅设置1个VAT<br />或申请提调及者收欧盟VAT
-              </td>
+              <td class="logi-cell-text">长尾选品, 新品测试销售, 单边缺货时补充销售</td>
             </tr>
           </tbody>
-        </table> -->
+        </table>
+
         <!-- 插入双边入库图片 -->
         <div class="logistics-image-container">
           <img
@@ -321,7 +122,6 @@
             alt="英国和欧盟间双边入库物流方案示意图"
             class="logistics-diagram"
           />
-          <!-- <p class="image-caption">英国和欧盟间双边入库物流方案示意图</p> -->
         </div>
       </div>
     </div>
@@ -624,17 +424,109 @@ export default {
   backdrop-filter: blur(5px);
 }
 
+/* ====== 抽离的物流方案对比表格样式 ====== */
+.logi-row.light {
+  background: #f8f9fa;
+}
+.logi-row.alt {
+  background: #fafafa;
+}
+.logi-cell-label {
+  background: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  border-right: 2px solid #ddd;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.logi-cell-text {
+  color: #333;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  line-height: 1.6;
+  background: #fff;
+}
+.logi-cell-text.light-bg {
+  background: #f8f9fa;
+}
+.logi-section-head {
+  background: #e9ecef;
+  color: #495057;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .logi-cell-label,
+  .logi-cell-text {
+    font-size: 11px;
+    padding: 10px 10px;
+  }
+}
+
+/* 新增表格头与整体样式 */
+.logi-compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #ffffff;
+  border: 2px solid #333;
+  border-radius: 6px;
+  margin-top: 15px;
+  overflow: hidden;
+}
+.logi-compare-table thead th {
+  background: #232f3e;
+  color: #fff;
+  font-weight: 600;
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.4;
+  border-right: 1px solid #fff;
+}
+.logi-compare-table thead th.col-name {
+  background: #333;
+  width: 25%;
+}
+.logi-compare-table thead th.col-di {
+  width: 37.5%;
+}
+.logi-compare-table thead th.col-eurf {
+  width: 37.5%;
+  border-right: none;
+}
+
+@media (max-width: 768px) {
+  .logi-compare-table {
+    font-size: 11px;
+  }
+  .logi-compare-table thead th {
+    font-size: 11px;
+    padding: 10px 8px;
+  }
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .logistics-image-container {
     margin: 20px 0;
     padding: 15px;
   }
-  
+
   .logistics-diagram {
     border-radius: 6px;
   }
-  
+
   .image-caption {
     font-size: 12px;
     padding: 6px 12px;
@@ -646,7 +538,7 @@ export default {
     margin: 15px 0;
     padding: 12px;
   }
-  
+
   .image-caption {
     font-size: 11px;
     padding: 5px 10px;
