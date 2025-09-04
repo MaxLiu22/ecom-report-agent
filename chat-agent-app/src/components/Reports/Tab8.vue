@@ -57,35 +57,30 @@
               <td class="logic">{{ computedActionResult.panEUASINParity }}</td>
             </tr>
             
-            <!-- 第五行: cost saving - CEE -->
-            <tr v-if="computedActionResult.ceeCostSaving">
+           <!-- DI相关行 - 共享逻辑单元格 -->
+          <!-- <template v-if="computedActionResult.diIncentive && computedActionResult.diIncentive.length"> -->
+            <!-- 第五行: incentive - DI (GSI) -->
+            <tr v-if="computedActionResult.diIncentive">
               <td class="ranking">5</td>
-              <td class="action">cost saving - CEE</td>
-              <td class="timeline">3个月</td>
-              <td class="logic">{{ computedActionResult.ceeCostSaving }}</td>
+              <td class="action">cost saving - DI</td>
+              <td class="timeline">1个月</td>
+              <!-- <td class="logic" rowspan="2"> -->
+              <td class="logic">
+                <div v-for="(item, index) in computedActionResult.diIncentive" :key="index" class="growth-item">
+                  <strong>{{ item.title }}:</strong> {{ item.description }}
+                </div>
+              </td>
             </tr>
-            
-            <!-- DI相关行 - 共享逻辑单元格 -->
-            <template v-if="computedActionResult.diIncentive && computedActionResult.diIncentive.length">
-              <!-- 第六行: incentive - DI (GSI) -->
-              <tr>
-                <td class="ranking">6</td>
-                <td class="action">cost saving - DI</td>
-                <td class="timeline">1个月</td>
-                <td class="logic" rowspan="2">
-                  <div v-for="(item, index) in computedActionResult.diIncentive" :key="index" class="growth-item">
-                    <strong>{{ item.title }}:</strong> {{ item.description }}
-                  </div>
-                </td>
-              </tr>
-              
-              <!-- 第七行: sales uplift - DI (MPG) -->
-              <!-- <tr>
-                <td class="ranking">7</td>
-                <td class="action">sales uplift - DI (MPG)</td>
-                <td class="timeline">3个月</td>
-              </tr> -->
-            </template>
+          <!-- </template> -->
+
+          <!-- 第六行: cost saving - CEE -->
+          <tr v-if="computedActionResult.ceeCostSaving">
+            <td class="ranking">6</td>
+            <td class="action">cost saving - CEE</td>
+            <td class="timeline">3个月</td>
+            <td class="logic">{{ computedActionResult.ceeCostSaving }}</td>
+          </tr>
+
           </tbody>
         </table>
       </div>
