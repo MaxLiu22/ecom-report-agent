@@ -645,6 +645,10 @@ export async function analyzePanEUOpportunities(sources) {
 	// 统计 荷兰政策
 	const nlPolicy = countNlPolicy(panEuRows)
 
+	// 统计 德国 销售数量
+	const totalSoldDE = sumSoldCountByMarketplace(skuRows, "DE")
+
+
 	// 统计pv_cost
 	const pvCost = saveCalculatePvCost(skuRows);
 	// 获取授权仓储国家
@@ -757,7 +761,9 @@ export async function analyzePanEUOpportunities(sources) {
 
 		cost_save: cost_save,
 
-		nlPolicy: nlPolicy
+		nlPolicy: nlPolicy,
+
+		totalSoldDE: totalSoldDE
 
 	};
 
@@ -843,7 +849,7 @@ export async function analyzePanEUOpportunitiesAuto(inputs, EUExpansionCheckli) 
 }
 
 
-
+// 统计荷兰政策
 function countNlPolicy(panEuRows) { 
 	// 需要保留的字段
 	const requiredFields = [
@@ -877,6 +883,13 @@ function countNlPolicy(panEuRows) {
 	});
 }
 
+
+// 计算德国销售数量
+function sumSoldCountByMarketplace(rows, marketplace = 'DE') {
+	return rows
+	  .filter(row => row["亚马逊商城"] === marketplace)
+	  .reduce((sum, row) => sum + (Number(row["已售商品数量"]) || 0), 0);
+  }
 
 
 export default {
