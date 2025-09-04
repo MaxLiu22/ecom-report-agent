@@ -10,15 +10,27 @@ class ActionService {
   
     // 逻辑1：合规 - new policy (NL/IT)
     checkNewPolicy() {
+      const result = {}
+
       const vatItem = this.EU_expansion_checkli.find(item => item["指标"] === "持有有效增值税号国家");
       
-      if (!vatItem) return '-';
+      if (!vatItem) {
+        result.content = "-";
+        result.value = 0
+      };
       
       if (vatItem["意大利"] === 1) {
-        return "意大利税号需注意";
+        result.content = "意大利税号需注意";
+        result.value = 1
+      } else {
+        result.content = "-";
+        result.value = 0
       }
       
-      return '-';
+      return {
+        newPolicy: result.content,
+        newPolicyValue: result.value
+      };
     }
   
     // 逻辑2：合规 - 开了仓储没开税号
@@ -80,7 +92,10 @@ class ActionService {
         results.push(`需上传${groupedResults.needVATAndWarehouse.join('、')}税号，可以开启${groupedResults.needVATAndWarehouse.join('、')}仓储，享受本地配送费`);
       }
       
-      return results;
+      return {
+        warehouseVATCompliance : results,
+        warehouseVATComplianceValue: groupedResults
+      };
     }
   
     // 逻辑3：cost saving - pan-EU placement
@@ -160,16 +175,21 @@ class ActionService {
         description: point.description
       }));
     }
-  
+
     // 逻辑计算入口函数
     calculateAll() {
+      const {newPolicy, newPolicyValue} = this.checkNewPolicy()
+      const {warehouseVATCompliance, warehouseVATComplianceValue} = this.checkWarehouseVATCompliance()
+
       return {
-        newPolicy: this.checkNewPolicy(),
-        warehouseVATCompliance: this.checkWarehouseVATCompliance(),
+        newPolicy: newPolicy,
+        warehouseVATCompliance: warehouseVATCompliance,
         panEUCostSaving: this.calculatePanEUCostSaving(),
         panEUASINParity: this.calculatePanEUASINParity(),
         ceeCostSaving: this.calculateCEECostSaving(),
-        diIncentive: this.getDIIncentive()
+        diIncentive: this.getDIIncentive(),
+        newPolicyValue: newPolicyValue,
+        warehouseVATComplianceValue: warehouseVATComplianceValue
       };
     }
   }

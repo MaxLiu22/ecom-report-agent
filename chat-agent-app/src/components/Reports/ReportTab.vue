@@ -207,7 +207,10 @@
 
       <!-- Tab 5: 欧洲站点拓展评估 -->
       <div v-if="activeTab === 4" class="center-wrap">
-        <Tab5 :euExpansionCheckli="euExpansionCheckli" />
+        <Tab5 
+          :euExpansionCheckli="euExpansionCheckli"
+          :euExpansionCheckliCee="euExpansionCheckliCee"
+          :actionResult="actionResult" />
       </div>
 
       <!-- Tab 6: 欧洲站拓展解决方案定制 -->
@@ -335,6 +338,10 @@ export default {
       type: Object,
       default: null,
     },
+    euExpansionCheckliCee: {
+      type: Object,
+      default: null,
+    }
   },
   setup(props) {
     // 当前活跃的标签页

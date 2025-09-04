@@ -6,54 +6,45 @@
     </div>
     
     <div class="content-body">
-      <!-- 新增的欧洲站点评估表格 -->
+      <!-- 新增的账户信息 -->
+      <div class="account-info">
+        <span>账户名称：{{ computedAccountTitle }}</span>
+        <span class="divider">|</span>
+        <span>MCID：{{ computedMCID }}</span>
+      </div>
+
+      <!-- 欧洲站点评估表格 -->
       <div class="europe-expansion-table">
         <table>
           <thead>
             <tr>
-              <th colspan="3"></th>
-              <th colspan="1" class="region-header">
-                {{ regions[0] }}
-              </th>
-              <th colspan="4" class="region-header_1">
-                {{ regions[1] }}
-              </th>
+              <th colspan="1"></th>
+              <th colspan="1" class="region-header">{{ regions[0] }}</th>
+              <th colspan="4" class="region-header_1">{{ regions[1] }}</th>
+              <th colspan="1"></th>
             </tr>
             <tr class="sub-header">
-              <th>MCID</th>
-              <th>账户名称</th>
               <th>指标名称</th>
               <th v-for="country in countries" :key="country">{{ country }}</th>
+              <th>机会点标注</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in computedeuExpansionCheckli" :key="item.指标">
-                
-              <!-- 只在第一行显示MCID和账户名称，并设置rowspan -->
-              <td v-if="index === 0" :rowspan="computedeuExpansionCheckli.length" class="mcid-cell">
-                {{ MCID }}
-              </td>
-              <td v-if="index === 0" :rowspan="computedeuExpansionCheckli.length" class="account-cell">
-                {{ accountTitle }}
-              </td>
-              
-              <!-- 指标名称 -->
+            <tr v-for="item in computedeuExpansionCheckliFiltered" :key="item.指标">
               <td class="metric-name">{{ item.指标 }}</td>
-              
-              <!-- 国家数据 -->
               <td v-for="country in countries" :key="country" class="value-cell">
                 <span v-if="item[country] === 1" class="checkmark">✓</span>
                 <span v-else-if="item[country] === 0" class="cross">✗</span>
                 <span v-else-if="item[country] === null" class="null-value">-</span>
                 <span v-else>{{ item[country] }}</span>
               </td>
-            
+              <td class="opportunity-cell" v-html="getOpportunityText(item.指标)"></td>
             </tr>
           </tbody>
         </table>
       </div>
-
     </div>
+
   </div>
 </template>
 
@@ -68,6 +59,14 @@ export default {
       type: Object,
       default: null
     },
+    euExpansionCheckliCee: {
+      type: Object,
+      default: null
+    },
+    actionResult: {
+      type: Object,
+      default: null
+    },
     region: {
       type: Array,
       default: null
@@ -79,7 +78,8 @@ export default {
     accountTitle: {
       type: String,
       default: "Sinuolong Lighting"
-    }
+    },
+
   },
   data() {
     return {
@@ -96,23 +96,94 @@ export default {
       this.localeuExpansionCheckli = this.euExpansionCheckli;
     }
   },
-  computed: {
+
+
+computed: {
     regions() {
       return this.region || ["0.英国和欧盟间物流", "1.EU5欧盟内物流"];
     },
     countries() {
       return ["英国", "德国", "意大利", "法国", "西班牙"];
     },
-    hasUKData() {
-      // 检查是否有英国数据
-      return this.computedeuExpansionCheckli.some(item => 
-        item.hasOwnProperty("英国") && item["英国"] !== null
+
+    computedeuExpansionCheckliFiltered() {
+      // 基础行：始终用数组
+      const base = Array.isArray(this.localeuExpansionCheckli || this.euExpansionCheckli)
+        ? [...(this.localeuExpansionCheckli || this.euExpansionCheckli)]
+        : [];
+
+      // 1) 过滤不需要的指标
+      const filtered = base.filter(
+        (item) => !["FBA BA /3P BA %", "FBA GMS/total GMS %"].includes(item.指标)
       );
+
+      // 2) 插入 “是否启用中欧计划” 行（仅当 cee 数据存在）
+      if (this.euExpansionCheckliCee) {
+        const ceeFlag =
+          Number(this.euExpansionCheckliCee["是否启用中欧计划 (CEP)"]) === 1 ? 1 : 0;
+
+        filtered.push({
+          指标: "是否启用中欧计划",
+          英国: "/",
+          德国: ceeFlag,
+          意大利: "/",
+          法国: "/",
+          西班牙: "/",
+        });
+      }
+
+      return filtered;
     },
-    computedeuExpansionCheckli() {
-      return this.localeuExpansionCheckli || this.euExpansionCheckli;
+
+    // 3) 如果 euExpansionCheckliCee 不为 null，则覆盖 MCID 和账户名称
+    computedMCID() {
+      // 兼容两种拼写：MCID / MICD
+      return this.euExpansionCheckliCee?.MCID
+        || this.euExpansionCheckliCee?.MICD
+        || this.$props.MCID;
+    },
+    computedAccountTitle() {
+      return this.euExpansionCheckliCee?.账户名称 || this.$props.accountTitle;
+    },
+  },
+
+
+
+  methods: {
+    getOpportunityText(metric) {
+      switch (metric) {
+        case "持有有效增值税号国家": {
+          const needVAT = this.actionResult?.warehouseVATComplianceValue?.needVAT;
+          if (Array.isArray(needVAT) && needVAT.length > 0) {
+            return `<span style="color:red;">${needVAT.join("，")} 存在税务风险，需采取紧急行动</span>`;
+          }
+          return ""; // ✅ 为空时整列留空
+        }
+        case "授权仓储国家":
+          return this.actionResult?.panEUCostSaving?.length
+            ? `<span style="color:orange;">${this.actionResult.panEUCostSaving.join("<br/>")}</span>`
+            : "";
+        case "是否启用亚马逊物流欧洲整合服务(PanEU)":
+          return this.actionResult?.panEUASINParity
+            ? `<span style="color:green;">${this.actionResult.panEUASINParity}</span>`
+            : "";
+        case "是否使用英国和欧盟之间的远程配送服务":
+          return Array.isArray(this.actionResult?.diIncentive) && this.actionResult.diIncentive.length
+            ? this.actionResult.diIncentive
+                .map(i => `<div style="margin-bottom:8px;color:green;"><strong>${i.title}</strong> : ${i.description}</div>`)
+                .join("")
+            : "";
+        case "是否启用中欧计划":
+          return this.actionResult?.ceeCostSaving
+            ? `<span style="color:green;">${this.actionResult.ceeCostSaving}</span>`
+            : "";
+        default:
+          return "";
+      }
     }
   }
+
+
 }
 </script>
 
@@ -178,6 +249,17 @@ export default {
   padding: 16px 8px;
 }
 
+.account-info {
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #232f3e;
+}
+.account-info .divider {
+  margin: 0 8px;
+  color: #666;
+}
+
 .region-header_1 {
   background-color: #223a57 !important;
   font-size: 16px;
@@ -238,6 +320,12 @@ export default {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.opportunity-cell {
+  font-size: 13px;
+  text-align: left;
+  padding-left: 8px;
 }
 
 .section-header {
