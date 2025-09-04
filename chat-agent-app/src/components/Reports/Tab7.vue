@@ -1,5 +1,6 @@
 <template>
-  <div class="content-panel">
+  <div class="tab7-root">
+    <div class="content-panel">
     <!-- 折叠合规扩展内容 -->
     <div class="accordion" style="margin-top: 32px">
       <!-- 1.1 荷兰站listing同步 -->
@@ -15,29 +16,50 @@
           <span class="acc-icon" aria-hidden="true"></span>
         </button>
         <div class="acc-body" id="panel-nlListing" v-show="openSections.nlListing">
-          <!-- <p class="acc-text">
-            说明：用于将主要 EU5（DE/FR/IT/ES/UK）已验证的 ASIN / Listing 信息快速同步到
-            NL，降低重复创建工作量并覆盖长尾流量。
-          </p>
-          <ul class="acc-list">
-            <li>检查多国库存/ PanEU 状态，确保可配送 NL</li>
-            <li>统一翻译策略：优先机器翻译 + 人工关键词微调</li>
-            <li>常见阻碍：品牌限制 / 变体结构不一致 / 属性缺失</li>
-            <li>建议：批量处理（模板上传）→ 监控抛错 → 增量同步</li>
-          </ul> -->
+
           <div class="policy-update-card">
             <h2 class="main-title">政策更新</h2>
 
             <div class="content-area">
               <h3 class="sub-title">PanEU正式纳入荷兰站</h3>
-
-              <div class="info-box-yellow">
-                <div class="info-line">
+              <template v-if="nlPolicyCount > 0">
+                <div class="info-box-yellow">
+                  <div class="info-line">
+                    <svg
+                      class="icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M20 12v10H4V12"></path>
+                      <path d="M12 2a4 4 0 0 1 4 4v6H8V6a4 4 0 0 1 4-4z"></path>
+                      <path d="M2 7h20"></path>
+                    </svg>
+                    <span>您的荷兰同步机会</span>
+                  </div>
+                  <div class="info-line">
+                    <span>需要同步到NL的ASIN数量：</span>
+                    <button class="asin-badge btn-link" @click="openNlPolicyModal" :disabled="nlPolicyCount===0" :title="nlPolicyCount===0 ? '暂无可展示数据' : '点击查看具体列表'">
+                      {{ nlPolicyCount }}
+                    </button>
+                  </div>
+                  <div class="info-line">
+                    <span>同步后可享受本地配送费，</span>
+                    <span class="highlight-text">平均比跨境配送费低43%</span>
+                  </div>
+                </div>
+                <div class="info-box-green">
                   <svg
                     class="icon"
                     xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -45,48 +67,41 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                   >
-                    <path d="M20 12v10H4V12"></path>
-                    <path d="M12 2a4 4 0 0 1 4 4v6H8V6a4 4 0 0 1 4-4z"></path>
-                    <path d="M2 7h20"></path>
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
                   </svg>
-                  <span>您的荷兰同步机会</span>
+                  <span>基于您上传的PanEU数据分析</span>
                 </div>
-                <div class="info-line">
-                  <span>需要同步到NL的ASIN数量：</span>
-                  <span class="asin-badge">1.5k</span>
-                </div>
-                <div class="info-line">
-                  <span>同步后可享受本地配送费，</span>
-                  <span class="highlight-text">平均比跨境配送费低43%</span>
-                </div>
-              </div>
-
-              <div class="info-box-green">
-                <svg
-                  class="icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                <span>基于您上传的PanEU数据分析</span>
-              </div>
-
-              <p class="description">
-                从 2025 年 7 月 22 日起，亚马逊物流欧洲整合服务 (Pan-European FBA)
-                将要求您在荷兰（以及法国、德国、意大利和西班牙之外）也必须为所有新的亚马逊物流欧洲整合服务
-                (Pan-European FBA)
-                商品设置有效的报价。这项要求将在今年晚些时候扩展到所有您现有的亚马逊物流欧洲整合服务
-                (Pan-European FBA) 商品。
-              </p>
+                <p class="description">
+                  从 2025 年 7 月 22 日起，亚马逊物流欧洲整合服务 (Pan-European FBA)
+                  将要求您在荷兰（以及法国、德国、意大利和西班牙之外）也必须为所有新的亚马逊物流欧洲整合服务
+                  (Pan-European FBA) 商品设置有效的报价。这项要求将在今年晚些时候扩展到所有您现有的亚马逊物流欧洲整合服务
+                  (Pan-European FBA) 商品。
+                </p>
+              </template>
+              <template v-else>
+                <figure class="nl-fallback" aria-label="荷兰站同步空状态">
+                  <div class="fallback-head">
+                    <svg class="fallback-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    <p class="fallback-text">
+                      目前 <strong>没有待同步到荷兰站的 ASIN</strong>。请在未来新品上架后，及时补充荷兰站 Listing 以确保享受 <span class="text-accent">本地配送费优势</span>。
+                    </p>
+                  </div>
+                  <figcaption class="fallback-tip">点击下图查看详情：</figcaption>
+                  <a
+                    href="https://mp.weixin.qq.com/s/DOASmjqT5fUNUYRGqCoNYA?mpshare=1&scene=1&srcid=0901K15TWEe3mI9dVGCaa6BR&sharer_shareinfo=82c8ad2cbde9eb57efb6cb657e01a67b&sharer_shareinfo_first=82c8ad2cbde9eb57efb6cb657e01a67b&from=industrynews&color_scheme=light#rd"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="fallback-img-link"
+                    aria-label="打开微信文章了解荷兰站纳入 PanEU 政策详情"
+                  >
+                    <div class="fallback-img-wrapper">
+                      <img src="/src/assets/荷兰站.png" alt="荷兰站同步说明图片" class="fallback-image" loading="lazy" decoding="async" />
+                      <span class="img-overlay-hint">在新窗口查看原文 ↗</span>
+                    </div>
+                  </a>
+                </figure>
+              </template>
             </div>
           </div>
         </div>
@@ -172,9 +187,55 @@
           <ProductComplianceComponent />
         </div>
       </div>
-    </div>
-
-  </div>
+    </div> <!-- end .accordion -->
+  </div> <!-- end .content-panel -->
+  <!-- 弹窗 Teleport 到 body，避免被父容器 overflow 影响 -->
+    <Teleport to="body" v-if="showNlPolicyModal">
+      <div class="nl-policy-overlay" @click.self="closeNlPolicyModal">
+        <div class="nl-policy-modal" role="dialog" aria-modal="true" aria-label="NL 同步 ASIN 列表">
+          <div class="nl-policy-header">
+            <h3>NL 同步 ASIN 列表 <span style="font-size:12px;color:#666;font-weight:500;">共 {{ nlPolicyCount }} 条</span></h3>
+            <button class="nl-policy-close" @click="closeNlPolicyModal" aria-label="关闭">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="nl-policy-body">
+            <template v-if="nlPolicyCount">
+              <div class="nl-table-wrapper">
+                <table class="nl-table" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th class="col-idx">#</th>
+                      <th v-for="col in nlPolicyColumns" :key="col">{{ col }}</th>
+                      <th class="col-ops">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, rIndex) in nlPolicyList" :key="rIndex">
+                      <td class="idx">{{ rIndex + 1 }}</td>
+                      <td v-for="col in nlPolicyColumns" :key="col" :class="['cell', 'cell-' + (col.replace(/\s+/g,'-').toLowerCase())]">
+                        <template v-if="statusPillClass(row[col], col)">
+                          <span class="status-pill" :class="statusPillClass(row[col], col)" :title="formatNlPolicyValue(row[col], col)">{{ formatNlPolicyValue(row[col], col) }}</span>
+                        </template>
+                        <template v-else>
+                          <span class="cell-text" :title="formatNlPolicyValue(row[col], col)">{{ formatNlPolicyValue(row[col], col) }}</span>
+                        </template>
+                      </td>
+                      <td class="ops">
+                        <button class="op-btn" @click="copyToClipboard(row.ASIN || row['ASIN'] || '')" :disabled="!row.ASIN && !row['ASIN']" title="复制 ASIN">复制</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+            <div v-else class="nl-empty">暂无数据</div>
+            <transition name="fade"><div v-if="copyToast" class="copy-toast">{{ copyToast }}</div></transition>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+  </div><!-- end .tab7-root -->
 </template>
 <script>
 import EUInternalSolutionsComponent from './EUInternalSolutionsComponent.vue'
@@ -207,7 +268,44 @@ export default {
         ukFHDDS: false,
         otherCompliance: false,
       },
+      showNlPolicyModal: false,
     }
+  },
+  computed: {
+    nlPolicyList() {
+      const list = this.panEUResult && Array.isArray(this.panEUResult.nlPolicy)
+        ? this.panEUResult.nlPolicy
+        : []
+      return list
+    },
+    nlPolicyCount() {
+      return this.nlPolicyList.length
+      // return 0
+    },
+    nlPolicyColumns() {
+      if (!this.nlPolicyCount) return []
+      // 预设优先顺序
+      const preferred = [
+        'ASIN', 'MerchantSKU', 'Enrol', 'FNSKU', 'Pan-EU status', 'Enrollment Date', 'Title',
+        'UK offer status', 'DE Offer Status', 'FR Offer Status', 'IE Offer Status', 'ES offer status', 'NL offer status'
+      ]
+      const first = this.nlPolicyList[0]
+      const keys = new Set()
+      // 收集所有对象键（避免有些列后面才出现）
+      this.nlPolicyList.forEach(it => {
+        if (it && typeof it === 'object') Object.keys(it).forEach(k => keys.add(k))
+      })
+      // 按 preferred 排序，追加其它未包含键
+      const ordered = preferred.filter(k => keys.has(k))
+      keys.forEach(k => { if (!ordered.includes(k)) ordered.push(k) })
+      return ordered
+    }
+  },
+  mounted() {
+    window.addEventListener('keydown', this.onKeydown)
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.onKeydown)
   },
   methods: {
     toggleSection(key) {
@@ -215,6 +313,80 @@ export default {
         this.openSections[key] = !this.openSections[key]
       }
     },
+    openNlPolicyModal() {
+      if (this.nlPolicyCount === 0) return
+      this.showNlPolicyModal = true
+      document.body.style.overflow = 'hidden'
+    },
+    closeNlPolicyModal() {
+      this.showNlPolicyModal = false
+      document.body.style.overflow = ''
+    },
+    onKeydown(e) {
+      if (e.key === 'Escape' && this.showNlPolicyModal) {
+        this.closeNlPolicyModal()
+      }
+    },
+    getNlPolicyItemLabel(item, index) {
+      if (item == null) return `记录 ${index + 1}`
+      if (typeof item === 'string') return item || `记录 ${index + 1}`
+      if (typeof item === 'object') {
+        const preferredKeys = ['asin', 'ASIN', 'title', 'name', 'sku', 'SKU', 'id']
+        for (const k of preferredKeys) {
+          if (item[k]) return item[k]
+        }
+        // fallback: stringify limited
+        try {
+          const json = JSON.stringify(item)
+          return json.length > 80 ? json.slice(0, 77) + '…' : json
+        } catch (e) {
+          return `记录 ${index + 1}`
+        }
+      }
+      return `记录 ${index + 1}`
+    },
+    formatNlPolicyValue(val, key) {
+      if (val === undefined || val === null || val === '') return '—'
+      if (key === 'Enrollment Date') {
+        const d = new Date(val)
+        if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10)
+      }
+      if (typeof val === 'number') return val.toString()
+      return String(val)
+    },
+    statusPillClass(val, key) {
+      if (!val || typeof val !== 'string') return ''
+      const v = val.toLowerCase()
+      if (key === 'Pan-EU status') {
+        if (v.includes('enrolled')) return 'pill-success'
+        if (v.includes('pending')) return 'pill-warning'
+        if (v.includes('suspend') || v.includes('stop')) return 'pill-danger'
+      }
+      if (key.toLowerCase().includes('offer status')) {
+        if (v.includes('no listing')) return 'pill-danger'
+        if (v.includes('no offer required')) return 'pill-neutral'
+        if (v.includes('active') || v.includes('ok')) return 'pill-success'
+      }
+      return ''
+    },
+    copyToClipboard(text, toast = '已复制') {
+      if (!text) return
+      navigator.clipboard && navigator.clipboard.writeText(text).then(() => {
+        this.showCopyToast(toast)
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea')
+        ta.value = text
+        document.body.appendChild(ta)
+        ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+        this.showCopyToast(toast)
+      })
+    },
+    showCopyToast(msg) {
+      this.copyToast = msg
+      clearTimeout(this._copyTimer)
+      this._copyTimer = setTimeout(() => { this.copyToast = '' }, 1800)
+    }
   },
 }
 </script>
@@ -605,6 +777,62 @@ export default {
   box-shadow: inset 0 0 0 1px #f5f5f5;
 }
 
+/* ===================== 荷兰站空状态 (nl-fallback) ===================== */
+.nl-fallback {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: linear-gradient(135deg, #f8fafc 0%, #fdf8f2 60%, #fff4e3 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 22px 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 2px 6px -2px rgba(0,0,0,0.08),
+    0 4px 14px -6px rgba(0,0,0,0.10);
+  animation: fallbackPop .55s cubic-bezier(.16,.8,.3,1);
+}
+@keyframes fallbackPop { 0% { opacity:0; transform:translateY(8px) scale(.98);} 60% { opacity:1; transform:translateY(0) scale(1);} 100% { opacity:1; transform:translateY(0) scale(1);} }
+.nl-fallback:before, .nl-fallback:after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(30px);
+  opacity: 0.45;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.nl-fallback:before { width: 220px; height: 220px; top: -90px; right: -70px; background: radial-gradient(circle at 30% 30%, rgba(255,170,64,.55), rgba(255,153,0,0)); }
+.nl-fallback:after { width: 240px; height: 240px; bottom: -120px; left: -80px; background: radial-gradient(circle at 70% 70%, rgba(255,200,120,.45), rgba(255,153,0,0)); }
+.fallback-head { display:flex; align-items:flex-start; gap:14px; position:relative; z-index:1; }
+.fallback-icon { flex-shrink:0; color:#ff9900; filter: drop-shadow(0 4px 6px rgba(0,0,0,.12)); }
+.fallback-text { margin:0; font-size:13.5px; line-height:1.6; color:#333; letter-spacing:.3px; }
+.fallback-text strong { color:#232f3e; font-weight:600; }
+.fallback-text .text-accent { color:#d9480f; font-weight:600; background:linear-gradient(90deg,#ffe1cc,#ffd4b3); padding:2px 6px; border-radius:6px; }
+.fallback-tip { font-size:12px; font-weight:600; color:#555; letter-spacing:.5px; padding-left:2px; position:relative; z-index:1; }
+.fallback-img-link { position:relative; display:block; border-radius:12px; overflow:hidden; outline:none; box-shadow:0 2px 8px -2px rgba(0,0,0,.18), 0 4px 18px -6px rgba(0,0,0,.18); transition:.4s ease; }
+.fallback-img-link:focus-visible { box-shadow:0 0 0 3px #232f3e, 0 0 0 6px #ffb84d; }
+.fallback-img-wrapper { position:relative; display:block; }
+.fallback-image { width:100%; display:block; object-fit:cover; transform:scale(1.02); transition: transform .65s cubic-bezier(.16,.8,.3,1), filter .45s ease; }
+.fallback-img-link:hover .fallback-image { transform:scale(1.06); filter:brightness(1.02) contrast(1.05); }
+.img-overlay-hint { position:absolute; right:10px; bottom:10px; background:rgba(35,47,62,.78); color:#ffb84d; font-size:11px; padding:6px 10px 6px; border-radius:20px; letter-spacing:.5px; font-weight:600; opacity:0; transform:translateY(6px); transition:.4s ease; backdrop-filter:blur(4px); box-shadow:0 4px 12px -4px rgba(0,0,0,.35); }
+.fallback-img-link:hover .img-overlay-hint { opacity:1; transform:translateY(0); }
+
+@media (max-width: 768px) {
+  .nl-fallback { padding:16px 16px 18px; }
+  .fallback-text { font-size:13px; }
+  .fallback-icon { width:24px; height:24px; }
+  .img-overlay-hint { font-size:10px; padding:5px 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nl-fallback, .fallback-image { animation:none; transition:none; }
+  .fallback-img-link:hover .fallback-image { transform:none; }
+  .fallback-img-link:hover .img-overlay-hint { transform:none; }
+}
+
 /* 轻量缩略模式（后期可复用） */
 .policy-update-card.compact {
   padding: 20px 22px 24px;
@@ -677,4 +905,90 @@ export default {
     gap: 24px;
   }
 }
+/* root wrapper 仅用于包裹 content 与 Teleport 占位，不增加视觉影响 */
+.tab7-root { position: relative; }
 </style>
+<style scoped>
+/* ========= NL Policy 列表弹窗 ========= */
+.nl-policy-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+  padding: 40px 32px;
+  backdrop-filter: blur(2px);
+}
+.nl-policy-modal {
+  background: #ffffff;
+  width: min(880px, 100%);
+  /* 限制高度为视口 2/3（原来接近全高） */
+  max-height: 66vh;
+  border-radius: 16px;
+  border: 1px solid #e3e6ea;
+  box-shadow: 0 10px 32px -8px rgba(0,0,0,0.25), 0 4px 12px -4px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  animation: modalFade 0.35s ease;
+}
+/* 小屏仍保留较高占比，避免内容可视区域过小 */
+@media (max-width: 640px) {
+  .nl-policy-modal { max-height: 88vh; }
+}
+@keyframes modalFade { from { opacity: 0; transform: translateY(12px);} to { opacity:1; transform:translateY(0);} }
+.nl-policy-header { padding: 20px 24px 16px; border-bottom: 1px solid #eef0f2; display:flex; align-items:center; gap:14px;}
+.nl-policy-header h3 { margin:0; font-size:18px; font-weight:600; color:#232f3e; letter-spacing:0.3px; display:flex; align-items:center; gap:8px; }
+.nl-policy-close { margin-left:auto; background:transparent; border:none; cursor:pointer; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#555; transition:.25s; }
+.nl-policy-close:hover { background:#f3f4f6; color:#000; }
+.nl-policy-body { padding: 18px 24px 26px; overflow-y:auto; display:flex; flex-direction:column; gap:18px; }
+.nl-table-wrapper { width:100%; overflow:auto; border:1px solid #e3e6ea; border-radius:12px; background:#fff; box-shadow:0 2px 6px -2px rgba(0,0,0,.08); }
+.nl-table { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
+.nl-table thead th { background:linear-gradient(90deg,#232f3e,#2f3d4a); color:#fff; text-align:left; padding:10px 12px; font-weight:600; position:sticky; top:0; z-index:2; letter-spacing:.3px; }
+.nl-table thead th.col-idx { width:42px; }
+.nl-table thead th.col-ops { width:60px; }
+.nl-table tbody td { padding:8px 12px; border-top:1px solid #eef0f2; vertical-align:middle; color:#333; line-height:1.4; }
+.nl-table tbody tr:nth-child(even) { background:#fafbfc; }
+.nl-table tbody tr:hover { background:#fff8eb; }
+.nl-table tbody td.idx { font-weight:600; font-size:11px; color:#232f3e; }
+.cell-text { display:inline-block; max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:middle; }
+.status-pill { display:inline-block; padding:2px 8px; font-size:11px; font-weight:600; border-radius:12px; letter-spacing:.5px; line-height:1.2; }
+.pill-success { background:#e6f6ec; color:#256c37; border:1px solid #b2e2c1; }
+.pill-warning { background:#fff4db; color:#9c6500; border:1px solid #ffe3a3; }
+.pill-danger { background:#ffe7e5; color:#b42318; border:1px solid #ffb4ab; }
+.pill-neutral { background:#eceff3; color:#555; border:1px solid #d5d9de; }
+.ops { text-align:center; }
+.op-btn { background:#232f3e; color:#ffb84d; border:none; padding:4px 10px; border-radius:8px; font-size:11px; cursor:pointer; font-weight:600; letter-spacing:.5px; transition:.25s; }
+.op-btn:disabled { opacity:.45; cursor:not-allowed; }
+.op-btn:not(:disabled):hover { background:#1b2733; }
+.op-btn:not(:disabled):active { background:#0f151b; }
+.copy-toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%); background:#232f3e; color:#ffb84d; padding:10px 18px; border-radius:30px; font-size:12px; font-weight:600; letter-spacing:.5px; box-shadow:0 4px 16px -4px rgba(0,0,0,.35); }
+.fade-enter-active, .fade-leave-active { transition: opacity .35s ease, transform .35s ease; }
+.fade-enter-from, .fade-leave-to { opacity:0; transform:translateY(6px); }
+.nl-table::-webkit-scrollbar { height:10px; }
+.nl-table-wrapper::-webkit-scrollbar { height:10px; }
+.nl-table-wrapper::-webkit-scrollbar-track { background:#f2f4f6; border-radius:6px; }
+.nl-table-wrapper::-webkit-scrollbar-thumb { background:#c2c9d1; border-radius:6px; }
+.nl-table-wrapper::-webkit-scrollbar-thumb:hover { background:#a8b0b8; }
+.nl-empty { font-size:14px; color:#666; text-align:center; padding:40px 0; }
+.nl-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.nl-item { border:1px solid #e5e7eb; background:#fff; padding:12px 14px 12px 16px; border-radius:10px; font-size:13px; line-height:1.5; color:#333; display:flex; align-items:center; gap:10px; position:relative; transition:border-color .25s, box-shadow .25s, transform .25s; }
+.nl-item:before { content:attr(data-index); font-size:11px; font-weight:600; letter-spacing:.5px; background:#232f3e; color:#ffb84d; padding:2px 8px; border-radius:12px; }
+.nl-item:hover { border-color:#ff9900; box-shadow:0 4px 14px -4px rgba(0,0,0,0.16); transform:translateY(-2px); }
+.nl-item + .nl-item { margin-top:0; }
+.nl-raw { margin-top:6px; font-size:11px; color:#777; word-break:break-all; }
+.asin-badge.btn-link { cursor:pointer; border:none; background:#232f3e; }
+.asin-badge.btn-link:disabled { opacity:.55; cursor:not-allowed; }
+.asin-badge.btn-link:not(:disabled):hover { background:#1b2733; }
+.asin-badge.btn-link:not(:disabled):active { background:#0f151b; }
+@media (max-width: 640px) {
+  .nl-policy-modal { width:100%; border-radius:12px; }
+  .nl-policy-overlay { padding: 20px 14px; }
+  .nl-policy-header { padding:16px 18px 12px; }
+  .nl-policy-body { padding:14px 18px 22px; }
+}
+</style>
+
