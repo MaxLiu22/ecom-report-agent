@@ -1,13 +1,23 @@
 <template>
   <div class="product-compliance-container">
     <!-- 第一部分：产品合规简介 -->
-    <div class="compliance-section">
-      <div class="compliance-header">
-        <div class="orange-arrow">▶</div>
+    <div class="compliance-section" :class="{ open: openSections.intro }">
+      <div
+        class="compliance-header"
+        role="button"
+        tabindex="0"
+        :aria-expanded="openSections.intro.toString()"
+        aria-controls="section-intro"
+        @click="toggle('intro')"
+        @keydown.enter.prevent="toggle('intro')"
+        @keydown.space.prevent="toggle('intro')"
+      >
+        <div class="arrow" :class="{ open: openSections.intro }" aria-hidden="true"></div>
         <h2 class="compliance-title">产品合规简介</h2>
       </div>
 
-      <div class="compliance-content">
+      <transition name="collapse">
+      <div class="compliance-content" id="section-intro" v-show="openSections.intro">
         <!-- 进度条 -->
         <div class="progress-bar">
           <div class="progress-step completed">
@@ -32,16 +42,27 @@
           <h1>产品合规简介</h1>
         </div>
       </div>
+      </transition>
     </div>
 
     <!-- 第二部分：需要符合产品合规的情况 -->
-    <div class="compliance-section">
-      <div class="compliance-header">
-        <div class="orange-arrow">▶</div>
+    <div class="compliance-section" :class="{ open: openSections.scenarios }">
+      <div
+        class="compliance-header"
+        role="button"
+        tabindex="0"
+        :aria-expanded="openSections.scenarios.toString()"
+        aria-controls="section-scenarios"
+        @click="toggle('scenarios')"
+        @keydown.enter.prevent="toggle('scenarios')"
+        @keydown.space.prevent="toggle('scenarios')"
+      >
+        <div class="arrow" :class="{ open: openSections.scenarios }" aria-hidden="true"></div>
         <h2 class="compliance-title">需要符合产品合规的情况</h2>
       </div>
 
-      <div class="compliance-content">
+      <transition name="collapse">
+      <div class="compliance-content" id="section-scenarios" v-show="openSections.scenarios">
         <!-- 有销售状态 -->
         <div class="sales-status">
           <div class="status-badge">有销售</div>
@@ -53,16 +74,27 @@
           <div class="sub-text">只要在当地销售就要进行产品合规</div>
         </div>
       </div>
+      </transition>
     </div>
 
     <!-- 第三部分：欧洲贸易&产品合规基础信息 -->
-    <div class="compliance-section">
-      <div class="compliance-header">
-        <div class="orange-arrow">▶</div>
+    <div class="compliance-section" :class="{ open: openSections.tradeBasics }">
+      <div
+        class="compliance-header"
+        role="button"
+        tabindex="0"
+        :aria-expanded="openSections.tradeBasics.toString()"
+        aria-controls="section-tradeBasics"
+        @click="toggle('tradeBasics')"
+        @keydown.enter.prevent="toggle('tradeBasics')"
+        @keydown.space.prevent="toggle('tradeBasics')"
+      >
+        <div class="arrow" :class="{ open: openSections.tradeBasics }" aria-hidden="true"></div>
         <h2 class="compliance-title">欧洲贸易&产品合规基础信息</h2>
       </div>
 
-      <div class="compliance-content">
+      <transition name="collapse">
+      <div class="compliance-content" id="section-tradeBasics" v-show="openSections.tradeBasics">
         <!-- 英国站信息 -->
         <div class="uk-section">
           <div class="country-header">
@@ -103,16 +135,27 @@
           </div>
         </div>
       </div>
+      </transition>
     </div>
 
     <!-- 第四部分：欧洲产品合规基础信息 -->
-    <div class="compliance-section">
-      <div class="compliance-header">
-        <div class="orange-arrow">▶</div>
+    <div class="compliance-section" :class="{ open: openSections.euBasics }">
+      <div
+        class="compliance-header"
+        role="button"
+        tabindex="0"
+        :aria-expanded="openSections.euBasics.toString()"
+        aria-controls="section-euBasics"
+        @click="toggle('euBasics')"
+        @keydown.enter.prevent="toggle('euBasics')"
+        @keydown.space.prevent="toggle('euBasics')"
+      >
+        <div class="arrow" :class="{ open: openSections.euBasics }" aria-hidden="true"></div>
         <h2 class="compliance-title">欧洲产品合规基础信息</h2>
       </div>
 
-      <div class="compliance-content">
+      <transition name="collapse">
+      <div class="compliance-content" id="section-euBasics" v-show="openSections.euBasics">
         <!-- 欧盟国家标志 -->
         <div class="eu-countries">
           <div class="country-flags">
@@ -203,6 +246,7 @@
           </div>
         </div>
       </div>
+      </transition>
     </div>
 
     <!-- 第五部分：泛欧洲拓展增值服务政策更新与解答 -->
@@ -214,427 +258,130 @@
  
  <script setup>
  import PanEUPolicyUpdateComponent from './PanEUPolicyUpdateComponent.vue'
+ import { reactive } from 'vue'
  
  // 组件名称
  defineOptions({
    name: 'ProductComplianceComponent'
  })
+
+  // 折叠状态管理
+  const openSections = reactive({
+    intro: true,
+    scenarios: true,
+    tradeBasics: true,
+    euBasics: true,
+  })
+
+  function toggle(key) {
+    if (Object.prototype.hasOwnProperty.call(openSections, key)) {
+      openSections[key] = !openSections[key]
+    }
+  }
  </script>
 
 <style scoped>
-.product-compliance-container {
-  margin: 20px 0;
-  width: 100%;
-  box-sizing: border-box;
-}
+/* =============== THEME TOKENS =============== */
+.product-compliance-container { --pc-primary:#232f3e; --pc-primary-end:#2f3d4a; --pc-accent:#ff9900; --pc-accent-alt:#ffb84d; --pc-surface:#ffffff; --pc-border:#e3e6ea; --pc-soft:#f5f7fa; --pc-radius-sm:6px; --pc-radius-md:10px; --pc-radius-lg:16px; --pc-shadow-sm:0 2px 6px -2px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.06); --pc-shadow-md:0 4px 14px -4px rgba(0,0,0,.12),0 2px 6px -2px rgba(0,0,0,.08); --pc-shadow-hover:0 10px 28px -6px rgba(0,0,0,.18),0 4px 12px -3px rgba(0,0,0,.12);} 
+.product-compliance-container { margin:20px 0 40px; width:100%; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:#333; }
 
-.compliance-section {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e8e8e8;
-  margin: 20px 0;
-  overflow: hidden;
-}
+/* =============== SECTION WRAPPER =============== */
+.compliance-section { background:var(--pc-surface); border:1px solid var(--pc-border); border-radius:var(--pc-radius-lg); margin:24px 0; box-shadow:var(--pc-shadow-md); overflow:hidden; position:relative; transition:.45s; }
+.compliance-section.open { border-color:var(--pc-accent); box-shadow:var(--pc-shadow-hover); }
+.compliance-section:before { content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at 95% 12%,rgba(255,153,0,.18),transparent 60%); opacity:.9; }
 
-.compliance-header {
-  background: #232f3e;
-  padding: 20px;
-  border-bottom: 1px solid #e8e8e8;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+/* =============== HEADER (CLICKABLE) =============== */
+.compliance-header { background:linear-gradient(90deg,var(--pc-primary),var(--pc-primary-end)); padding:18px 22px 18px 24px; display:flex; align-items:center; gap:14px; cursor:pointer; position:relative; user-select:none; outline:none; transition:.4s; }
+.compliance-section.open > .compliance-header { background:linear-gradient(90deg,var(--pc-accent),var(--pc-accent-alt)); color:#232f3e; }
+.compliance-header:focus-visible { box-shadow:0 0 0 3px #232f3e,0 0 0 6px var(--pc-accent); }
 
-.orange-arrow {
-  color: #FFFFFF;
-  font-size: 20px;
-  font-weight: bold;
-}
+.arrow { width:0; height:0; border-left:10px solid #fff; border-top:7px solid transparent; border-bottom:7px solid transparent; transition:.4s; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
+.compliance-section.open .arrow { transform:rotate(90deg); }
+.compliance-section.open .arrow { border-left-color:#232f3e; }
 
-.compliance-title {
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: 600;
-  margin: 0;
-  line-height: 1.4;
-}
+.compliance-title { margin:0; font-size:18px; font-weight:600; letter-spacing:.5px; color:#fff; }
+.compliance-section.open .compliance-title { color:#232f3e; }
 
-.compliance-content {
-  padding: 30px;
-}
+/* =============== COLLAPSE TRANSITION =============== */
+.collapse-enter-active, .collapse-leave-active { transition: height .45s cubic-bezier(.16,.8,.3,1), opacity .4s ease; overflow:hidden; }
+.collapse-enter-from, .collapse-leave-to { height:0!important; opacity:0; }
 
-/* 进度条样式 */
-.progress-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 30px 0;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+/* =============== CONTENT AREA =============== */
+.compliance-content { padding:30px 36px 38px; position:relative; z-index:1; line-height:1.6; }
+@media (max-width: 860px){ .compliance-content { padding:24px 24px 30px; } }
+@media (max-width: 600px){ .compliance-content { padding:20px 18px 26px; } }
 
-.progress-step {
-  background: #e8e8e8;
-  color: #666;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 0;
-  position: relative;
-  min-width: 150px;
-  text-align: center;
-}
+/* =============== PROGRESS BAR =============== */
+.progress-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin:10px 0 40px; }
+.progress-step { background:#eceff3; color:#555; padding:10px 18px; font-size:12px; font-weight:600; letter-spacing:.4px; border-radius:30px; position:relative; display:flex; align-items:center; justify-content:center; min-width:160px; box-shadow:inset 0 0 0 1px #d5d9de; }
+.progress-step.completed { background:linear-gradient(90deg,#256c37,#3b8d50); color:#fff; box-shadow:0 2px 6px -2px rgba(0,0,0,.3); }
+.progress-step.current { background:linear-gradient(90deg,var(--pc-accent),var(--pc-accent-alt)); color:#232f3e; box-shadow:0 2px 6px -2px rgba(0,0,0,.35); }
+.progress-arrow { color:#999; font-size:18px; font-weight:600; }
+.step-text { white-space:nowrap; }
 
-.progress-step.completed {
-  background: #2c5aa0;
-  color: white;
-}
+/* =============== INTRO TITLE =============== */
+.intro-title { text-align:center; margin:46px 0 10px; }
+.intro-title h1 { margin:0; font-size:42px; font-weight:600; letter-spacing:.6px; background:linear-gradient(90deg,var(--pc-primary),var(--pc-primary-end)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+@media (max-width: 780px){ .intro-title h1 { font-size:34px; } }
+@media (max-width: 520px){ .intro-title h1 { font-size:28px; } }
 
-.progress-step.current {
-  background: #FF8C00;
-  color: white;
-}
+/* =============== SALES STATUS BADGE =============== */
+.sales-status { display:flex; justify-content:center; margin:30px 0 24px; }
+.status-badge { background:linear-gradient(135deg,#ffe3b3,#ffbf66); color:#5c3b00; padding:14px 36px; border-radius:40px; font-size:22px; font-weight:700; letter-spacing:.8px; position:relative; box-shadow:var(--pc-shadow-sm),0 4px 14px -4px rgba(0,0,0,.25); }
 
-.progress-arrow {
-  color: #ccc;
-  font-size: 18px;
-  font-weight: bold;
-}
+/* =============== CORE MESSAGE =============== */
+.core-message { text-align:center; margin:44px 0 10px; display:flex; flex-direction:column; gap:14px; }
+.main-text { font-size:22px; font-weight:600; color:#232f3e; letter-spacing:.4px; }
+.sub-text { font-size:18px; font-weight:500; color:#444; letter-spacing:.3px; }
+@media (max-width: 640px){ .main-text { font-size:19px; } .sub-text { font-size:16px; } }
 
-/* 产品合规简介标题 */
-.intro-title {
-  text-align: center;
-  margin: 50px 0;
-}
+/* =============== UK SECTION =============== */
+.uk-section { margin:40px 0 20px; background:linear-gradient(110deg,#f8f9fa,#f1f4f7); border:1px solid #e0e4e8; border-radius:16px; padding:26px 26px 30px; position:relative; overflow:hidden; box-shadow:var(--pc-shadow-sm); }
+.uk-section:before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 90% 15%,rgba(255,153,0,.18),transparent 60%); pointer-events:none; }
+.country-header { display:flex; align-items:center; gap:16px; margin:0 0 20px; }
+.uk-flag { font-size:40px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)); }
+.country-title { margin:0; font-size:24px; font-weight:600; letter-spacing:.5px; background:linear-gradient(90deg,var(--pc-accent),var(--pc-accent-alt)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.compliance-info { background:#fff; padding:24px 26px 26px; border-radius:14px; border:1px solid #e3e6ea; box-shadow:inset 0 0 0 1px #f2f4f6, var(--pc-shadow-sm); position:relative; }
+.info-title { margin:0 0 10px; font-size:17px; font-weight:600; color:#232f3e; letter-spacing:.4px; }
+.warning-text { color:#b42318; font-weight:700; font-size:13px; background:#ffe7e5; padding:6px 10px; display:inline-block; border-radius:8px; letter-spacing:.4px; }
+.fhdds-description { margin:18px 0 20px; font-size:13px; color:#444; line-height:1.55; }
+.fhdds-description p { margin:0; }
+.fhdds-links { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+.link-item { display:flex; gap:8px; font-size:13px; align-items:flex-start; }
+.checkmark { color:#256c37; font-weight:700; font-size:14px; margin-top:2px; }
+.link-text { color:#444; line-height:1.5; }
+.link { color:var(--pc-accent); text-decoration:none; position:relative; font-weight:600; }
+.link:after { content:''; position:absolute; left:0; bottom:-2px; width:100%; height:2px; background:linear-gradient(90deg,var(--pc-accent),var(--pc-accent-alt)); transform:scaleX(0); transform-origin:left; transition:.4s; }
+.link:hover:after { transform:scaleX(1); }
 
-.intro-title h1 {
-  color: #333;
-  font-size: 48px;
-  font-weight: 600;
-  margin: 0;
-}
+/* =============== EU COUNTRIES =============== */
+.eu-countries { margin:40px 0 30px; display:flex; flex-direction:column; align-items:center; gap:18px; }
+.country-flags { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+.flag-item { font-size:30px; padding:10px; border-radius:14px; background:#fff; box-shadow:var(--pc-shadow-sm); border:1px solid #e3e6ea; }
+.eu-title { text-align:center; }
+.eu-title h3 { margin:0 0 6px; font-size:24px; font-weight:600; background:linear-gradient(90deg,var(--pc-accent),var(--pc-accent-alt)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.eu-subtitle { margin:0; font-size:12.5px; color:#555; letter-spacing:.5px; }
 
-/* 销售状态样式 */
-.sales-status {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0;
-}
+/* =============== GPSR TABLE =============== */
+.gpsr-section { margin:34px 0 26px; }
+.regulation-title { margin:0 0 18px; font-size:17px; font-weight:600; color:#232f3e; letter-spacing:.4px; }
+.compliance-table { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; border:1px solid #e3e6ea; background:#fff; border-radius:14px; overflow:hidden; box-shadow:var(--pc-shadow-sm); }
+.compliance-table th { background:linear-gradient(90deg,var(--pc-primary),var(--pc-primary-end)); color:#fff; padding:12px 10px; font-weight:600; letter-spacing:.4px; font-size:12px; text-align:center; }
+.compliance-table td { padding:10px 10px; border-top:1px solid #eef0f2; font-size:12px; line-height:1.45; color:#333; vertical-align:top; }
+.compliance-table tbody tr:nth-child(even) td { background:#fafbfc; }
 
-.status-badge {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  color: #333;
-  padding: 15px 40px;
-  border-radius: 25px;
-  font-size: 24px;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
-  border: 2px solid #FF8C00;
-}
+/* =============== EPR SECTION =============== */
+.epr-section { margin:32px 0 10px; }
+.epr-items { margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+.epr-item { display:flex; gap:10px; font-size:13px; line-height:1.55; position:relative; }
+.bullet { font-weight:700; color:#232f3e; margin-top:2px; }
+.epr-text { flex:1; color:#444; }
+.epr-text strong { color:#232f3e; font-weight:600; }
 
-.core-message {
-  text-align: center;
-  margin: 40px 0;
-}
+/* =============== RESPONSIVE =============== */
+@media (max-width: 880px){ .progress-step { min-width:140px; } }
+@media (max-width: 760px){ .progress-bar { flex-direction:column; } .progress-arrow { transform:rotate(90deg); } .uk-section { padding:22px 20px 26px; } .intro-title { margin:40px 0 6px; } }
+@media (max-width: 560px){ .status-badge { font-size:18px; padding:12px 26px; } .main-text { font-size:18px; } .sub-text { font-size:15px; } .country-title { font-size:20px; } .compliance-table th, .compliance-table td { padding:8px 8px; } }
 
-.main-text {
-  color: #333;
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 15px;
-  line-height: 1.4;
-}
-
-.sub-text {
-  color: #333;
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-/* 英国站样式 */
-.uk-section {
-  margin: 30px 0;
-}
-
-.country-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.uk-flag {
-  font-size: 32px;
-}
-
-.country-title {
-  color: #333;
-  font-size: 24px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.compliance-info {
-  background: #f8f9fa;
-  padding: 25px;
-  border-radius: 8px;
-  border-left: 4px solid #FF8C00;
-}
-
-.info-title {
-  color: #333;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 10px 0;
-}
-
-.warning-text {
-  color: #dc3545;
-  font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-
-.fhdds-description {
-  margin: 15px 0 20px 0;
-}
-
-.fhdds-description p {
-  color: #555;
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.fhdds-links {
-  margin-top: 20px;
-}
-
-.link-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 8px 0;
-}
-
-.checkmark {
-  color: #00aa66;
-  font-weight: bold;
-  font-size: 14px;
-  margin-top: 2px;
-}
-
-.link-text {
-  color: #555;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.link {
-  color: #007bff;
-  text-decoration: underline;
-}
-
-/* 欧盟国家样式 */
-.eu-countries {
-  margin: 30px 0;
-}
-
-.country-flags {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.flag-item {
-  font-size: 32px;
-  padding: 10px;
-  border-radius: 50%;
-  background: #f8f9fa;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.eu-title {
-  text-align: center;
-}
-
-.eu-title h3 {
-  color: #FF8C00;
-  font-size: 24px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-}
-
-.eu-subtitle {
-  color: #555;
-  font-size: 14px;
-  margin: 0;
-}
-
-/* GPSR表格样式 */
-.gpsr-section {
-  margin: 30px 0;
-}
-
-.regulation-title {
-  color: #333;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 20px 0;
-}
-
-.compliance-table {
-  width: 100% !important;
-  border-collapse: collapse !important;
-  font-size: 13px !important;
-  background: white !important;
-  margin: 0 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-  table-layout: fixed;
-  word-wrap: break-word;
-}
-
-.compliance-table th {
-  background: #232f3e;
-  color: white !important;
-  font-weight: 600 !important;
-  padding: 15px 12px !important;
-  text-align: center !important;
-  border: 1px solid #e0e0e0 !important;
-  font-size: 13px !important;
-  line-height: 1.4 !important;
-}
-
-.compliance-table td {
-  padding: 12px !important;
-  border: 1px solid #e0e0e0 !important;
-  vertical-align: top !important;
-  background: white !important;
-  color: #333 !important;
-  font-size: 12px !important;
-  line-height: 1.5 !important;
-}
-
-.compliance-table tbody tr:nth-child(even) {
-  background: #f8f9fa !important;
-}
-
-.compliance-table:hover tbody tr {
-  background: white !important;
-}
-
-.compliance-table tbody tr:nth-child(even):hover {
-  background: #f8f9fa !important;
-}
-
-/* EPR样式 */
-.epr-section {
-  margin: 30px 0;
-}
-
-.epr-items {
-  margin-top: 15px;
-}
-
-.epr-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 15px 0;
-  line-height: 1.6;
-}
-
-.bullet {
-  color: #333;
-  font-weight: bold;
-  margin-top: 3px;
-  min-width: 8px;
-}
-
-.epr-text {
-  color: #555;
-  font-size: 14px;
-  line-height: 1.6;
-  flex: 1;
-}
-
-.epr-text strong {
-  color: #333;
-  font-weight: 600;
-}
-
-/* 政策更新标题 */
-.policy-title {
-  text-align: center;
-  margin: 50px 0;
-}
-
-.policy-title h1 {
-  color: #333;
-  font-size: 36px;
-  font-weight: 600;
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .progress-bar {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .progress-arrow {
-    transform: rotate(90deg);
-  }
-  
-  .progress-step {
-    min-width: auto;
-    width: 100%;
-  }
-  
-  .country-flags {
-    justify-content: center;
-  }
-  
-  .flag-item {
-    font-size: 24px;
-    padding: 8px;
-  }
-  
-  .intro-title h1 {
-    font-size: 32px;
-  }
-  
-  .policy-title h1 {
-    font-size: 24px;
-  }
-  
-  .main-text {
-    font-size: 20px;
-  }
-  
-  .sub-text {
-    font-size: 18px;
-  }
-  
-  .compliance-content {
-    padding: 20px;
-  }
-  
-  .compliance-table {
-    font-size: 12px;
-  }
-  
-  .compliance-table th,
-  .compliance-table td {
-    padding: 8px;
-  }
-}
+@media (prefers-reduced-motion: reduce){ .compliance-section, .arrow, .link:after { transition:none!important; } }
 </style>
