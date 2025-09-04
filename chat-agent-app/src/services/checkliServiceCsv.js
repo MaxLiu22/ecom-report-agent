@@ -19,7 +19,8 @@ const COUNTRY_ALIASES = {
   '意大利': ['意大利','IT','Italy','義大利'],
   '法国': ['法国','FR','France','法國'],
   '西班牙': ['西班牙','ES','Spain','España','西班牙(Spain)'],
-  '英国': ['英国','UK','UnitedKingdom','United Kingdom','GB','GreatBritain','Great Britain','UK(英国)']
+  '英国': ['英国','UK','UnitedKingdom','United Kingdom','GB','GreatBritain','Great Britain','UK(英国)'],
+  '波兰': ['波兰','PL','Poland','波蘭']
 };
 const BASE_COUNTRIES = Object.keys(COUNTRY_ALIASES); // ['德国','意大利','法国','西班牙','英国']
 
