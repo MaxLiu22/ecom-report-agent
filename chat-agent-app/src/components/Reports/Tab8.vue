@@ -12,74 +12,119 @@
             <tr>
               <th class="ranking-col">优先级</th>
               <th class="action-col">主题</th>
-              <th class="timeline-col">时间</th>
               <th class="logic-col">行动</th>
+              <th class="due-col">预计完成时间</th>
+              <th class="status-col">是否完成</th>
             </tr>
           </thead>
           <tbody>
-            <!-- 第一行: 合规 - new policy -->
+            <!-- 第一行: new policy -->
             <tr v-if="computedActionResult.newPolicy">
               <td class="ranking">1</td>
               <td class="action">合规 - new policy (NL/IT)</td>
-              <td class="timeline">1个月</td>
               <td class="logic">{{ computedActionResult.newPolicy }}</td>
+              <td class="due">
+                <input type="date" v-model="inputs.newPolicyDue" />
+              </td>
+              <td class="status">
+                <select v-model="inputs.newPolicyDone">
+                  <option value="否">否</option>
+                  <option value="是">是</option>
+                </select>
+              </td>
             </tr>
-            
-            <!-- 第二行: 合规 - 开了仓储没开税号 -->
+
+            <!-- 第二行: 仓储没开税号 -->
             <tr v-if="computedActionResult.warehouseVATCompliance && computedActionResult.warehouseVATCompliance.length">
               <td class="ranking">2</td>
               <td class="action">合规 - 开了仓储没开税号</td>
-              <td class="timeline">3个月</td>
               <td class="logic">
                 <ul>
                   <li v-for="(item, index) in computedActionResult.warehouseVATCompliance" :key="index">{{ item }}</li>
                 </ul>
               </td>
+              <td class="due">
+                <input type="date" v-model="inputs.warehouseDue" />
+              </td>
+              <td class="status">
+                <select v-model="inputs.warehouseDone">
+                  <option value="否">否</option>
+                  <option value="是">是</option>
+                </select>
+              </td>
             </tr>
-            
-            <!-- 第三行: cost saving - pan-EU placement -->
+
+            <!-- 第三行: pan-EU placement -->
             <tr v-if="computedActionResult.panEUCostSaving && computedActionResult.panEUCostSaving.length">
               <td class="ranking">3</td>
               <td class="action">cost saving - pan-EU placement</td>
-              <td class="timeline">3个月</td>
               <td class="logic">
                 <ul>
                   <li v-for="(item, index) in computedActionResult.panEUCostSaving" :key="index">{{ item }}</li>
                 </ul>
               </td>
+              <td class="due">
+                <input type="date" v-model="inputs.panEUDue" />
+              </td>
+              <td class="status">
+                <select v-model="inputs.panEUDone">
+                  <option value="否">否</option>
+                  <option value="是">是</option>
+                </select>
+              </td>
             </tr>
-            
-            <!-- 第四行: cost saving - pan-EU ASIN parity -->
+
+            <!-- 第四行: pan-EU ASIN parity -->
             <tr v-if="computedActionResult.panEUASINParity">
               <td class="ranking">4</td>
               <td class="action">cost saving - pan-EU ASIN parity</td>
-              <td class="timeline">1个月</td>
               <td class="logic">{{ computedActionResult.panEUASINParity }}</td>
+              <td class="due">
+                <input type="date" v-model="inputs.panEUASINDue" />
+              </td>
+              <td class="status">
+                <select v-model="inputs.panEUASINDone">
+                  <option value="否">否</option>
+                  <option value="是">是</option>
+                </select>
+              </td>
             </tr>
-            
-           <!-- DI相关行 - 共享逻辑单元格 -->
-          <!-- <template v-if="computedActionResult.diIncentive && computedActionResult.diIncentive.length"> -->
-            <!-- 第五行: incentive - DI (GSI) -->
+
+            <!-- 第五行: DI incentive -->
             <tr v-if="computedActionResult.diIncentive">
               <td class="ranking">5</td>
               <td class="action">cost saving - DI</td>
-              <td class="timeline">1个月</td>
-              <!-- <td class="logic" rowspan="2"> -->
               <td class="logic">
                 <div v-for="(item, index) in computedActionResult.diIncentive" :key="index" class="growth-item">
                   <strong>{{ item.title }}:</strong> {{ item.description }}
                 </div>
               </td>
+              <td class="due">
+                <input type="date" v-model="inputs.diDue" />
+              </td>
+              <td class="status">
+                <select v-model="inputs.diDone">
+                  <option value="否">否</option>
+                  <option value="是">是</option>
+                </select>
+              </td>
             </tr>
-          <!-- </template> -->
 
-          <!-- 第六行: cost saving - CEE -->
-          <tr v-if="computedActionResult.ceeCostSaving">
-            <td class="ranking">6</td>
-            <td class="action">cost saving - CEE</td>
-            <td class="timeline">3个月</td>
-            <td class="logic">{{ computedActionResult.ceeCostSaving }}</td>
-          </tr>
+            <!-- 第六行: CEE cost saving -->
+            <tr v-if="computedActionResult.ceeCostSaving">
+              <td class="ranking">6</td>
+              <td class="action">cost saving - CEE</td>
+              <td class="logic">{{ computedActionResult.ceeCostSaving }}</td>
+              <td class="due">
+                <input type="date" v-model="inputs.ceeDue" />
+              </td>
+              <td class="status">
+                <select v-model="inputs.ceeDone">
+                  <option value="否">否</option>
+                  <option value="是">是</option>
+                </select>
+              </td>
+            </tr>
 
           </tbody>
         </table>
@@ -87,6 +132,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import ActionService, { 
@@ -99,7 +145,6 @@ import ActionService, {
 export default {
   name: 'Tab8',
   props: {
-    // action 分析结果
     actionResult: {
       type: Object,
       default: null
@@ -107,14 +152,27 @@ export default {
   },
   data() {
     return {
-      localActionResult: null
+      localActionResult: null,
+      // 所有行的用户输入
+      inputs: {
+        newPolicyDue: '',
+        newPolicyDone: '否',
+        warehouseDue: '',
+        warehouseDone: '否',
+        panEUDue: '',
+        panEUDone: '否',
+        panEUASINDue: '',
+        panEUASINDone: '否',
+        diDue: '',
+        diDone: '否',
+        ceeDue: '',
+        ceeDone: '否'
+      }
     };
   },
   created() {
-    // 如果props中没有传入actionResult，则使用默认参数计算
     if (!this.actionResult) {
       this.calculateWithDefaults();
-      console.log('使用默认参数计算');
     } else {
       this.localActionResult = this.actionResult;
     }
@@ -127,19 +185,16 @@ export default {
         defaultCeeResult,
         defaultEUExpansionCheckli
       );
-      console.log('使用传入参数计算1111');
-      
       this.localActionResult = actionService.calculateAll();
-      console.log('计算结果:', this.localActionResult);
     }
   },
   computed: {
-    // 使用本地计算结果或props传入的结果
     computedActionResult() {
       return this.localActionResult || this.actionResult;
     }
   }
 };
+
 </script>
 
 <style scoped>
@@ -272,6 +327,27 @@ export default {
   display: block;
   margin-bottom: 4px;
 }
+
+.due-col {
+  width: 160px;
+}
+
+.status-col {
+  width: 120px;
+}
+
+.due input[type="date"] {
+  width: 100%;
+  padding: 6px;
+  font-size: 14px;
+}
+
+.status select {
+  width: 100%;
+  padding: 6px;
+  font-size: 14px;
+}
+
 
 /* 响应式设计 */
 @media (max-width: 768px) {
