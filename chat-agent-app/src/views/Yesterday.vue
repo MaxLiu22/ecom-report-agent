@@ -321,7 +321,7 @@ onMounted(() => {
         </div>
         
         <div class="report-area">
-          <ReportTab :reportGenerated="reportGenerated" :disablePreview="true" />
+          <ReportTab :reportGenerated="reportGenerated" :disablePreview="false" />
         </div>
         <!-- 按键区域 -->
         <div class="button-area">
@@ -385,6 +385,7 @@ onMounted(() => {
   flex: 1;
   display: flex;
   gap: 20px;
+  min-height: 0; /* 允许子元素使用 flex 内部滚动 */
 }
 
 .left-panel {
@@ -396,17 +397,20 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden; /* 防止内部撑高父级 */
+  min-height: 0;
 }
 
 .message-container {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0px 5px;
-  max-height: calc(100vh - 250px);
+  /* 移除固定 max-height，改由父级 flex 约束 */
+  min-height: 0;
   scroll-behavior: smooth;
 }
 
@@ -680,6 +684,7 @@ onMounted(() => {
   border: 2px solid #2d5a45;
   overflow: hidden;
   min-width: 0;
+  min-height: 0;
 }
 
 .report-area {
@@ -693,28 +698,18 @@ onMounted(() => {
   overflow: hidden; /* 自身不滚动，交由内部 tab-content 滚动 */
 }
 
-/* 让内部的 ReportTab 框架绝对填充，避免高度被内容撑开 */
-.report-area :deep(.report-frame) {
-  position: absolute;
-  inset: 0;
+/* 仅嵌入态（非浮层预览）下让内部充满并由 tab-content 滚动 */
+.report-area :deep(.report-frame:not(.floating-mode)) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%;
-  overflow: hidden; /* 防止双重滚动 */
+  overflow: hidden;
 }
-
-/* 仅内容区滚动 */
-.report-area :deep(.tab-content) {
+.report-area :deep(.report-frame:not(.floating-mode) .tab-content) {
   flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  min-height: 0;
-}
-
-/* 去掉可能的双层滚动条影响 */
-.report-area :deep(.content-panel) {
-  box-sizing: border-box;
 }
 
 /* 报告区域滚动条样式 */

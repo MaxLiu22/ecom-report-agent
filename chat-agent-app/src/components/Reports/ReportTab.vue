@@ -1,5 +1,5 @@
 <template>
-  <div class="report-frame" :class="{ 'floating-mode': showUniReport && !disablePreview }">
+  <div class="report-frame" :class="{ 'floating-mode': showUniReport && !disablePreview, 'fullscreen': showUniReport && previewFullScreen && !disablePreview }">
     <!-- Tab 导航栏 -->
     <div class="tab-navigation">
       <div class="tab-container">
@@ -305,6 +305,11 @@ export default {
       type: Boolean,
       default: false,
     },
+    // 是否在预览时使用全屏（100% 视口而不是 90vw/90vh 弹窗）
+    previewFullScreen: {
+      type: Boolean,
+      default: false,
+    },
     // PanEU 分析结果
     panEUResult: {
       type: Object,
@@ -441,8 +446,10 @@ export default {
     }
 
     // 打开浮层预览
-    const openFloatingPreview = () => { if (!props.disablePreview) showUniReport.value = true }
-    const closeFloating = () => { showUniReport.value = false }
+  const lockBodyScroll = () => { document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden' }
+  const unlockBodyScroll = () => { document.documentElement.style.overflow = ''; document.body.style.overflow = '' }
+  const openFloatingPreview = () => { if (!props.disablePreview) { showUniReport.value = true; if (props.previewFullScreen) lockBodyScroll() } }
+  const closeFloating = () => { showUniReport.value = false; unlockBodyScroll() }
     const togglePreview = () => { if (props.disablePreview) return; showUniReport.value ? closeFloating() : openFloatingPreview() }
 
     // 包装导出与邮件发送（调用隐藏 UniReport 实例）
@@ -941,6 +948,21 @@ export default {
   animation: popIn 0.35s ease;
   background: #fff;
 }
+/* 全屏模式覆盖尺寸、圆角与定位 */
+.report-frame.floating-mode.fullscreen {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  transform: none;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  animation: fadeInFs .25s ease;
+}
+@keyframes fadeInFs { from { opacity:0; } to { opacity:1; } }
+.report-frame.floating-mode.fullscreen .tab-navigation { border-radius: 0; }
+.report-frame.floating-mode.fullscreen .floating-header { border-radius: 0; }
 @keyframes popIn {
   from {
     opacity: 0;
