@@ -80,9 +80,6 @@
               <td class="logi-cell-text">英国及欧盟均为本地配送费用节约高至53%，1-2天送达</td>
               <td class="logi-cell-text">跨境配送：费用高，5-7天送达</td>
             </tr>
-            <!-- <tr>
-              <td colspan="3" class="logi-section-head">加入条件</td>
-            </tr> -->
             <tr class="logi-row alt">
               <td class="logi-cell-label">ASIN 设置</td>
               <td class="logi-cell-text">
@@ -116,13 +113,13 @@
         </table>
 
         <!-- 插入双边入库图片 -->
-        <div class="logistics-image-container">
+        <!-- <div class="logistics-image-container">
           <img
             src="@/assets/双边入库.jpg"
             alt="英国和欧盟间双边入库物流方案示意图"
             class="logistics-diagram"
           />
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -432,24 +429,23 @@ export default {
   background: #fafafa;
 }
 .logi-cell-label {
-  background: #f8f9fa;
-  color: #333;
+  background: #f2f3f5;
+  color: #1f2225;
   font-weight: 600;
   text-align: center;
   padding: 12px 10px;
-  border: 1px solid #ddd;
-  border-right: 2px solid #ddd;
   font-size: 12px;
   line-height: 1.5;
+  border: 1px solid #1d1f22;
 }
 .logi-cell-text {
-  color: #333;
-  text-align: left;
+  color: #1f2225;
+  text-align: center;
   padding: 12px 14px;
-  border: 1px solid #ddd;
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.55;
   background: #fff;
+  border: 1px solid #1d1f22;
 }
 .logi-cell-text.light-bg {
   background: #f8f9fa;
@@ -476,10 +472,11 @@ export default {
 /* 新增表格头与整体样式 */
 .logi-compare-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 12px;
   background: #ffffff;
-  border: 2px solid #333;
+  border: 2px solid #1d1f22;
   border-radius: 6px;
   margin-top: 15px;
   overflow: hidden;
@@ -491,20 +488,13 @@ export default {
   padding: 14px 12px;
   text-align: center;
   font-size: 12px;
-  line-height: 1.4;
-  border-right: 1px solid #fff;
+  line-height: 1.35;
+  border-right: 1px solid #1d1f22;
+  border-bottom: 2px solid #1d1f22;
 }
-.logi-compare-table thead th.col-name {
-  background: #333;
-  width: 25%;
-}
-.logi-compare-table thead th.col-di {
-  width: 37.5%;
-}
-.logi-compare-table thead th.col-eurf {
-  width: 37.5%;
-  border-right: none;
-}
+.logi-compare-table thead th.col-name { background:#333; width:25%; }
+.logi-compare-table thead th.col-di { width:37.5%; }
+.logi-compare-table thead th.col-eurf { width:37.5%; border-right:none; }
 
 @media (max-width: 768px) {
   .logi-compare-table {
