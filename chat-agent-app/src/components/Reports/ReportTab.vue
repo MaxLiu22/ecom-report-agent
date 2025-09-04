@@ -49,6 +49,7 @@
   <div v-if="showUniReport && !disablePreview" class="floating-header uni-report-header">
       <!-- <h2 class="title">📊 IntraEU 卖家统一报告预览</h2> -->
       <div class="actions">
+        <button class="export-btn" @click="exportPdfWrapper">导出PDF</button>
         <button class="export-btn" @click="exportHtmlWrapper">导出HTML</button>
         <button class="export-btn" @click="sendEmailWrapper">发送邮件</button>
         <!-- <button class="close-btn" @click="closeFloating">×</button> -->
@@ -251,6 +252,23 @@
 
   <!-- 背景遮罩 -->
   <div v-if="showUniReport && !disablePreview" class="floating-backdrop" @click.self="closeFloating"></div>
+  <!-- 导出进度弹窗 -->
+  <transition name="fade">
+    <div v-if="exportingPdf" class="export-progress-overlay">
+      <div class="export-progress-dialog">
+        <h3>正在生成 PDF...</h3>
+        <p class="hint">请勿关闭窗口，当前进度：{{ exportProgress.current }} / {{ exportProgress.total }} 面板</p>
+        <div class="bar-wrap">
+          <div class="bar" :style="{ width: progressPercent + '%' }"></div>
+        </div>
+        <p v-if="exportProgress.message" class="msg">{{ exportProgress.message }}</p>
+        <div class="actions">
+          <button class="cancel-btn" @click="cancelExport" :disabled="exportProgress.done">取消</button>
+          <button v-if="exportProgress.done" class="close-btn" @click="closeExportOverlay">关闭</button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -262,6 +280,8 @@ import Tab8 from './Tab8.vue'
 import Tab9 from './Tab9.vue'
 import UniReport from './uniReport.vue'
 import OverviewDirectory from './TianOffered/Overview_Directory.vue'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 export default {
   name: 'ReportTab',
@@ -318,6 +338,15 @@ export default {
     const selectedSubTab = ref(61)
     const showUniReport = ref(false)
     const uniReportRef = ref(null)
+    // 导出进度状态
+    const exportingPdf = ref(false)
+    const cancelExportFlag = ref(false)
+    const exportProgress = ref({ current: 0, total: 0, message: '', done: false })
+    const progressPercent = computed(() => {
+      if (!exportProgress.value.total) return 0
+      return Math.min(100, (exportProgress.value.current / exportProgress.value.total) * 100)
+    })
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
     const solutionSubTabs = [
       { id: 61, title: '欧盟内部物流方案（PanEU）', desc: '解决方案子页面 1 概述' },
@@ -562,6 +591,295 @@ export default {
       window.removeEventListener('resize', updateMenuPosition)
     })
 
+    // === PDF 导出实现 ===
+    const exportPdfWrapper = async () => {
+      if (!props.reportGenerated) {
+        console.warn('报告未生成，无法导出 PDF')
+        return
+      }
+      try {
+        exportingPdf.value = true
+        cancelExportFlag.value = false
+        exportProgress.value = { current: 0, total: 0, message: '初始化...', done: false }
+        // 先渲染进度层
+        await nextTick()
+        // 再稍作延迟让浏览器完成一次绘制，避免首帧看不到弹窗
+        await sleep(30)
+        // 优先视觉模式
+        await exportPdfVisualMode()
+      } catch (e) {
+        console.warn('视觉模式失败，切换文本模式', e)
+        const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
+        await exportPdfTextMode(pdf)
+        pdf.save('IntraEU_Report.pdf')
+        exportProgress.value.message = '文本模式完成'
+        exportProgress.value.done = true
+        setTimeout(()=>{ exportingPdf.value = false }, 1200)
+      }
+    }
+
+    // 纯文本回退版本（保留原逻辑）
+    const exportPdfTextMode = async (pdf) => {
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const marginX = 36
+      const marginY = 40
+      const lineHeight = 14
+      let cursorY = marginY
+
+      const title = 'IntraEU 综合分析报告'
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(16)
+      pdf.text(title, pageWidth / 2, cursorY, { align: 'center' })
+      cursorY += 28
+
+      const exportTabConfigs = tabs.value.filter(t => t.id !== 8)
+      const originalMain = activeTab.value
+      const originalSub = selectedSubTab.value
+
+      const addSectionHeader = (txt) => {
+        if (cursorY + 40 > pageHeight - marginY) { pdf.addPage(); cursorY = marginY }
+        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(13); pdf.setTextColor(35,47,62)
+        pdf.text(txt, marginX, cursorY); cursorY += 22
+      }
+      const addParagraphLines = (text) => {
+        pdf.setFont('helvetica','normal'); pdf.setFontSize(10); pdf.setTextColor(60,60,60)
+        const maxWidth = pageWidth - marginX*2
+        const lines = pdf.splitTextToSize(text, maxWidth)
+        lines.forEach(l => { if (cursorY + lineHeight > pageHeight - marginY) { pdf.addPage(); cursorY = marginY } pdf.text(l, marginX, cursorY); cursorY += lineHeight })
+        cursorY += 4
+      }
+      const extractPlainText = (htmlString) => {
+        const tmp = document.createElement('div'); tmp.innerHTML = htmlString
+        tmp.querySelectorAll('script,style,button').forEach(n=>n.remove())
+        tmp.querySelectorAll('table').forEach(tbl => {
+          const rows = [...tbl.rows].map(r => [...r.cells].map(c => c.innerText.trim()).join(' | ')).join('\n')
+          const pre = document.createElement('pre'); pre.textContent = rows; tbl.replaceWith(pre)
+        })
+        return tmp.innerText.replace(/\n{3,}/g,'\n\n').trim()
+      }
+      for (const tabCfg of exportTabConfigs) {
+        activeTab.value = tabCfg.id; await nextTick()
+        if (tabCfg.id === 5) {
+          addSectionHeader(tabCfg.title)
+          for (const sub of solutionSubTabs) {
+            selectedSubTab.value = sub.id; await nextTick()
+            const contentRoot = document.querySelector('.tab-content'); if (!contentRoot) continue
+            const text = extractPlainText(contentRoot.innerHTML)
+            addSectionHeader('• ' + sub.title)
+            addParagraphLines(text || '(无数据)')
+          }
+          selectedSubTab.value = originalSub; await nextTick()
+        } else {
+          const contentRoot = document.querySelector('.tab-content'); if (!contentRoot) continue
+          const text = extractPlainText(contentRoot.innerHTML)
+          addSectionHeader(tabCfg.title)
+          addParagraphLines(text || '(无数据)')
+        }
+      }
+      activeTab.value = originalMain; selectedSubTab.value = originalSub; await nextTick()
+    }
+
+    // 视觉模式：截图每个面板
+    const exportPdfVisualMode = async () => {
+      const tStart = performance.now()
+      const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const scale = 2 // 高清
+
+      const originalMain = activeTab.value
+      const originalSub = selectedSubTab.value
+      const exportTabConfigs = tabs.value.filter(t => t.id !== 8)
+
+      // 构建隐藏根节点
+      const tempRoot = document.createElement('div')
+      Object.assign(tempRoot.style, {
+        position: 'fixed', left: '-10000px', top: '0', width: '1200px',
+        background: '#fff', padding: '0', margin: '0', zIndex: '-1'
+      })
+      document.body.appendChild(tempRoot)
+
+      const panels = []
+      const addPanel = (title, sourceEl, level = 1) => {
+        // 深克隆源内容 (保持现有 DOM 结构，而不是 innerHTML 重新解析)
+        const clone = sourceEl.cloneNode(true)
+        // 移除所有按钮
+        clone.querySelectorAll('button').forEach(b => b.remove())
+        // 包裹容器 + 标题
+        const wrapper = document.createElement('div')
+        wrapper.style.cssText = 'padding:32px 40px 40px;font-family:Helvetica,Arial,sans-serif;'
+        const hTag = level === 0 ? 'h1' : (level === 1 ? 'h2' : 'h3')
+        const size = level === 0 ? 38 : (level === 1 ? 26 : 20)
+        const color = level === 2 ? '#ff9900' : '#232f3e'
+        wrapper.innerHTML = `<${hTag} style="margin:0 0 20px;font-size:${size}px;color:${color};">${title}</${hTag}>`
+        wrapper.appendChild(clone)
+        tempRoot.appendChild(wrapper)
+        panels.push({ title, el: wrapper })
+      }
+
+      // 封面（单独）
+      const cover = document.createElement('div')
+      cover.style.cssText = 'padding:80px 60px;font-family:Helvetica,Arial,sans-serif;'
+      cover.innerHTML = `
+        <h1 style="margin:0 0 24px;font-size:40px;color:#232f3e;">IntraEU 综合分析报告</h1>
+        <p style="margin:0 0 10px;font-size:14px;color:#555;">生成时间：${new Date().toLocaleString()}</p>
+        <p style="margin:0;font-size:12px;color:#777;">(不含 AM 指导话术 Tab)</p>`
+      tempRoot.appendChild(cover)
+      panels.push({ title: '封面', el: cover })
+
+      // 逐 Tab 构建
+      for (const tabCfg of exportTabConfigs) {
+        activeTab.value = tabCfg.id
+        await nextTick()
+        if (tabCfg.id === 5) {
+          // 主标题单独一个 panel（不复制内容）
+          const headerBlock = document.createElement('div')
+          headerBlock.style.cssText = 'padding:32px 40px 12px;font-family:Helvetica,Arial,sans-serif;background:#f5f5f5;border-bottom:1px solid #eee;'
+          headerBlock.innerHTML = `<h2 style="margin:0;font-size:28px;color:#232f3e;">${tabCfg.title}</h2>`
+          tempRoot.appendChild(headerBlock)
+          panels.push({ title: tabCfg.title, el: headerBlock })
+          for (const sub of solutionSubTabs) {
+            selectedSubTab.value = sub.id
+            await nextTick()
+            const contentRoot = document.querySelector('.tab-content')
+            if (!contentRoot) continue
+            addPanel(sub.title, contentRoot, 2)
+          }
+        } else {
+          const contentRoot = document.querySelector('.tab-content')
+          if (!contentRoot) continue
+            addPanel(tabCfg.title, contentRoot, 1)
+        }
+      }
+
+      // 状态恢复
+      activeTab.value = originalMain
+      selectedSubTab.value = originalSub
+      await nextTick()
+
+      // 等待所有图片加载，避免空白
+      const waitForImages = async (root) => {
+        const imgs = Array.from(root.querySelectorAll('img'))
+        await Promise.all(imgs.map(img => {
+          if (img.complete) return Promise.resolve()
+          return new Promise(res => { img.onload = () => res(); img.onerror = () => res() })
+        }))
+      }
+      await waitForImages(tempRoot)
+      // 方案A：先截图全部 panel 存储，再“瀑布流”合成
+      exportProgress.value.total = panels.length
+      exportProgress.value.current = 0
+      exportProgress.value.message = '面板截图中...'
+
+      const captured = [] // {canvas,width,height,title}
+      for (const { el } of panels) {
+        if (cancelExportFlag.value) break
+        exportProgress.value.current++
+        exportProgress.value.message = `截图 ${exportProgress.value.current}/${exportProgress.value.total}`
+        try {
+          const c = await html2canvas(el, { scale, backgroundColor: '#ffffff', useCORS: true, allowTaint: false, logging: false })
+          captured.push({ canvas: c, width: c.width, height: c.height })
+        } catch (e) {
+          console.error('[PDF] 截图失败，插入占位', e)
+          const ph = document.createElement('canvas')
+          ph.width = 1200; ph.height = 200
+          const ctx = ph.getContext('2d')
+          ctx.fillStyle = '#f5f5f5'; ctx.fillRect(0,0,ph.width,ph.height)
+          ctx.fillStyle = '#cc0000'; ctx.font = '28px sans-serif'; ctx.fillText('该面板截图失败', 40, 110)
+          captured.push({ canvas: ph, width: ph.width, height: ph.height })
+        }
+      }
+
+      // 若取消
+      if (cancelExportFlag.value) {
+        document.body.removeChild(tempRoot)
+        exportProgress.value.message = '已取消'
+        exportProgress.value.done = true
+        return
+      }
+
+      exportProgress.value.message = '切分大面板...'
+      const pageMarginX = 36
+      const pageMarginY = 40
+      const contentWidthPdf = pageWidth - pageMarginX * 2
+      const contentHeightPdf = pageHeight - pageMarginY * 2
+
+      // 将超高面板按 PDF 内容高度切分（以原始像素为基准）
+      const pixelScaleToPdf = (w) => contentWidthPdf / w // 将原 canvas 宽度映射到 PDF 内容宽度的缩放系数
+      const sliced = [] // {canvas,width,height}
+      for (const item of captured) {
+        const scaleToPdf = pixelScaleToPdf(item.width)
+        const pdfHeight = item.height * scaleToPdf
+        if (pdfHeight <= contentHeightPdf) {
+          sliced.push(item)
+        } else {
+          // 需要切分
+            const maxSlicePdfHeight = contentHeightPdf
+            const pxPerPdfPoint = item.height / pdfHeight // 原像素 / PDF 点
+            const maxSlicePxHeight = Math.floor(maxSlicePdfHeight * pxPerPdfPoint)
+            let rendered = 0
+            while (rendered < item.height) {
+              const slicePxHeight = Math.min(maxSlicePxHeight, item.height - rendered)
+              const sliceCanvas = document.createElement('canvas')
+              sliceCanvas.width = item.width
+              sliceCanvas.height = slicePxHeight
+              const ctx = sliceCanvas.getContext('2d')
+              ctx.drawImage(item.canvas, 0, rendered, item.width, slicePxHeight, 0, 0, item.width, slicePxHeight)
+              sliced.push({ canvas: sliceCanvas, width: item.width, height: slicePxHeight })
+              rendered += slicePxHeight
+            }
+        }
+      }
+
+      exportProgress.value.message = '合成分页...' 
+      // 分组：累积多个切片在一页（瀑布流单列压缩留白）
+      const groups = [] // 每组若干 image items
+      let currentGroup = []
+      let currentGroupPdfHeight = 0
+      const gapPdf = 12 // pdf 点单位的间隙
+      for (const item of sliced) {
+        const scaleToPdf = pixelScaleToPdf(item.width)
+        const hPdf = item.height * scaleToPdf
+        const needed = (currentGroup.length === 0 ? hPdf : (currentGroupPdfHeight + gapPdf + hPdf))
+        if (needed <= contentHeightPdf) {
+          currentGroup.push(item)
+          currentGroupPdfHeight = needed
+        } else {
+          if (currentGroup.length) groups.push(currentGroup)
+          currentGroup = [item]
+          currentGroupPdfHeight = hPdf
+        }
+      }
+      if (currentGroup.length) groups.push(currentGroup)
+
+      // 输出到 PDF
+      let pageIndex = 0
+      for (const group of groups) {
+        if (pageIndex > 0) pdf.addPage()
+        let y = pageMarginY
+        for (let i=0;i<group.length;i++) {
+          const it = group[i]
+          const scaleToPdf = pixelScaleToPdf(it.width)
+          const drawHeight = it.height * scaleToPdf
+          pdf.addImage(it.canvas.toDataURL('image/jpeg', 0.9), 'JPEG', pageMarginX, y, contentWidthPdf, drawHeight)
+          y += drawHeight + gapPdf
+        }
+        pageIndex++
+        exportProgress.value.message = `分页合成 ${pageIndex}/${groups.length}`
+      }
+
+      document.body.removeChild(tempRoot)
+      pdf.save('IntraEU_Report.pdf')
+      exportProgress.value.message = 'PDF 已保存'
+      exportProgress.value.done = true
+      console.log(`[PDF] 视觉导出完成(瀑布流), 用时 ${(performance.now()-tStart).toFixed(0)} ms, 页数: ${pdf.getNumberOfPages()}`)
+      setTimeout(()=>{ if (!cancelExportFlag.value) exportingPdf.value = false }, 1400)
+    }
+
+    const cancelExport = () => { cancelExportFlag.value = true; exportProgress.value.message = '取消中...'}
+    const closeExportOverlay = () => { exportingPdf.value = false }
+
     return {
       activeTab,
       tabs,
@@ -579,6 +897,8 @@ export default {
       exportHtmlWrapper,
       sendEmailWrapper,
       uniReportRef,
+      exportPdfWrapper
+      ,exportingPdf, exportProgress, progressPercent, cancelExport, closeExportOverlay
     }
   },
 }
@@ -745,6 +1065,25 @@ export default {
 }
 .preview-btn.active { background:#ff4d4f; color:#fff; text-transform:none; }
 .preview-btn.active:hover { background:#ff7875; }
+
+/* 导出进度弹窗样式 */
+.export-progress-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); backdrop-filter:blur(3px); z-index:5000; display:flex; align-items:center; justify-content:center; }
+.export-progress-dialog { width: min(420px,90%); background:#ffffff; border:1px solid #e3e8ee; border-radius:16px; padding:28px 30px 26px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; box-shadow:0 12px 32px -6px rgba(0,0,0,0.28),0 4px 12px -2px rgba(0,0,0,0.12); animation:scaleIn .35s ease; }
+.export-progress-dialog h3 { margin:0 0 12px; font-size:18px; color:#232f3e; font-weight:600; letter-spacing:.5px; }
+.export-progress-dialog .hint { margin:0 0 18px; font-size:12px; color:#555; line-height:1.5; }
+.bar-wrap { height:10px; background:#f1f3f5; border-radius:6px; overflow:hidden; position:relative; box-shadow:inset 0 0 0 1px #e2e6ea; }
+.bar-wrap .bar { height:100%; background:linear-gradient(90deg,#ff9900,#ffb347); width:0; transition:width .35s ease; }
+.export-progress-dialog .msg { margin:12px 0 0; font-size:11px; color:#666; letter-spacing:.3px; }
+.export-progress-dialog .actions { margin-top:22px; display:flex; gap:12px; justify-content:flex-end; }
+.export-progress-dialog button { border:none; cursor:pointer; padding:8px 16px; font-size:12px; font-weight:600; border-radius:8px; letter-spacing:.5px; display:inline-flex; align-items:center; gap:4px; transition:.25s; }
+.export-progress-dialog .cancel-btn { background:#ff4d4f; color:#fff; }
+.export-progress-dialog .cancel-btn:hover:not(:disabled) { background:#ff7375; }
+.export-progress-dialog .cancel-btn:disabled { opacity:.5; cursor:default; }
+.export-progress-dialog .close-btn { background:#232f3e; color:#fff; }
+.export-progress-dialog .close-btn:hover { background:#394b5d; }
+@keyframes scaleIn { from { opacity:0; transform:translateY(8px) scale(.96);} to { opacity:1; transform:translateY(0) scale(1);} }
+.fade-enter-active, .fade-leave-active { transition: opacity .25s ease; }
+.fade-enter-from, .fade-leave-to { opacity:0; }
 
 .tab-item {
   position: relative;
