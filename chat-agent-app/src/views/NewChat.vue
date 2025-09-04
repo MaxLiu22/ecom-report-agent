@@ -2,13 +2,15 @@
 import { ref, nextTick, onMounted, computed } from 'vue';
 import ReportTab from '@/components/Reports/ReportTab.vue';
 import UniReport from '@/components/Reports/uniReport.vue';
-import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
-import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
+import { analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
+import { analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
 import CeeService from '@/services/CeeService.js';
 import DifyService from '@/services/DifyService.js';
 import {analyzeSingleEUChecklist} from '@/services/checkliService.js';
 import {analyzeSingleEUChecklistCSV} from '@/services/checkliServiceCsv.js';
+import CheckliCeeParser from '@/services/checkliServiceCee.js';
 import ActionService from '@/services/actionService.js';
+import { findAndParseValidChecklist } from '@/services/fileService.js';
 
 const message = ref('');
 const messageContainer = ref(null);
@@ -24,6 +26,7 @@ const panEUResult = ref(null);
 const diResult = ref(null);
 const ceeResult = ref(null);
 const EUExpansionCheckli = ref(null);
+const EUExpansionCheckliCee = ref(null);
 const actionResult = ref(null);
 const reportGenerated = ref(false);
 // 统一报告预览状态
@@ -40,8 +43,6 @@ const feedbackForm = ref({
 });
 
 // 打字机效果相关
-const displayedText = ref('');
-const isTyping = ref(false);
 const showInitialPrompts = ref(false);
 
 // 文件上传状态跟踪
@@ -52,6 +53,9 @@ const allFilesUploaded = computed(() => panEUFilesUploaded.value && diFilesUploa
 // 文件验证错误状态
 const panEUValidationError = ref('');
 const diValidationError = ref('');
+
+// 初始话对象
+const checkliCeeParser = new CheckliCeeParser()
 
 const props = defineProps({
   // 从父组件传递的初始文件
@@ -148,7 +152,7 @@ const scrollToBottom = () => {
 
 const sendMessage = async () => {
   const messageText = message.value.trim();
-      
+
   message.value = '';
   // 检查是否有上传的文件且没有文本消息（纯文件发送）
   if (!messageText && uploadedFiles.value.length > 0) {
@@ -212,14 +216,7 @@ const sendMessage = async () => {
         addAgentMessage('抱歉，发送消息时出现了错误。');
       }
     }
-    
-    // 如果有文件一起发送
-    // if (uploadedFiles.value.length > 0) {
-    //   setTimeout(() => {
-    //     addAgentMessage('已收到您的消息和文件，接下来请输入 CEE 参数：');
-    //     uploadedFiles.value = [];
-    //   }, 500);
-    // }
+  
   }
   
   // 发送消息后滚动到底部
@@ -279,116 +276,8 @@ const addCEEStatusMessage = () => {
   nextTick(() => scrollToBottom());
 };
 
-const addCEEFormMessage = () => {
-  messages.value.push({
-    id: Date.now(),
-    type: 'agent',
-    messageType: 'cee-form',
-    content: {
-      germanSales: 10000,
-      polandTax: false,
-      czechTax: true
-    },
-    timestamp: new Date().toLocaleTimeString()
-  });
-  nextTick(() => scrollToBottom());
-};
-
-const handleCEEStatusChoice = (hasJoined) => {
-  if (hasJoined) {
-    // 用户已加入CEE，直接开始生成报告
-    addAgentMessage('您已加入 CEE，开始生成全套报告...');
-    setTimeout(() => {
-      startReportGeneration();
-    }, 500);
-  } else {
-    // 用户未加入CEE，显示CEE表单
-    addAgentMessage('请输入 CEE 参数：');
-    setTimeout(() => {
-      addCEEFormMessage();
-    }, 500);
-  }
-};
 
 const startReportGeneration = async () => {
-  if (isGeneratingReport.value) return; // 防止重复提交
-  
-  isGeneratingReport.value = true;
-  panEUResult.value = null;
-  diResult.value = null;
-  ceeResult.value = null;
-  EUExpansionCheckli.value = null;
-  actionResult.value = null;
-  reportGenerated.value = false;
-  
-  try {
-    // 添加生成报告开始的消息
-    addAgentMessage('开始生成报告，请稍候...');
-    
-    // 1. 调用 analyzePanEU
-    console.log('开始 PanEU 分析...');
-    addAgentMessage('正在进行 PanEU 分析...');
-    
-    // 使用上传的文件进行自动分析
-    // 收集所有上传的文件（包括PanEU和DI文件）
-    const allFileMessages = messages.value.filter(msg => msg.messageType === 'files');
-    const allFiles = [];
-    allFileMessages.forEach(msg => {
-      allFiles.push(...msg.content.map(f => f.file));
-    });
-    
-    // 找出 eu_expansion_checkli 表（体检表）
-    const matchingFiles = allFiles.filter(file => 
-      file.name.toLowerCase().includes('eu_expansion_checkli'.toLowerCase())
-    );
-    const EUExpansionCheckliFile = matchingFiles[0]
-    let analyzeResult;
-    if (EUExpansionCheckliFile.name.toLowerCase().endsWith('.csv')) {
-      analyzeResult = await analyzeSingleEUChecklistCSV(EUExpansionCheckliFile);
-    } else {
-      analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile);
-    }
-    EUExpansionCheckli.value = analyzeResult.table_json
-
-    const panEUFiles = allFiles; // 传递所有文件给分析函数
-    panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
-    
-    // 2. 调用 analyzeDI
-    console.log('开始 DI 分析...');
-    addAgentMessage('正在进行 DI 分析...');
-    
-    if (panEUFiles.length >= 6) {
-      diResult.value = await analyzeDIOpportunitiesAuto(panEUFiles);
-      addAgentMessage('DI 分析完成 ✓');
-    } else {
-      addAgentMessage('DI 分析跳过（文件不足）');
-    }
-    
-    
-    // 4. 生成行动总结
-    const actionService = new ActionService(
-      panEUResult,
-      diResult,
-      ceeResult,
-      EUExpansionCheckli.value
-    );
-    
-    actionResult.value = actionService.calculateAll();
-
-    // 5. 标记报告生成完成
-    reportGenerated.value = true;
-    addAgentMessage('📊 报告生成完成！请查看右侧报告区域。');
-    
-  } catch (error) {
-    console.error('报告生成失败:', error);
-    addAgentMessage(`报告生成失败: ${error.message}`);
-  } finally {
-    isGeneratingReport.value = false;
-    scrollToBottom();
-  }
-};
-
-const submitCEEForm = async () => {
   console.log('提交CEE表单');
   
   if (isGeneratingReport.value) return; // 防止重复提交
@@ -398,16 +287,13 @@ const submitCEEForm = async () => {
   diResult.value = null;
   ceeResult.value = null;
   EUExpansionCheckli.value = null;
+  EUExpansionCheckliCee.value = null;
   actionResult.value = null;
   reportGenerated.value = false;
   
   try {
     // 添加生成报告开始的消息
     addAgentMessage('开始生成报告，请稍候...');
-    
-    // 1. 调用 analyzePanEU
-    console.log('开始 PanEU 分析...');
-    addAgentMessage('正在进行 PanEU 分析...');
     
     // 使用上传的文件进行自动分析
     // 收集所有上传的文件（包括PanEU和DI文件）
@@ -417,21 +303,16 @@ const submitCEEForm = async () => {
       allFiles.push(...msg.content.map(f => f.file));
     });
     
-    // 找出 eu_expansion_checkli 表（体检表）
-    const matchingFiles = allFiles.filter(file => 
-      file.name.toLowerCase().includes('eu_expansion_checkli'.toLowerCase())
-    );
-    const EUExpansionCheckliFile = matchingFiles[0]
-    // 根据扩展名决定用哪个解析函数
-    let analyzeResult;
-    if (EUExpansionCheckliFile.name.toLowerCase().endsWith('.csv')) {
-      analyzeResult = await analyzeSingleEUChecklistCSV(EUExpansionCheckliFile);
-    } else {
-      analyzeResult = await analyzeSingleEUChecklist(EUExpansionCheckliFile);
-    }
-    EUExpansionCheckli.value = analyzeResult.table_json
-    const panEUFiles = allFiles; // 传递所有文件给分析函数
+    // 解析两个 eu_expansion_checkli 表（体检表）
+    const checkliResutl = await findAndParseValidChecklist(allFiles, checkliCeeParser, analyzeSingleEUChecklist, analyzeSingleEUChecklistCSV)
+    EUExpansionCheckli.value = checkliResutl.paneuData.table_json
+    EUExpansionCheckliCee.value = checkliResutl.ceeData
 
+
+    // 1. 调用 analyzePanEU
+    console.log('开始 PanEU 分析...');
+    addAgentMessage('正在进行 PanEU 分析...');
+    const panEUFiles = allFiles; // 传递所有文件给分析函数
     panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
    
     // 2. 调用 analyzeDI
@@ -447,16 +328,20 @@ const submitCEEForm = async () => {
     
     // 3. 调用 calculateCEECosts
     console.log('开始 CEE 成本计算...');
-    addAgentMessage('正在计算 CEE 成本...');
+    const shouldJoinCEEResult = CeeService.shouldJoinCEE(EUExpansionCheckliCee.value)
+    if (shouldJoinCEEResult.shouldJoinCEE) {
+      addAgentMessage('已加入 CEE，无需计算CEE成本。');
+    } else {
+      addAgentMessage('正在计算 CEE 成本...');
+      const soldCount = panEUResult.value.totalSoldDE || 10000;
+      const hasPolishVAT = shouldJoinCEEResult.hasPolishVAT;
+      const hasCzechVAT = shouldJoinCEEResult.hasCzechVAT;
+      console.log(soldCount, hasPolishVAT, hasCzechVAT)
+      ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
+      console.log(ceeResult.value)
+      addAgentMessage('CEE 成本计算完成 ✓');
+    }
     
-    // 从最后一个CEE表单消息中获取参数
-    const lastCEEMessage = messages.value.slice().reverse().find(msg => msg.messageType === 'cee-form');
-    const soldCount = lastCEEMessage?.content?.germanSales || 10000;
-    const hasPolishVAT = lastCEEMessage?.content?.polandTax || false;
-    const hasCzechVAT = lastCEEMessage?.content?.czechTax || false;
-    
-    ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
-    addAgentMessage('CEE 成本计算完成 ✓');
 
     // 4. 生成行动总结
     const actionService = new ActionService(
@@ -481,17 +366,8 @@ const submitCEEForm = async () => {
   }
 };
 
-// 打开统一报告预览
-const openUniReport = () => {
-  if (!reportGenerated.value) return;
-  showUniReport.value = true;
-};
-const closeUniReport = () => { showUniReport.value = false; };
 
-// 文件上传相关函数
-const triggerFileUpload = () => {
-  fileInputRef.value?.click();
-};
+const closeUniReport = () => { showUniReport.value = false; };
 
 const triggerPanEUFileUpload = () => {
   panEUFileInputRef.value?.click();
@@ -737,14 +613,12 @@ const addUploadMessage = (files) => {
 // 检查所有文件是否都已上传
 const checkAllFilesUploaded = () => {
   if (allFilesUploaded.value) {
-    // 隐藏初始提示
-    // showInitialPrompts.value = false;
-    
+
     // 延迟显示CEE状态询问
     setTimeout(() => {
       addAgentMessage('🎉 所有文件上传完成！现在开始生成报告流程。');
-      setTimeout(() => {
-        addCEEStatusMessage();
+      setTimeout(async () => {
+        await startReportGeneration();
       }, 1000);
     }, 500);
   }
@@ -894,26 +768,6 @@ onMounted(() => {
                 </div>
               </div>
 
-
-              <!-- CEE状态选择消息 -->
-              <div v-if="msg.messageType === 'cee-status'" class="cee-status-container">
-                <div class="cee-status-text">{{ msg.content }}</div>
-                <div class="cee-status-options">
-                  <button 
-                    class="cee-status-btn cee-status-joined" 
-                    @click="handleCEEStatusChoice(true)"
-                  >
-                    已加入
-                  </button>
-                  <button 
-                    class="cee-status-btn cee-status-not-joined" 
-                    @click="handleCEEStatusChoice(false)"
-                  >
-                    未加入
-                  </button>
-                </div>
-              </div>
-
               <!-- 文件消息 -->
               <div v-else-if="msg.messageType === 'files'" class="files-message">
                 <div class="files-message-header">
@@ -936,43 +790,6 @@ onMounted(() => {
                 </div>
               </div>
 
-              <!-- CEE表单消息 -->
-              <div v-else-if="msg.messageType === 'cee-form'" class="cee-form-container">
-                <div class="cee-header">
-                  <h4>📊 CEE 中欧计划分析</h4>
-                </div>
-                
-                <div class="form-section">
-                  <label class="form-label">德国商城过去12个月已售商品数量</label>
-                  <input type="number" class="form-input" placeholder="10000" v-model="msg.content.germanSales">
-                </div>
-
-                <div class="form-section">
-                  <label class="form-label">税号状态</label>
-                  <div class="checkbox-group">
-                    <div class="checkbox-item">
-                      <input type="checkbox" id="poland-tax" class="form-checkbox" v-model="msg.content.polandTax">
-                      <label for="poland-tax">波兰税号 ✓</label>
-                    </div>
-                    <div class="checkbox-item">
-                      <input type="checkbox" id="czech-tax" class="form-checkbox" v-model="msg.content.czechTax">
-                      <label for="czech-tax">捷克税号 ✓</label>
-                    </div>
-                  </div>
-                  <p class="form-note">* 备案信息：来源信息→卖家信息上传到各国税务局→业务规模→建议至少12个月的销售周期→已计入商品数量</p>
-                </div>
-
-                <button 
-                  class="cee-submit-btn" 
-                  @click="submitCEEForm"
-                  :disabled="isGeneratingReport"
-                >
-                  {{ isGeneratingReport ? '生成中...' : '开始生成报告' }}
-                </button>
-              </div>
-              
-              <!-- 文本消息 -->
-              <!-- <p v-else>{{ msg.content }}</p> -->
             </div>
           </div>
         </div>
@@ -1148,6 +965,7 @@ onMounted(() => {
           :cee-result="ceeResult"
           :action-result="actionResult"
           :eu-expansion-checkli="EUExpansionCheckli"
+          :eu-expansion-checkli-cee="EUExpansionCheckliCee"
         />
         <!-- 按键区域 -->
         <div class="button-area">
