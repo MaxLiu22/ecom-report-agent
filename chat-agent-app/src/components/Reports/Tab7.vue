@@ -185,6 +185,13 @@ import VATInfoComponent from './VATInfoComponent.vue'
 
 export default {
   name: 'Tab7',
+  props: {
+    // PanEU 分析结果
+    panEUResult: {
+      type: Object,
+      default: null
+    }
+  },
   components: {
     EUInternalSolutionsComponent,
     PanEUPolicyUpdateComponent,

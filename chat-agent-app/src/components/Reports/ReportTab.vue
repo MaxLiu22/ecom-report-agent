@@ -225,7 +225,9 @@
 
       <!-- Tab 7: 合规政策 -->
       <div v-if="activeTab === 6" class="center-wrap">
-        <Tab7 />
+        <Tab7 
+          :panEUResult="panEUResult"
+        />
       </div>
 
       <!-- Tab 8: 行动计划 -->
