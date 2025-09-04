@@ -642,6 +642,9 @@ export async function analyzePanEUOpportunities(sources) {
 	const skuRows = sheetToJson(wbSku);
 	const IncRows = sheetToJson(wbInv);
 
+	// 统计 荷兰政策
+	const nlPolicy = countNlPolicy(panEuRows)
+
 	// 统计pv_cost
 	const pvCost = saveCalculatePvCost(skuRows);
 	// 获取授权仓储国家
@@ -660,12 +663,10 @@ export async function analyzePanEUOpportunities(sources) {
 	// 计算节约成本
 	const cost_saving = oppAddCostSaving(enrichPanEuRows, skuRows)
 	
-
+	// 构建excel数据
 	const missing1to2_formula = logic1(skuRows, cost_saving)
 	const expiredPanEU_formula = logic2(skuRows, cost_saving)
-
 	const excelData = buildExcelData(cost_saving, missing1to2_formula, expiredPanEU_formula)
-
 
 
 	// ============ Excel Formula Implementation ============
@@ -756,6 +757,8 @@ export async function analyzePanEUOpportunities(sources) {
 
 		cost_save: cost_save,
 
+		nlPolicy: nlPolicy
+
 	};
 
 	return report;
@@ -839,6 +842,40 @@ export async function analyzePanEUOpportunitiesAuto(inputs, EUExpansionCheckli) 
 	return report;
 }
 
+
+
+function countNlPolicy(panEuRows) { 
+	// 需要保留的字段
+	const requiredFields = [
+		"ASIN",
+		"MerchantSKU",
+		"Enrol",
+		"FNSKU",
+		"Pan-EU status",
+		"Enrollment Date",
+		"Title",
+		"UK offer status",
+		"DE Offer Status",
+		"FR Offer Status",
+		"IE Offer Status",
+		"ES offer status",
+		"NL offer status"
+	];
+	
+	// 先过滤出符合条件的数据
+	const filtered = panEuRows.filter(
+		row => row["Pan-EU status"] === "Enrolled" && row["NL offer status"] === "No listing"
+	);
+	
+	// 再筛选出需要的字段
+	return filtered.map(row => {
+		const obj = {};
+		requiredFields.forEach(field => {
+		obj[field] = row[field] ?? null;
+		});
+		return obj;
+	});
+}
 
 
 
