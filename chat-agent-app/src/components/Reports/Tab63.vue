@@ -65,6 +65,12 @@
           </div>
           <div class="section-content">
             <div v-if="ceeResult">
+
+              <!-- 提示文字 -->
+              <div v-if="missingVAT" class="cee-tip">
+                <strong>卖家申请 {{ missingVAT }} 并开启中欧计划可获得 {{ formatCurrency(ceeResult.finalSaving) }} 成本节约</strong>
+              </div>
+
               <div class="cee-table-wrapper">
                 <table class="cee-table">
                   <thead>
@@ -151,6 +157,16 @@ export default {
         cursor: 'default',
         transition: 'all 0.3s ease'
       }
+    },
+
+    // 计算缺少的 VAT
+    missingVAT() {
+      if (!this.ceeResult) return ''
+      const { hasPolishVAT, hasCzechVAT } = this.ceeResult
+      if (!hasPolishVAT && !hasCzechVAT) return '波兰 + 捷克VAT'
+      if (!hasPolishVAT) return '波兰VAT'
+      if (!hasCzechVAT) return '捷克VAT'
+      return ''
     }
   },
   methods: {
@@ -193,6 +209,12 @@ export default {
 .cee-table tbody td:first-child { font-weight:600; color:#232f3e; text-align:left; }
 .cee-table .final-row td { background:#f8f9fa; font-weight:700; color:#333; }
 .cee-summary-tip { margin-top:10px; font-size:11px; color:#666; text-align:right; }
+
+.cee-tip {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #232f3e;
+}
 </style>
 
 <!-- 追加 CEE 成本分析结果区块结束 -->

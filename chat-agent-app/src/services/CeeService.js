@@ -27,6 +27,8 @@ class CeeService {
       estimatedSaving: Number(estimatedSaving.toFixed(2)),
       vatRegistrationCost: Number(vatRegistrationCost.toFixed(2)),
       finalSaving: Number(finalSaving.toFixed(2)),
+      hasPolishVAT: hasPolishVAT,
+      hasCzechVAT: hasCzechVAT
     };
   }
 
