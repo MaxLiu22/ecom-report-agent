@@ -11,6 +11,7 @@ import {analyzeSingleEUChecklistCSV} from '@/services/checkliServiceCsv.js';
 import CheckliCeeParser from '@/services/checkliServiceCee.js';
 import ActionService from '@/services/actionService.js';
 import { findAndParseValidChecklist } from '@/services/fileService.js';
+import PolicyService from '@/services/policyService.js';
 
 const message = ref('');
 const messageContainer = ref(null);
@@ -19,12 +20,14 @@ const panEUFileInputRef = ref(null);
 const diFileInputRef = ref(null);
 const uploadedFiles = ref([]);
 const messages = ref([]);
+const sellerCID = ref('');
 
 // 报告生成相关状态
 const isGeneratingReport = ref(false);
 const panEUResult = ref(null);
 const diResult = ref(null);
 const ceeResult = ref(null);
+const policyResult = ref(null);
 const EUExpansionCheckli = ref(null);
 const EUExpansionCheckliCee = ref(null);
 const actionResult = ref(null);
@@ -67,10 +70,10 @@ const props = defineProps({
   
 
 // PanEU 报告文件上传提示
-const panEUText = `请上传以下文件以生成 PanEU 报告：
+const panEUText = `请上传以下文件以生成 PanEU & CEE 报告：
 
 【PanEU 报告必需文件】
-1. 体检表 ✓
+1. 体检表(2份) ✓   此位置两张表均需下载！！
    路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV 
 
 2. SKU report ✓
@@ -286,6 +289,7 @@ const startReportGeneration = async () => {
   panEUResult.value = null;
   diResult.value = null;
   ceeResult.value = null;
+  policyResult.value = null;
   EUExpansionCheckli.value = null;
   EUExpansionCheckliCee.value = null;
   actionResult.value = null;
@@ -342,7 +346,6 @@ const startReportGeneration = async () => {
       addAgentMessage('CEE 成本计算完成 ✓');
     }
     
-
     // 4. 生成行动总结
     const actionService = new ActionService(
         panEUResult,
@@ -352,6 +355,12 @@ const startReportGeneration = async () => {
       );
       
     actionResult.value = actionService.calculateAll();
+
+    // 5. 生成政策信息
+    addAgentMessage('政策信息生成中...');
+    const policyService = new PolicyService()
+    policyResult.value = await policyService.processAndRun(EUExpansionCheckli.value, sellerCID.value)
+    addAgentMessage('政策信息生成完成 ✓');
 
     // 5. 标记报告生成完成
     reportGenerated.value = true;
@@ -383,22 +392,26 @@ const validatePanEUFiles = (files) => {
   const requiredFiles = {
     masterSheet: { 
       keywords: ['EU_expansion_checkli'], 
-      found: false,
-      displayName: '体检表'
+      count: 0,
+      requiredCount: 2,
+      displayName: '体检表 (2份)'
     },
     sku: { 
       keywords: ['sku', 'cost', '成本'], 
-      found: false,
+      count: 0,
+      requiredCount: 1,
       displayName: 'SKU report'
     },
     paneu: { 
       keywords: ['pan-eu', 'paneu', '欧洲整合', 'inventory'], 
-      found: false,
+      count: 0,
+      requiredCount: 1,
       displayName: 'Pan-EU report'
     },
     multicountry: { 
       keywords: ['多国库存', 'multicountry', 'inventory'], 
-      found: false,
+      count: 0,
+      requiredCount: 1,
       displayName: '多国库存报告'
     }
   };
@@ -419,14 +432,18 @@ const validatePanEUFiles = (files) => {
     const fileName = file.name.toLowerCase();
     Object.keys(requiredFiles).forEach(type => {
       if (requiredFiles[type].keywords.some(keyword => fileName.includes(keyword.toLowerCase()))) {
-        requiredFiles[type].found = true;
+        requiredFiles[type].count++;
       }
     });
   });
   
+  // 检查缺失
   const missingTypes = Object.keys(requiredFiles)
-    .filter(type => !requiredFiles[type].found)
-    .map(type => requiredFiles[type].displayName);
+    .filter(type => requiredFiles[type].count < requiredFiles[type].requiredCount)
+    .map(type => {
+      const missing = requiredFiles[type].requiredCount - requiredFiles[type].count;
+      return `${requiredFiles[type].displayName}（缺少 ${missing} 份）`;
+    });
     
   if (missingTypes.length > 0) {
     errors.push(`PanEU 缺少必要文件：${missingTypes.join('、')}`);
@@ -703,11 +720,30 @@ onMounted(() => {
               <!-- 初始Agent 消息 (左侧) - 文件上传提示 -->
               <div v-if="msg.messageType === 'prompt'" class="message-item agent-message">
                 <div class="message-content initial-prompts-container">
+
+                  <!-- 新增的卖家CID输入区域 -->
+                  <div class="seller-cid-section">
+                    <div class="cid-input-container">
+                      <label class="cid-label">请输入卖家CID：</label>
+                      <div class="input-wrapper">
+                        <input 
+                          type="text" 
+                          v-model="sellerCID" 
+                          class="cid-input" 
+                          placeholder="例如: A2L5B8C9D0E1F"
+                          @keyup.enter="focusNextInput"
+                        />
+                        <span class="input-icon">🆔</span>
+                      </div>
+                      <div v-if="sellerCID" class="cid-hint">已输入CID: {{ sellerCID }}</div>
+                    </div>
+                  </div>
+
                   <!-- PanEU 报告文件上传提示 -->
                   <div class="upload-prompt-section">
                     <div class="title-button-row">
                       <h3 class="prompt-title">
-                        📊 PanEU 报告分析
+                        📊 PanEU 报告分析&nbsp;&nbsp;&nbsp;CEE报告分析
                         <span v-if="panEUFilesUploaded" class="title-checkmark">✅</span>
                       </h3>
                       <button 
@@ -722,7 +758,7 @@ onMounted(() => {
                         <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        {{ panEUFilesUploaded ? '已上传 PanEU' : '上传 PanEU 文件' }}
+                        {{ panEUFilesUploaded ? '已上传 PanEU & CEE文件' : '上传 PanEU & CEE 文件' }}
                       </button>
                     </div>
                     <pre class="file-paths-text">{{ panEUText }}</pre>
@@ -966,6 +1002,7 @@ onMounted(() => {
           :action-result="actionResult"
           :eu-expansion-checkli="EUExpansionCheckli"
           :eu-expansion-checkli-cee="EUExpansionCheckliCee"
+          :policy-result="policyResult"
         />
         <!-- 按键区域 -->
         <div class="button-area">
@@ -2364,6 +2401,102 @@ onMounted(() => {
 
 .feedback-form-content::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* 卖家CID输入区域样式 */
+.seller-cid-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px dashed #9dd3a8;
+}
+
+.cid-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cid-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e5233;
+  margin-bottom: 5px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cid-input {
+  flex: 1;
+  padding: 12px 16px 12px 40px;
+  border: 2px solid #9dd3a8;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8fdf9;
+  color: #1e5233;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(157, 211, 168, 0.2);
+}
+
+.cid-input:focus {
+  outline: none;
+  border-color: #7cc48a;
+  box-shadow: 0 0 0 3px rgba(124, 196, 138, 0.3);
+  background-color: white;
+}
+
+.cid-input::placeholder {
+  color: #6b9c78;
+  font-size: 13px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: #7cc48a;
+  font-size: 16px;
+}
+
+.cid-hint {
+  font-size: 12px;
+  color: #4a7c5a;
+  padding: 6px 10px;
+  background-color: #f0f8f2;
+  border-radius: 4px;
+  border-left: 3px solid #7cc48a;
+  animation: fadeIn 0.5s ease;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .seller-cid-section {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+  }
+  
+  .cid-input {
+    padding: 10px 14px 10px 36px;
+    font-size: 13px;
+  }
+  
+  .input-icon {
+    left: 10px;
+    font-size: 14px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 移动端适配 */
