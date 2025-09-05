@@ -1,98 +1,97 @@
 <template>
-  <div class="app">
-    <div class="container">
-      <div class="header">
-        <h1>AM Pitching话术 - PanEU & DI & CEE</h1>
+  <div class="pitching-root">
+    <div class="pitching-container">
+      <div class="pitch-header">
+        <h1 class="title">AM Pitching 话术库</h1>
+        <p class="subtitle">PanEU · DI · CEE 常见阻碍与话术要点汇总（支持关键词快速过滤）</p>
         <div class="search-box">
-          <input v-model="searchTerm" placeholder="🔍 搜索话术内容..." @input="filterContent">
+          <input v-model="searchTerm" placeholder="🔍 输入关键词过滤..." @input="filterContent" />
         </div>
       </div>
 
       <!-- PanEU Section -->
-      <div class="section-divider">
-        <h2>🌍 第一部分：PanEU</h2>
-      </div>
-
-      <div v-for="(sheet, index) in filteredPanEUSheets" :key="'paneu-' + index" class="sheet-container">
-        <div class="sheet-header" @click="toggleSheet('paneu', index)">
-          <span>{{ sheet.expanded ? '📖' : '📋' }} {{ sheet.name }}</span>
-          <span class="toggle-icon">{{ sheet.expanded ? '▼' : '▶' }}</span>
+      <div class="section-block">
+        <div class="section-header">
+          <span class="section-index">1</span>
+          <h2 class="section-title">PanEU 话术</h2>
         </div>
-        <div class="sheet-content" :class="{ 'collapsed': !sheet.expanded }">
-          <table v-if="sheet.data.length > 0">
-            <thead>
-              <tr>
-                <th v-for="col in sheet.columns" :key="col">{{ col }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, rowIndex) in sheet.data" :key="rowIndex" 
-                  @click="highlightRow('paneu', index, rowIndex)"
-                  :class="{ 'highlighted': sheet.highlightedRow === rowIndex }">
-                <td v-for="(cell, colIndex) in row" :key="colIndex" 
-                    :class="{ 'empty-cell': !cell || cell === '-' }">
-                  {{ cell || '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-else class="empty-sheet">此工作表为空</div>
+        <div v-for="(sheet, index) in filteredPanEUSheets" :key="'paneu-' + index" class="sheet-card" :class="{open: sheet.expanded}">
+          <button type="button" class="sheet-head" @click="toggleSheet('paneu', index)">
+            <span class="head-icon" aria-hidden="true">{{ sheet.expanded ? '📖' : '📋' }}</span>
+            <span class="head-title">{{ sheet.name }}</span>
+            <span class="head-toggle" aria-hidden="true">{{ sheet.expanded ? '−' : '+' }}</span>
+          </button>
+          <div class="sheet-body" :class="{collapsed: !sheet.expanded}" :aria-hidden="(!sheet.expanded).toString()">
+            <table v-if="sheet.data.length > 0">
+              <thead>
+                <tr>
+                  <th v-for="col in sheet.columns" :key="col">{{ col }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, rowIndex) in sheet.data" :key="rowIndex" @click="highlightRow('paneu', index, rowIndex)" :class="{ highlighted: sheet.highlightedRow === rowIndex }">
+                  <td v-for="(cell, colIndex) in row" :key="colIndex" :class="{ 'empty-cell': !cell || cell === '-' }">{{ cell || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="empty-sheet">此工作表暂无数据</div>
+          </div>
         </div>
       </div>
 
       <!-- DI Section -->
-      <div class="section-divider">
-        <h2>📊 第二部分：DI</h2>
-      </div>
-
-      <div v-for="(sheet, index) in filteredDISheets" :key="'di-' + index" class="sheet-container">
-        <div class="sheet-header" @click="toggleSheet('di', index)">
-          <span>{{ sheet.expanded ? '📖' : '📋' }} {{ sheet.name }}</span>
-          <span class="toggle-icon">{{ sheet.expanded ? '▼' : '▶' }}</span>
+      <div class="section-block">
+        <div class="section-header">
+          <span class="section-index">2</span>
+          <h2 class="section-title">DI 话术</h2>
         </div>
-        <div class="sheet-content" :class="{ 'collapsed': !sheet.expanded }">
-          <table v-if="sheet.data.length > 0">
-            <thead>
-              <tr>
-                <th v-for="col in sheet.columns" :key="col">{{ col }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, rowIndex) in sheet.data" :key="rowIndex" 
-                  @click="highlightRow('di', index, rowIndex)"
-                  :class="{ 'highlighted': sheet.highlightedRow === rowIndex }">
-                <td v-for="(cell, colIndex) in row" :key="colIndex" 
-                    :class="{ 'empty-cell': !cell || cell === '-' }">
-                  {{ cell || '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-else class="empty-sheet">此工作表为空</div>
+        <div v-for="(sheet, index) in filteredDISheets" :key="'di-' + index" class="sheet-card" :class="{open: sheet.expanded}">
+          <button type="button" class="sheet-head" @click="toggleSheet('di', index)">
+            <span class="head-icon" aria-hidden="true">{{ sheet.expanded ? '📖' : '📋' }}</span>
+            <span class="head-title">{{ sheet.name }}</span>
+            <span class="head-toggle" aria-hidden="true">{{ sheet.expanded ? '−' : '+' }}</span>
+          </button>
+          <div class="sheet-body" :class="{collapsed: !sheet.expanded}" :aria-hidden="(!sheet.expanded).toString()">
+            <table v-if="sheet.data.length > 0">
+              <thead>
+                <tr>
+                  <th v-for="col in sheet.columns" :key="col">{{ col }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, rowIndex) in sheet.data" :key="rowIndex" @click="highlightRow('di', index, rowIndex)" :class="{ highlighted: sheet.highlightedRow === rowIndex }">
+                  <td v-for="(cell, colIndex) in row" :key="colIndex" :class="{ 'empty-cell': !cell || cell === '-' }">{{ cell || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="empty-sheet">此工作表暂无数据</div>
+          </div>
         </div>
       </div>
 
       <!-- CEE Section -->
-      <div class="section-divider">
-        <h2>🎯 第三部分：CEE</h2>
-      </div>
-
-      <div class="sheet-container">
-        <div class="sheet-header" @click="toggleSheet('cee', 0)">
-          <span>{{ ceeSheet.expanded ? '📖' : '📋' }} CEE Program FAQ</span>
-          <span class="toggle-icon">{{ ceeSheet.expanded ? '▼' : '▶' }}</span>
+      <div class="section-block">
+        <div class="section-header">
+          <span class="section-index">3</span>
+          <h2 class="section-title">CEE Program FAQ</h2>
         </div>
-        <div class="sheet-content" :class="{ 'collapsed': !ceeSheet.expanded }">
-          <div class="cee-content">
-            <div v-for="(faq, index) in ceeData" :key="index" class="faq-item"
-                 @click="highlightFAQ(index)"
-                 :class="{ 'highlighted': ceeSheet.highlightedFAQ === index }">
-              <div class="faq-question">{{ faq.question }}</div>
-              <div class="faq-answer">{{ faq.answer }}</div>
+        <div class="sheet-card" :class="{open: ceeSheet.expanded}">
+          <button type="button" class="sheet-head" @click="toggleSheet('cee', 0)">
+            <span class="head-icon" aria-hidden="true">{{ ceeSheet.expanded ? '📖' : '📋' }}</span>
+            <span class="head-title">CEE Program FAQ</span>
+            <span class="head-toggle" aria-hidden="true">{{ ceeSheet.expanded ? '−' : '+' }}</span>
+          </button>
+          <div class="sheet-body" :class="{collapsed: !ceeSheet.expanded}" :aria-hidden="(!ceeSheet.expanded).toString()">
+            <div class="faq-list">
+              <div v-for="(faq, index) in ceeData" :key="index" class="faq-item" :class="{ highlighted: ceeSheet.highlightedFAQ === index }" @click="highlightFAQ(index)">
+                <div class="faq-q">{{ faq.question }}</div>
+                <div class="faq-a">{{ faq.answer }}</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -262,264 +261,71 @@ export default {
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ===== 核心布局 ===== */
+.pitching-root { background:#f5f6f8; padding:0 0 60px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; color:#232f3e; }
+.pitching-container { max-width:1400px; margin:0 auto; padding:32px 32px 40px; }
 
-.app {
-  font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
-  line-height: 1.8;
-  color: #333;
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-  min-height: 100vh;
-}
+/* ===== 标题区 ===== */
+.pitch-header { background:#fff; border:1px solid #e3e6ea; border-radius:18px; padding:30px 34px 34px; box-shadow:0 4px 16px -6px rgba(0,0,0,.12), 0 2px 6px -2px rgba(0,0,0,.08); position:relative; overflow:hidden; }
+.pitch-header:before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 90% 18%,rgba(255,153,0,.20),transparent 60%), linear-gradient(135deg,rgba(255,153,0,.06),rgba(35,47,62,0)); pointer-events:none; }
+.pitch-header .title { margin:0 0 10px; font-size:28px; font-weight:600; letter-spacing:.5px; }
+.pitch-header .subtitle { margin:0 0 18px; font-size:13px; color:#555; letter-spacing:.3px; }
+.search-box { display:flex; }
+.search-box input { flex:1; max-width:420px; background:#fff; border:1px solid #d5d9de; border-radius:10px; padding:10px 14px; font-size:13px; letter-spacing:.3px; transition:.25s; }
+.search-box input:focus { outline:none; border-color:#ff9900; box-shadow:0 0 0 3px rgba(255,153,0,.25); }
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-}
+/* ===== 分节头 ===== */
+.section-block { margin-top:40px; display:flex; flex-direction:column; gap:16px; }
+.section-header { display:flex; align-items:center; gap:12px; position:relative; }
+.section-index { background:#232f3e; color:#ffb84d; font-size:12px; font-weight:600; padding:4px 10px; border-radius:14px; letter-spacing:.5px; box-shadow:0 2px 4px rgba(0,0,0,.15); }
+.section-title { margin:0; font-size:20px; font-weight:600; letter-spacing:.5px; color:#232f3e; position:relative; }
+.section-title:after { content:''; display:block; width:54px; height:4px; background:linear-gradient(90deg,#ff9900,#ffb84d); border-radius:4px; margin-top:8px; }
 
-.header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 40px;
-  text-align: center;
-  margin-bottom: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
+/* ===== 表 / 卡片折叠 ===== */
+.sheet-card { background:#fff; border:1px solid #e3e6ea; border-radius:14px; overflow:hidden; box-shadow:0 4px 14px -6px rgba(0,0,0,.12),0 2px 6px -2px rgba(0,0,0,.08); transition:.35s ease; position:relative; }
+.sheet-card.open { border-color:#ff9900; }
+.sheet-card:not(.open):hover { border-color:#d5d9de; box-shadow:0 6px 18px -6px rgba(0,0,0,.16),0 3px 8px -3px rgba(0,0,0,.10); }
+.sheet-head { width:100%; background:linear-gradient(90deg,#232f3e,#2f3d4a); color:#fff; border:none; padding:16px 22px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer; font-size:14px; font-weight:600; letter-spacing:.3px; position:relative; transition:.3s; }
+.sheet-card.open .sheet-head { background:linear-gradient(90deg,#ff9900,#ffb84d); color:#232f3e; }
+.sheet-head:hover { filter:brightness(1.03); }
+.head-icon { font-size:16px; }
+.head-title { flex:1; }
+.head-toggle { font-size:20px; line-height:1; font-weight:500; }
+.sheet-body { padding:20px 24px 26px; max-height:1600px; transition:max-height .45s cubic-bezier(.25,.9,.3,1), padding .35s ease; background:#fafafa; border-top:1px solid #e8eaec; }
+.sheet-body.collapsed { max-height:0; padding:0 24px; overflow:hidden; border-top-color:transparent; }
 
-.header:hover {
-  transform: translateY(-5px);
-}
+/* ===== 表格 ===== */
+.table-wrap { overflow:auto; }
+ table { width:100%; border-collapse:collapse; font-size:12.5px; background:#fff; border:1px solid #e5e7eb; }
+ thead th { background:linear-gradient(90deg,#232f3e,#2f3d4a); color:#fff; text-align:left; padding:10px 10px; font-weight:600; letter-spacing:.3px; font-size:12px; position:sticky; top:0; z-index:2; }
+ tbody td { padding:9px 10px; border-top:1px solid #eef0f2; vertical-align:top; line-height:1.5; background:#fff; }
+ tbody tr:nth-child(even) td { background:#fafbfc; }
+ tbody tr:hover td { background:#fff8eb; }
+ tbody tr.highlighted td { background:#ffe9e7 !important; border-left:4px solid #b42318; }
+.empty-cell { color:#999; font-style:italic; }
+.empty-sheet { padding:30px 10px; text-align:center; font-size:13px; color:#666; }
 
-.header h1 {
-  font-size: 2.5em;
-  color: #2d3748;
-  margin-bottom: 10px;
-  font-weight: 300;
-}
+/* ===== FAQ ===== */
+.faq-list { display:flex; flex-direction:column; background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; }
+.faq-item { padding:16px 20px 18px; border-bottom:1px solid #eef0f2; cursor:pointer; background:#fff; position:relative; transition:.28s ease; }
+.faq-item:last-child { border-bottom:none; }
+.faq-item:hover { background:#fff8eb; }
+.faq-item.highlighted { background:#ffe9e7 !important; border-left:4px solid #b42318; }
+.faq-q { font-weight:600; font-size:13.5px; margin:0 0 6px; color:#232f3e; }
+.faq-a { font-size:12.5px; color:#444; line-height:1.6; white-space:pre-line; }
 
-.search-box {
-  margin-top: 20px;
-}
+/* ===== 动画/辅助 ===== */
+@media (prefers-reduced-motion: reduce) { .sheet-body { transition:none; } .sheet-card { transition:none; } }
 
-.search-box input {
-  width: 100%;
-  max-width: 400px;
-  padding: 12px 20px;
-  border: 2px solid #e2e8f0;
-  border-radius: 25px;
-  font-size: 16px;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.search-box input:focus {
-  border-color: #4a5568;
-  box-shadow: 0 0 20px rgba(74, 85, 104, 0.3);
-  transform: scale(1.02);
-}
-
-.section-divider {
-  background: linear-gradient(135deg, #4a5568, #2d3748);
-  color: white;
-  padding: 20px 30px;
-  border-radius: 15px;
-  margin: 30px 0 20px 0;
-  text-align: center;
-  box-shadow: 0 10px 25px rgba(74, 85, 104, 0.3);
-}
-
-.section-divider h2 {
-  font-size: 1.8em;
-  font-weight: 500;
-  margin: 0;
-}
-
-.sheet-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  margin-bottom: 30px;
-  overflow: hidden;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.sheet-container:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
-}
-
-.sheet-header {
-  background: linear-gradient(135deg, #4a5568, #2d3748);
-  color: white;
-  padding: 20px 30px;
-  font-size: 1.3em;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.3s ease;
-}
-
-.sheet-header:hover {
-  background: linear-gradient(135deg, #2d3748, #1a202c);
-}
-
-.toggle-icon {
-  font-size: 1.2em;
-  transition: transform 0.3s ease;
-}
-
-.sheet-content {
-  padding: 30px;
-  max-height: 2000px;
-  overflow: hidden;
-  transition: all 0.5s ease;
-}
-
-.sheet-content.collapsed {
-  max-height: 0;
-  padding: 0 30px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  font-size: 0.9em;
-}
-
-th {
-  background: linear-gradient(135deg, #4a5568, #2d3748);
-  color: white;
-  padding: 12px 8px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.9em;
-  letter-spacing: 0.5px;
-}
-
-td {
-  padding: 12px 8px;
-  border-bottom: 1px solid #e2e8f0;
-  vertical-align: top;
-  white-space: pre-line;
-  font-size: 0.85em;
-  line-height: 1.5;
-  transition: all 0.3s ease;
-}
-
-tr {
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-tr:hover {
-  background-color: #f7fafc;
-}
-
-tr.highlighted {
-  background-color: #edf2f7 !important;
-  border-left: 4px solid #4a5568;
-  animation: pulse 2s infinite;
-}
-
-.cee-content {
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-}
-
-.faq-item {
-  padding: 20px;
-  border-bottom: 1px solid #e2e8f0;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.faq-item:hover {
-  background-color: #f7fafc;
-  transform: translateX(5px);
-}
-
-.faq-item.highlighted {
-  background-color: #edf2f7 !important;
-  border-left: 4px solid #4a5568;
-  animation: pulse 2s infinite;
-}
-
-.faq-question {
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 10px;
-  font-size: 1.1em;
-}
-
-.faq-answer {
-  color: #4a5568;
-  line-height: 1.7;
-  padding-left: 20px;
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(74, 85, 104, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(74, 85, 104, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(74, 85, 104, 0); }
-}
-
-.empty-cell {
-  color: #a0aec0;
-  font-style: italic;
-}
-
-.empty-sheet {
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  text-align: center;
-  color: #4a5568;
-  font-style: italic;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 10px;
-  }
-  
-  .header {
-    padding: 20px;
-  }
-  
-  .header h1 {
-    font-size: 2em;
-  }
-  
-  .sheet-content {
-    padding: 15px;
-  }
-  
-  table {
-    font-size: 0.8em;
-  }
-  
-  th, td {
-    padding: 8px 4px;
-  }
-
-  .section-divider h2 {
-    font-size: 1.4em;
-  }
+@media (max-width: 860px) {
+  .pitching-container { padding:24px 18px 40px; }
+  .pitch-header { padding:24px 24px 30px; }
+  .pitch-header .title { font-size:24px; }
+  .section-title { font-size:18px; }
+  .sheet-head { padding:14px 18px; font-size:13px; }
+  .sheet-body { padding:16px 18px 20px; }
+  table { font-size:12px; }
+  thead th { font-size:11.5px; }
+  tbody td { font-size:11.5px; }
 }
 </style>
