@@ -318,7 +318,9 @@ const startReportGeneration = async () => {
     addAgentMessage('正在进行 PanEU 分析...');
     const panEUFiles = allFiles; // 传递所有文件给分析函数
     panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
-   
+    addAgentMessage('PanEU 分析完成 ✓');
+
+
     // 2. 调用 analyzeDI
     console.log('开始 DI 分析...');
     addAgentMessage('正在进行 DI 分析...');
@@ -506,130 +508,116 @@ const validateDIFiles = (files) => {
 };
 
 
-const handleFileUpload = (event) => {
+// 通用上传处理
+const handleFileUpload = (event, category, validateFn, errorRef, uploadedFlagRef) => {
   const files = Array.from(event.target.files);
-  if (files.length > 0) {
-    // 添加文件到上传列表
-    const newFiles = files.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      file: file,
-      uploadTime: new Date().toLocaleString()
-    }));
-    
-    uploadedFiles.value.push(...newFiles);
-    
-    // 添加上传成功的消息到聊天
-    addUploadMessage(newFiles);
-    
-    // 清空文件输入
-    event.target.value = '';
-    
-    // 滚动到底部
-    scrollToBottom();
+  if (files.length === 0) return;
+
+  // 清空之前的错误信息
+  errorRef.value = '';
+
+  // 已上传的此类文件
+  const existingFiles = uploadedFiles.value.filter(f => f.category === category);
+
+  // 验证用文件集合（已有的 + 新的）
+  const filesToValidate = [
+    ...existingFiles.map(f => f.file),
+    ...files
+  ];
+
+  // 执行验证
+  const validationErrors = validateFn(filesToValidate);
+  if (validationErrors.length > 0) {
+    errorRef.value = validationErrors.join('\n');
+    event.target.value = ''; // 清空输入
+  } else {
+    uploadedFlagRef.value = true; // 标记当前类别文件已上传
   }
+
+  // 添加文件到上传列表
+  const newFiles = files.map(file => ({
+    id: Date.now() + Math.random(),
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    file,
+    uploadTime: new Date().toLocaleString(),
+    category
+  }));
+
+  uploadedFiles.value.push(...newFiles);
+
+  // 检查是否两类文件都已上传
+  checkAllFilesUploaded();
+
+  // 清空 input
+  event.target.value = '';
+
+  // 滚动到底部
+  scrollToBottom();
 };
 
+// PanEU 上传
 const handlePanEUFileUpload = (event) => {
-  const files = Array.from(event.target.files);
-  if (files.length > 0) {
-    // 清空之前的错误信息
-    panEUValidationError.value = '';
-
-    // 验证文件
-    const validationErrors = validatePanEUFiles(files);
-    if (validationErrors.length > 0) {
-      panEUValidationError.value = validationErrors.join('\n');
-      // 清空文件输入
-      event.target.value = '';
-      return;
-    }
-
-    // 添加文件到上传列表，标记为PanEU类型
-    const newFiles = files.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      file: file,
-      uploadTime: new Date().toLocaleString(),
-      category: 'paneu' // 标记文件类型
-    }));
-    
-    uploadedFiles.value.push(...newFiles);
-    
-    // 标记PanEU文件已上传
-    panEUFilesUploaded.value = true;
-    
-    // 添加用户文件消息
-    addUserMessage('files', newFiles);
-    
-    // 检查是否两种类型的文件都已上传
-    checkAllFilesUploaded();
-    
-    // 清空文件输入
-    event.target.value = '';
-    
-    // 滚动到底部
-    scrollToBottom();
-  }
+  handleFileUpload(
+    event,
+    'paneu',
+    validatePanEUFiles,
+    panEUValidationError,
+    panEUFilesUploaded
+  );
 };
 
+// DI 上传
 const handleDIFileUpload = (event) => {
-  const files = Array.from(event.target.files);
-  if (files.length > 0) {
-    // 清空之前的错误信息
-    diValidationError.value = '';
-    
-    // 验证文件
-    const validationErrors = validateDIFiles(files);
-    if (validationErrors.length > 0) {
-      diValidationError.value = validationErrors.join('\n');
-      // 清空文件输入
-      event.target.value = '';
-      return;
-    }
-    
-    // 添加文件到上传列表，标记为DI类型
-    const newFiles = files.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      file: file,
-      uploadTime: new Date().toLocaleString(),
-      category: 'di' // 标记文件类型
-    }));
-    
-    uploadedFiles.value.push(...newFiles);
-    
-    // 标记DI文件已上传
-    diFilesUploaded.value = true;
-    
-    // 添加用户文件消息
-    addUserMessage('files', newFiles);
-    
-    // 检查是否两种类型的文件都已上传
-    checkAllFilesUploaded();
-    
-    // 清空文件输入
-    event.target.value = '';
-    
-    // 滚动到底部
-    scrollToBottom();
+  handleFileUpload(
+    event,
+    'di',
+    validateDIFiles,
+    diValidationError,
+    diFilesUploaded
+  );
+};
+
+// 删除文件
+const removeFile = (fileId) => {
+  uploadedFiles.value = uploadedFiles.value.filter(file => file.id !== fileId);
+
+  // 删除后需要重新验证每一类文件，并更新状态
+  recheckFiles('paneu', validatePanEUFiles, panEUValidationError, panEUFilesUploaded);
+  recheckFiles('di', validateDIFiles, diValidationError, diFilesUploaded);
+
+  // 再次检查整体上传状态
+  checkAllFilesUploaded();
+};
+
+// 重新检查某一类文件
+const recheckFiles = (category, validateFn, errorRef, uploadedFlagRef) => {
+  const files = uploadedFiles.value.filter(f => f.category === category).map(f => f.file);
+
+  if (files.length === 0) {
+    uploadedFlagRef.value = false;
+    errorRef.value = '';
+    return;
+  }
+
+  const validationErrors = validateFn(files);
+  if (validationErrors.length > 0) {
+    errorRef.value = validationErrors.join('\n');
+    uploadedFlagRef.value = false;
+  } else {
+    errorRef.value = '';
+    uploadedFlagRef.value = true;
   }
 };
 
-const addUploadMessage = (files) => {
-  // 这里可以添加一个上传成功的消息到聊天界面
-  console.log('上传文件:', files.map(f => f.name));
-};
 
 // 检查所有文件是否都已上传
 const checkAllFilesUploaded = () => {
   if (allFilesUploaded.value) {
+
+    // 添加用户文件消息
+    addUserMessage('files', [...uploadedFiles.value]);
 
     // 延迟显示CEE状态询问
     setTimeout(() => {
@@ -639,12 +627,9 @@ const checkAllFilesUploaded = () => {
       }, 1000);
     }, 500);
   }
-  // 不再生成新的气泡框提示，状态已在原有气泡框中的标题旁显示
 };
 
-const removeFile = (fileId) => {
-  uploadedFiles.value = uploadedFiles.value.filter(file => file.id !== fileId);
-};
+
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes';
