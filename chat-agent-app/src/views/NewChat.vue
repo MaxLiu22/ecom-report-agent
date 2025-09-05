@@ -611,6 +611,17 @@ const recheckFiles = (category, validateFn, errorRef, uploadedFlagRef) => {
   }
 };
 
+// 清空所有文件
+const clearAllFiles = () => {
+  uploadedFiles.value = [];
+
+  // 清空 PanEU / DI 状态
+  panEUValidationError.value = '';
+  diValidationError.value = '';
+  panEUFilesUploaded.value = false;
+  diFilesUploaded.value = false;
+};
+
 
 // 检查所有文件是否都已上传
 const checkAllFilesUploaded = () => {
@@ -819,7 +830,7 @@ onMounted(() => {
         <div v-if="uploadedFiles.length > 0 && !allFilesUploaded" class="uploaded-files-area">
           <div class="files-header">
             <h4>已上传文件 ({{ uploadedFiles.length }})</h4>
-            <button class="clear-all-btn" @click="uploadedFiles = []" title="清空所有文件">
+            <button class="clear-all-btn" @click="clearAllFiles" title="清空所有文件">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
