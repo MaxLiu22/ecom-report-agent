@@ -13,7 +13,7 @@
       <div class="section-block">
         <div class="section-header">
           <span class="section-index">1</span>
-          <h2 class="section-title">PanEU 话术</h2>
+            <h2 class="section-title">PanEU 话术</h2>
         </div>
         <div v-for="(sheet, index) in filteredPanEUSheets" :key="'paneu-' + index" class="sheet-card" :class="{open: sheet.expanded}">
           <button type="button" class="sheet-head" @click="toggleSheet('paneu', index)">
@@ -83,10 +83,12 @@
           </button>
           <div class="sheet-body" :class="{collapsed: !ceeSheet.expanded}" :aria-hidden="(!ceeSheet.expanded).toString()">
             <div class="faq-list">
-              <div v-for="(faq, index) in ceeData" :key="index" class="faq-item" :class="{ highlighted: ceeSheet.highlightedFAQ === index }" @click="highlightFAQ(index)">
+              <!-- 使用过滤后的 FAQ 数据 -->
+              <div v-for="(faq, index) in filteredCEEData" :key="index" class="faq-item" :class="{ highlighted: ceeSheet.highlightedFAQ === index }" @click="highlightFAQ(index)">
                 <div class="faq-q">{{ faq.question }}</div>
                 <div class="faq-a">{{ faq.answer }}</div>
               </div>
+              <div v-if="filteredCEEData.length === 0" class="empty-sheet">未找到匹配的 FAQ</div>
             </div>
           </div>
         </div>
@@ -192,11 +194,10 @@ export default {
   computed: {
     filteredPanEUSheets() {
       if (!this.searchTerm) return this.paneuSheets;
-      
       return this.paneuSheets.map(sheet => ({
         ...sheet,
-        data: sheet.data.filter(row => 
-          row.some(cell => 
+        data: sheet.data.filter(row =>
+          row.some(cell =>
             cell && cell.toString().toLowerCase().includes(this.searchTerm.toLowerCase())
           )
         )
@@ -204,15 +205,22 @@ export default {
     },
     filteredDISheets() {
       if (!this.searchTerm) return this.diSheets;
-      
       return this.diSheets.map(sheet => ({
         ...sheet,
-        data: sheet.data.filter(row => 
-          row.some(cell => 
+        data: sheet.data.filter(row =>
+          row.some(cell =>
             cell && cell.toString().toLowerCase().includes(this.searchTerm.toLowerCase())
           )
         )
       }));
+    },
+    // 新增：对 CEE FAQ 进行搜索过滤
+    filteredCEEData() {
+      if (!this.searchTerm) return this.ceeData;
+      const kw = this.searchTerm.toLowerCase();
+      return this.ceeData.filter(faq =>
+        [faq.question, faq.answer].some(text => text && text.toLowerCase().includes(kw))
+      );
     }
   },
   methods: {
@@ -229,25 +237,16 @@ export default {
       if (section === 'paneu') {
         this.paneuSheets.forEach(sheet => sheet.highlightedRow = null);
         this.paneuSheets[sheetIndex].highlightedRow = rowIndex;
-        
-        setTimeout(() => {
-          this.paneuSheets[sheetIndex].highlightedRow = null;
-        }, 3000);
+        setTimeout(() => { this.paneuSheets[sheetIndex].highlightedRow = null; }, 3000);
       } else if (section === 'di') {
         this.diSheets.forEach(sheet => sheet.highlightedRow = null);
         this.diSheets[sheetIndex].highlightedRow = rowIndex;
-        
-        setTimeout(() => {
-          this.diSheets[sheetIndex].highlightedRow = null;
-        }, 3000);
+        setTimeout(() => { this.diSheets[sheetIndex].highlightedRow = null; }, 3000);
       }
     },
     highlightFAQ(index) {
       this.ceeSheet.highlightedFAQ = index;
-      
-      setTimeout(() => {
-        this.ceeSheet.highlightedFAQ = null;
-      }, 3000);
+      setTimeout(() => { this.ceeSheet.highlightedFAQ = null; }, 3000);
     },
     filterContent() {
       if (this.searchTerm) {
