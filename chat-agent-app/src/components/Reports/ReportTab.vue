@@ -33,7 +33,7 @@
         >
           <ul class="dropdown-list">
             <li
-              v-for="item in solutionSubTabs"
+              v-for="item in filteredSolutionSubTabs"
               :key="item.id"
               class="dropdown-item"
               :class="{ selected: selectedSubTab === item.id }"
@@ -375,6 +375,27 @@ export default {
       { id: 64, title: '亚马逊英欧头程整合(BIXD)', desc: '解决方案子页面 4 概述' }
     ]
 
+    // 解析 policyResult.cid_result.is_in_cid3 -> 仅当为 true 才展示 id=64 子标签
+    const cidIsInCid3 = computed(() => {
+      const pr = props.policyResult
+      if (!pr || typeof pr !== 'object') return false
+      const c = pr.cid_result || pr.cidResult || pr.CIDResult || pr.CID_RESULT
+      if (!c || typeof c !== 'object') return false
+      return c.is_in_cid3 === true || c.isInCid3 === true || c.IS_IN_CID3 === true
+    })
+
+    const filteredSolutionSubTabs = computed(() => {
+      return cidIsInCid3.value ? solutionSubTabs : solutionSubTabs.filter(t => t.id !== 64)
+    })
+
+    // 若当前选中 id=64 但条件不满足则回退到第一个可用子标签
+    watch([cidIsInCid3, () => props.policyResult], () => {
+      if (!cidIsInCid3.value && selectedSubTab.value === 64) {
+        const first = filteredSolutionSubTabs.value[0]
+        selectedSubTab.value = first ? first.id : null
+      }
+    })
+
     // 完整的标签页配置
     const allTabs = [
       { id: 0, title: '概览', key: 'overview' },
@@ -455,6 +476,8 @@ export default {
     }
 
     const selectSubTab = (id) => {
+      // 防护：仅允许选择当前可见的子标签
+      if (!filteredSolutionSubTabs.value.some(t => t.id === id)) return
       selectedSubTab.value = id
       // 保持菜单展示状态，或可选择自动关闭：
       showSolutionMenu.value = false
@@ -496,7 +519,7 @@ export default {
         await nextTick()
         if (t.id === 5) { // 解决方案：采集所有子页
           const subPanels = []
-          for (const sub of solutionSubTabs) {
+          for (const sub of filteredSolutionSubTabs.value) {
             selectedSubTab.value = sub.id
             await nextTick()
             const subRoot = document.querySelector('.tab-content')
@@ -684,7 +707,7 @@ export default {
         activeTab.value = tabCfg.id; await nextTick()
         if (tabCfg.id === 5) {
           addSectionHeader(tabCfg.title)
-          for (const sub of solutionSubTabs) {
+          for (const sub of filteredSolutionSubTabs.value) {
             selectedSubTab.value = sub.id; await nextTick()
             const contentRoot = document.querySelector('.tab-content'); if (!contentRoot) continue
             const text = extractPlainText(contentRoot.innerHTML)
@@ -761,7 +784,7 @@ export default {
           headerBlock.innerHTML = `<h2 style="margin:0;font-size:28px;color:#232f3e;">${tabCfg.title}</h2>`
           tempRoot.appendChild(headerBlock)
           panels.push({ title: tabCfg.title, el: headerBlock })
-          for (const sub of solutionSubTabs) {
+          for (const sub of filteredSolutionSubTabs.value) {
             selectedSubTab.value = sub.id
             await nextTick()
             const contentRoot = document.querySelector('.tab-content')
@@ -908,7 +931,9 @@ export default {
       switchTab,
       onMainTabClick,
       showSolutionMenu,
-      solutionSubTabs,
+      solutionSubTabs, // 原始全集（导出可能需要展示全部条件判断）
+      filteredSolutionSubTabs,
+      cidIsInCid3,
       selectedSubTab,
       selectSubTab,
       solutionMenu,
@@ -919,8 +944,8 @@ export default {
       exportHtmlWrapper,
       sendEmailWrapper,
       uniReportRef,
-      exportPdfWrapper
-      ,exportingPdf, exportProgress, progressPercent, cancelExport, closeExportOverlay
+      exportPdfWrapper,
+      exportingPdf, exportProgress, progressPercent, cancelExport, closeExportOverlay
     }
   },
 }
