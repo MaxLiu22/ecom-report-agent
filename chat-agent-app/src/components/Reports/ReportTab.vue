@@ -227,6 +227,7 @@
       <div v-if="activeTab === 6" class="center-wrap">
         <Tab7 
           :panEUResult="panEUResult"
+          :policyResult="policyResult"
         />
       </div>
 
