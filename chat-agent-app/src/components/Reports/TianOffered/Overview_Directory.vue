@@ -98,101 +98,58 @@ export default {
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ============ 基础 & 背景 ============ */
+* { margin:0; padding:0; box-sizing:border-box; }
+.app { background:#f5f6f8; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; color:#232f3e; -webkit-font-smoothing:antialiased; }
 
-.app { font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background:linear-gradient(135deg,#f7fafc 0%,#edf2f7 100%); color:#333; }
+/* ============ 主容器 ============ */
+.main-container { max-width:1240px; margin:0 auto; padding:34px 32px 50px; }
 
-/* 顶部导航 */
-.top-nav {
-  background: #4a5568;
-  border-bottom: 3px solid #ed8936;
-  padding: 0 2rem;
-}
+/* ============ 标题卡 ============ */
+.hero-section { text-align:center; margin:0 0 20px; background:linear-gradient(130deg,#232f3e,#1b2732); padding:20px 36px 24px; border:1px solid #1e2a34; border-radius:20px; box-shadow:0 5px 18px -6px rgba(0,0,0,.5),0 2px 8px -4px rgba(0,0,0,.32); position:relative; overflow:hidden; }
+.hero-section:before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 82% 18%,rgba(255,153,0,.38),transparent 62%), linear-gradient(140deg,rgba(255,153,0,.18),rgba(255,153,0,0)); mix-blend-mode:overlay; pointer-events:none; }
+.hero-title { font-size:32px; font-weight:700; letter-spacing:.6px; margin:0 0 14px; color:#ffedcc; text-shadow:0 2px 4px rgba(0,0,0,.35); }
+.hero-subtitle { font-size:14px; color:#d0d6dc; letter-spacing:.35px; margin:0; }
 
-.nav-container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; height:54px; }
+/* ============ 列表区域 ============ */
+.services-list { display:flex; flex-direction:column; gap:12px; }
 
-.logo-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+/* 统一卡片：圆角 18 + 阴影 + 渐变侧条 */
+.service-item { background:#fff; border:1px solid #e3e6ea; border-radius:14px; padding:12px 16px 14px 16px; display:flex; align-items:center; gap:14px; position:relative; overflow:hidden; box-shadow:0 3px 10px -5px rgba(0,0,0,.12),0 1px 4px -2px rgba(0,0,0,.08); transition:.3s ease; }
+.service-item:before { /* 去除左侧黄色强调条 */ content:''; display:none; }
+.service-item:after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,153,0,.08),rgba(255,153,0,0)); opacity:0; transition:.45s; }
+.service-item:hover { transform:translateY(-2px); border-color:#ffb84d; box-shadow:0 8px 18px -6px rgba(0,0,0,.16),0 3px 8px -3px rgba(0,0,0,.12); }
+.service-item:hover:after { opacity:1; }
 
-.amazon-logo {
-  font-size: 2rem;
-}
+/* 图标：柔光渐变方形，与整体统一 */
+.service-icon { width:48px; height:48px; border-radius:14px; background:linear-gradient(145deg,#2d3b47,#16202a); box-shadow:0 0 0 1px #31404d inset,0 3px 8px -3px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; position:relative; flex-shrink:0; }
+.service-icon:after { content:'✓'; font-size:24px; font-weight:700; color:#ffb84d; text-shadow:0 2px 6px rgba(0,0,0,.5); }
 
-.site-title {
-  color: white;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
+.service-content { flex:1; display:flex; flex-direction:column; gap:4px; }
+.service-title { font-size:16px; font-weight:700; color:#232f3e; margin:0; letter-spacing:.45px; }
+.service-desc { font-size:12px; line-height:1.5; color:#4a5568; letter-spacing:.2px; margin:0; }
 
-.nav-time {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-}
-
-/* 主容器 */
-.main-container { max-width:1200px; margin:0 auto; padding:1.6rem 1.25rem 2.2rem; }
-
-/* 标题区域 */
-.hero-section { text-align:center; margin-bottom:1.6rem; }
-
-.hero-title { font-size:1.9rem; font-weight:600; color:#2d3748; margin-bottom:.35rem; letter-spacing:.5px; }
-
-.hero-subtitle { font-size:.95rem; color:#718096; }
-
-/* 服务列表 */
-.services-list { display:flex; flex-direction:column; gap:.6rem; }
-
-.service-item { background:#fff; border-radius:8px; padding:.75rem .85rem .8rem; display:flex; align-items:center; gap:.75rem; box-shadow:0 1px 5px rgba(0,0,0,.06); transition:.18s ease; border-left:4px solid #ed8936; position:relative; }
-
-.service-item:hover { transform:translateY(-2px); box-shadow:0 4px 14px -4px rgba(0,0,0,.15),0 2px 5px rgba(0,0,0,.08); }
-
-.service-icon { width:34px; height:34px; background:#0891b2; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; box-shadow:0 0 0 2px rgba(8,145,178,.15); }
-
-.service-icon::after { content:'✓'; color:#fff; font-size:19px; font-weight:600; }
-
-.service-content { flex:1; display:flex; flex-direction:column; gap:.25rem; }
-
-.service-title { font-size:1rem; font-weight:600; color:#2d3748; margin:0; line-height:1.2; }
-
-.service-desc { color:#5f6b7a; font-size:.72rem; line-height:1.25; letter-spacing:.2px; }
-
-.service-btn {
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #4a5568;
-  color: white;
-  flex-shrink: 0;
-}
-
-.service-btn:hover {
-  background: #2d3748;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(74, 85, 104, 0.3);
-}
+/* 隐藏按钮保留结构：可以后续启用统一按钮风格 */
+.service-btn { display:none; }
 
 /* 底部 */
-.footer { text-align:center; margin-top:.9rem; padding:.55rem 0 .4rem; color:#6b7280; border-top:1px solid #e2e8f0; font-size:.7rem; }
+.footer { text-align:center; margin-top:30px; padding:20px 0 10px; color:#5f6b7a; border-top:1px solid #e2e8f0; font-size:11.5px; letter-spacing:.4px; }
+.footer p { margin:0; }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .main-container { padding:1.25rem .9rem 1.6rem; }
-  .hero-title { font-size:1.55rem; }
-  .services-list { gap:.55rem; }
-  .service-item { padding:.65rem .7rem .7rem; gap:.6rem; }
-  .service-title { font-size:.95rem; }
-  .service-desc { font-size:.68rem; }
-  .service-icon { width:30px; height:30px; }
+/* ============ 响应式 ============ */
+@media (max-width: 900px) { .hero-section { padding:22px 30px 22px; } .hero-title { font-size:28px; } }
+@media (max-width: 680px) {
+  .main-container { padding:30px 20px 46px; }
+  .hero-section { padding:32px 26px 38px; margin-bottom:26px; }
+  .hero-title { font-size:26px; }
+  .service-item { padding:10px 14px 12px; gap:12px; }
+  .service-icon { width:42px; height:42px; }
+  .service-title { font-size:14px; }
+  .service-desc { font-size:11.5px; }
+}
+@media (max-width: 460px) {
+  .hero-title { font-size:24px; }
+  .service-item { padding:9px 12px 11px; }
+  .service-icon { width:40px; height:40px; }
 }
 </style>
