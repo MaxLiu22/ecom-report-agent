@@ -13,8 +13,8 @@
               <th class="ranking-col">优先级</th>
               <th class="action-col">主题</th>
               <th class="logic-col">行动</th>
+              <th class="status-col">是否采取行动</th>
               <th class="due-col">预计完成时间</th>
-              <th class="status-col">是否完成</th>
             </tr>
           </thead>
           <tbody>
@@ -23,14 +23,14 @@
               <td class="ranking">1</td>
               <td class="action">合规 - new policy (NL/IT)</td>
               <td class="logic">{{ computedActionResult.newPolicy }}</td>
-              <td class="due">
-                <input type="date" v-model="inputs.newPolicyDue" />
-              </td>
               <td class="status">
                 <select v-model="inputs.newPolicyDone">
                   <option value="否">否</option>
                   <option value="是">是</option>
                 </select>
+              </td>
+              <td class="due">
+                <input type="date" v-model="inputs.newPolicyDue" />
               </td>
             </tr>
 
@@ -43,14 +43,14 @@
                   <li v-for="(item, index) in computedActionResult.warehouseVATCompliance" :key="index">{{ item }}</li>
                 </ul>
               </td>
-              <td class="due">
-                <input type="date" v-model="inputs.warehouseDue" />
-              </td>
               <td class="status">
                 <select v-model="inputs.warehouseDone">
                   <option value="否">否</option>
                   <option value="是">是</option>
                 </select>
+              </td>
+              <td class="due">
+                <input type="date" v-model="inputs.warehouseDue" />
               </td>
             </tr>
 
@@ -63,14 +63,14 @@
                   <li v-for="(item, index) in computedActionResult.panEUCostSaving" :key="index">{{ item }}</li>
                 </ul>
               </td>
-              <td class="due">
-                <input type="date" v-model="inputs.panEUDue" />
-              </td>
               <td class="status">
                 <select v-model="inputs.panEUDone">
                   <option value="否">否</option>
                   <option value="是">是</option>
                 </select>
+              </td>
+              <td class="due">
+                <input type="date" v-model="inputs.panEUDue" />
               </td>
             </tr>
 
@@ -79,14 +79,14 @@
               <td class="ranking">4</td>
               <td class="action">cost saving - pan-EU ASIN parity</td>
               <td class="logic">{{ computedActionResult.panEUASINParity }}</td>
-              <td class="due">
-                <input type="date" v-model="inputs.panEUASINDue" />
-              </td>
               <td class="status">
                 <select v-model="inputs.panEUASINDone">
                   <option value="否">否</option>
                   <option value="是">是</option>
                 </select>
+              </td>
+              <td class="due">
+                <input type="date" v-model="inputs.panEUASINDue" />
               </td>
             </tr>
 
@@ -99,14 +99,14 @@
                   <strong>{{ item.title }}:</strong> {{ item.description }}
                 </div>
               </td>
-              <td class="due">
-                <input type="date" v-model="inputs.diDue" />
-              </td>
               <td class="status">
                 <select v-model="inputs.diDone">
                   <option value="否">否</option>
                   <option value="是">是</option>
                 </select>
+              </td>
+              <td class="due">
+                <input type="date" v-model="inputs.diDue" />
               </td>
             </tr>
 
@@ -115,14 +115,14 @@
               <td class="ranking">6</td>
               <td class="action">cost saving - CEE</td>
               <td class="logic">{{ computedActionResult.ceeCostSaving }}</td>
-              <td class="due">
-                <input type="date" v-model="inputs.ceeDue" />
-              </td>
               <td class="status">
                 <select v-model="inputs.ceeDone">
                   <option value="否">否</option>
                   <option value="是">是</option>
                 </select>
+              </td>
+              <td class="due">
+                <input type="date" v-model="inputs.ceeDue" />
               </td>
             </tr>
 
