@@ -1,61 +1,61 @@
 <script setup>
-import { ref, nextTick, onMounted, computed } from 'vue';
-import ReportTab from '@/components/Reports/ReportTab.vue';
-import UniReport from '@/components/Reports/uniReport.vue';
-import { analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
-import { analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
-import CeeService from '@/services/CeeService.js';
-import DifyService from '@/services/DifyService.js';
-import {analyzeSingleEUChecklist} from '@/services/checkliService.js';
-import {analyzeSingleEUChecklistCSV} from '@/services/checkliServiceCsv.js';
-import CheckliCeeParser from '@/services/checkliServiceCee.js';
-import ActionService from '@/services/actionService.js';
-import { findAndParseValidChecklist } from '@/services/fileService.js';
-import PolicyService from '@/services/policyService.js';
+import { ref, nextTick, onMounted, computed } from 'vue'
+import ReportTab from '@/components/Reports/ReportTab.vue'
+import UniReport from '@/components/Reports/uniReport.vue'
+import { analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js'
+import { analyzeDIOpportunitiesAuto } from '@/services/DIService.js'
+import CeeService from '@/services/CeeService.js'
+import DifyService from '@/services/DifyService.js'
+import { analyzeSingleEUChecklist } from '@/services/checkliService.js'
+import { analyzeSingleEUChecklistCSV } from '@/services/checkliServiceCsv.js'
+import CheckliCeeParser from '@/services/checkliServiceCee.js'
+import ActionService from '@/services/actionService.js'
+import { findAndParseValidChecklist } from '@/services/fileService.js'
+import PolicyService from '@/services/policyService.js'
 
-const message = ref('');
-const messageContainer = ref(null);
-const fileInputRef = ref(null);
-const panEUFileInputRef = ref(null);
-const diFileInputRef = ref(null);
-const uploadedFiles = ref([]);
-const messages = ref([]);
-const sellerCID = ref('');
+const message = ref('')
+const messageContainer = ref(null)
+const fileInputRef = ref(null)
+const panEUFileInputRef = ref(null)
+const diFileInputRef = ref(null)
+const uploadedFiles = ref([])
+const messages = ref([])
+const sellerCID = ref('')
 
 // 报告生成相关状态
-const isGeneratingReport = ref(false);
-const panEUResult = ref(null);
-const diResult = ref(null);
-const ceeResult = ref(null);
-const policyResult = ref(null);
-const EUExpansionCheckli = ref(null);
-const EUExpansionCheckliCee = ref(null);
-const actionResult = ref(null);
-const reportGenerated = ref(false);
+const isGeneratingReport = ref(false)
+const panEUResult = ref(null)
+const diResult = ref(null)
+const ceeResult = ref(null)
+const policyResult = ref(null)
+const EUExpansionCheckli = ref(null)
+const EUExpansionCheckliCee = ref(null)
+const actionResult = ref(null)
+const reportGenerated = ref(false)
 // 统一报告预览状态
-const showUniReport = ref(false);
+const showUniReport = ref(false)
 
 // 反馈表单数据
-const showFeedbackForm = ref(false);
+const showFeedbackForm = ref(false)
 const feedbackForm = ref({
   sellerId: '',
   meetingTime: '',
   amFeedback: '',
   sellerFeedback: '',
-  sellerConcerns: []
-});
+  sellerConcerns: [],
+})
 
 // 打字机效果相关
-const showInitialPrompts = ref(false);
+const showInitialPrompts = ref(false)
 
 // 文件上传状态跟踪
-const panEUFilesUploaded = ref(false);
-const diFilesUploaded = ref(false);
-const allFilesUploaded = computed(() => panEUFilesUploaded.value && diFilesUploaded.value);
+const panEUFilesUploaded = ref(false)
+const diFilesUploaded = ref(false)
+const allFilesUploaded = computed(() => panEUFilesUploaded.value && diFilesUploaded.value)
 
 // 文件验证错误状态
-const panEUValidationError = ref('');
-const diValidationError = ref('');
+const panEUValidationError = ref('')
+const diValidationError = ref('')
 
 // 初始话对象
 const checkliCeeParser = new CheckliCeeParser()
@@ -64,10 +64,9 @@ const props = defineProps({
   // 从父组件传递的初始文件
   initialText: {
     type: String,
-    default: "请帮我生成一个 IntraEU 卖家分析报告"
-  }
-  })
-  
+    default: '请帮我生成一个 IntraEU 卖家分析报告',
+  },
+})
 
 // PanEU 报告文件上传提示
 const panEUText = `请上传以下文件以生成 PanEU & CEE 报告：
@@ -90,7 +89,7 @@ const panEUText = `请上传以下文件以生成 PanEU & CEE 报告：
 
 【PanEU 报告可选文件】
 5. NL ASIN list ◯
-   路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list`;
+   路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list`
 
 // DI 分析文件上传提示
 const diText = `请上传以下文件以生成 DI 分析报告：
@@ -124,107 +123,105 @@ const diText = `请上传以下文件以生成 DI 分析报告：
 
 7. Remote_Fulfillment_Order_Report ◯
    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载订单报告
-   备注：卖家若未开启远程配送，则无下载页面`;
+   备注：卖家若未开启远程配送，则无下载页面`
 
 // 初始化显示
-const initializeMessages = async() => {
+const initializeMessages = async () => {
   // 将初始文本作为用户消息添加到消息列表
   // addUserMessage('text', props.initialText);
-  console.log('初始化消息列表');
-  console.log(props.initialText);
+  console.log('初始化消息列表')
+  console.log(props.initialText)
   // 延迟一下再发送消息，确保UI已更新
-  await nextTick();
-  
+  await nextTick()
+
   // 模拟发送消息
   if (props.initialText) {
-    message.value = props.initialText;
-  } else{
-    message.value = "请帮我生成一个 IntraEU 卖家分析报告"
+    message.value = props.initialText
+  } else {
+    message.value = '请帮我生成一个 IntraEU 卖家分析报告'
   }
-  
-  await sendMessage();
-};
+
+  await sendMessage()
+}
 
 const scrollToBottom = () => {
   if (messageContainer.value) {
     nextTick(() => {
-      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
-    });
+      messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+    })
   }
-};
+}
 
 const sendMessage = async () => {
-  const messageText = message.value.trim();
+  const messageText = message.value.trim()
 
-  message.value = '';
+  message.value = ''
   // 检查是否有上传的文件且没有文本消息（纯文件发送）
   if (!messageText && uploadedFiles.value.length > 0) {
     // 添加用户文件消息
-    addUserMessage('files', uploadedFiles.value);
-    
+    addUserMessage('files', uploadedFiles.value)
+
     // 延迟显示agent回复
     setTimeout(() => {
-      addCEEStatusMessage();
-    }, 500);
-    
+      addCEEStatusMessage()
+    }, 500)
+
     // 清空文件列表
-    uploadedFiles.value = [];
-    
+    uploadedFiles.value = []
   } else if (messageText) {
     // 普通文本消息
-    addUserMessage('text', messageText);
+    addUserMessage('text', messageText)
 
-    if (messageText.includes("卖家报告") || messageText.includes("分析报告")) {
-      console.log("包含关键词");
+    if (messageText.includes('卖家报告') || messageText.includes('分析报告')) {
+      console.log('包含关键词')
       addPromptMessage()
 
-    // 执行相关逻辑
+      // 执行相关逻辑
     } else {
       try {
         // 使用流式响应模式
-        const stream = await DifyService.sendChatMessage(messageText);
-        
+        const stream = await DifyService.sendChatMessage(messageText)
+
         // 创建一个临时消息ID用于更新
-        const tempMessageId = Date.now();
-        let fullResponse = '';
-        
+        const tempMessageId = Date.now()
+        let fullResponse = ''
+
         // 添加一个空的Agent消息，后续会更新内容
-        addAgentMessage('', tempMessageId);
-        
+        addAgentMessage('', tempMessageId)
+
         // 处理流式响应
         await DifyService.processStream(
           stream,
           (data) => {
             // 处理每个数据块
             if (data.answer) {
-              fullResponse += data.answer;
+              fullResponse += data.answer
               // 更新消息内容
-              updateAgentMessage(tempMessageId, fullResponse);
+              updateAgentMessage(tempMessageId, fullResponse)
               // 滚动到底部
-              scrollToBottom();
+              scrollToBottom()
             }
           },
           () => {
             // 完成时的处理
-            console.log('Stream completed');
+            console.log('Stream completed')
           },
           (error) => {
             // 错误处理
-            console.error('Stream error:', error);
-            addAgentMessage('抱歉，处理您的请求时出现了错误。');
-          }
-        );
+            console.error('Stream error:', error)
+            addAgentMessage('抱歉，处理您的请求时出现了错误。')
+          },
+        )
       } catch (error) {
-        console.error('Error sending message:', error);
-        addAgentMessage('抱歉，发送消息时出现了错误。');
+        console.error('Error sending message:', error)
+        addAgentMessage('抱歉，发送消息时出现了错误。')
       }
     }
-  
   }
-  
+
   // 发送消息后滚动到底部
-  scrollToBottom();
-};
+  scrollToBottom()
+}
 
 const addUserMessage = (type, content) => {
   messages.value.push({
@@ -232,10 +229,10 @@ const addUserMessage = (type, content) => {
     type: 'user',
     messageType: type,
     content: content,
-    timestamp: new Date().toLocaleTimeString()
-  });
-  nextTick(() => scrollToBottom());
-};
+    timestamp: new Date().toLocaleTimeString(),
+  })
+  nextTick(() => scrollToBottom())
+}
 
 const addAgentMessage = (text, id = null) => {
   messages.value.push({
@@ -243,18 +240,18 @@ const addAgentMessage = (text, id = null) => {
     type: 'agent',
     messageType: 'text',
     content: text,
-    timestamp: new Date().toLocaleTimeString()
-  });
-  nextTick(() => scrollToBottom());
-};
+    timestamp: new Date().toLocaleTimeString(),
+  })
+  nextTick(() => scrollToBottom())
+}
 
 // 更新Agent消息内容
 const updateAgentMessage = (id, newContent) => {
-  const messageIndex = messages.value.findIndex(msg => msg.id === id);
+  const messageIndex = messages.value.findIndex((msg) => msg.id === id)
   if (messageIndex !== -1) {
-    messages.value[messageIndex].content = newContent;
+    messages.value[messageIndex].content = newContent
   }
-};
+}
 
 const addPromptMessage = () => {
   messages.value.push({
@@ -262,11 +259,10 @@ const addPromptMessage = () => {
     type: 'agent',
     messageType: 'prompt',
     content: '',
-    timestamp: new Date().toLocaleTimeString()
-  });
-  nextTick(() => scrollToBottom());
-};
-
+    timestamp: new Date().toLocaleTimeString(),
+  })
+  nextTick(() => scrollToBottom())
+}
 
 const addCEEStatusMessage = () => {
   messages.value.push({
@@ -274,462 +270,459 @@ const addCEEStatusMessage = () => {
     type: 'agent',
     messageType: 'cee-status',
     content: '已收到所有文件。\n请问您是否已加入 CEE？',
-    timestamp: new Date().toLocaleTimeString()
-  });
-  nextTick(() => scrollToBottom());
-};
-
+    timestamp: new Date().toLocaleTimeString(),
+  })
+  nextTick(() => scrollToBottom())
+}
 
 const startReportGeneration = async () => {
-  console.log('提交CEE表单');
-  
-  if (isGeneratingReport.value) return; // 防止重复提交
-  
-  isGeneratingReport.value = true;
-  panEUResult.value = null;
-  diResult.value = null;
-  ceeResult.value = null;
-  policyResult.value = null;
-  EUExpansionCheckli.value = null;
-  EUExpansionCheckliCee.value = null;
-  actionResult.value = null;
-  reportGenerated.value = false;
-  
+  console.log('提交CEE表单')
+
+  if (isGeneratingReport.value) return // 防止重复提交
+
+  isGeneratingReport.value = true
+  panEUResult.value = null
+  diResult.value = null
+  ceeResult.value = null
+  policyResult.value = null
+  EUExpansionCheckli.value = null
+  EUExpansionCheckliCee.value = null
+  actionResult.value = null
+  reportGenerated.value = false
+
   try {
     // 添加生成报告开始的消息
-    addAgentMessage('开始生成报告，请稍候...');
-    
+    addAgentMessage('开始生成报告，请稍候...')
+
     // 使用上传的文件进行自动分析
     // 收集所有上传的文件（包括PanEU和DI文件）
-    const allFileMessages = messages.value.filter(msg => msg.messageType === 'files');
-    const allFiles = [];
-    allFileMessages.forEach(msg => {
-      allFiles.push(...msg.content.map(f => f.file));
-    });
-    
+    const allFileMessages = messages.value.filter((msg) => msg.messageType === 'files')
+    const allFiles = []
+    allFileMessages.forEach((msg) => {
+      allFiles.push(...msg.content.map((f) => f.file))
+    })
+
     // 解析两个 eu_expansion_checkli 表（体检表）
-    const checkliResutl = await findAndParseValidChecklist(allFiles, checkliCeeParser, analyzeSingleEUChecklist, analyzeSingleEUChecklistCSV)
+    const checkliResutl = await findAndParseValidChecklist(
+      allFiles,
+      checkliCeeParser,
+      analyzeSingleEUChecklist,
+      analyzeSingleEUChecklistCSV,
+    )
     EUExpansionCheckli.value = checkliResutl.paneuData.table_json
     EUExpansionCheckliCee.value = checkliResutl.ceeData
 
-
     // 1. 调用 analyzePanEU
-    console.log('开始 PanEU 分析...');
-    addAgentMessage('正在进行 PanEU 分析...');
-    const panEUFiles = allFiles; // 传递所有文件给分析函数
-    panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value);
-    addAgentMessage('PanEU 分析完成 ✓');
-
+    console.log('开始 PanEU 分析...')
+    addAgentMessage('正在进行 PanEU 分析...')
+    const panEUFiles = allFiles // 传递所有文件给分析函数
+    panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value)
+    addAgentMessage('PanEU 分析完成 ✓')
 
     // 2. 调用 analyzeDI
-    console.log('开始 DI 分析...');
-    addAgentMessage('正在进行 DI 分析...');
-    
+    console.log('开始 DI 分析...')
+    addAgentMessage('正在进行 DI 分析...')
+
     if (panEUFiles.length >= 1) {
-      diResult.value = await analyzeDIOpportunitiesAuto(panEUFiles);
-      addAgentMessage('DI 分析完成 ✓');
+      diResult.value = await analyzeDIOpportunitiesAuto(panEUFiles)
+      addAgentMessage('DI 分析完成 ✓')
     } else {
-      addAgentMessage('DI 分析跳过（文件不足）');
+      addAgentMessage('DI 分析跳过（文件不足）')
     }
-    
+
     // 3. 调用 calculateCEECosts
-    console.log('开始 CEE 成本计算...');
+    console.log('开始 CEE 成本计算...')
     const shouldJoinCEEResult = CeeService.shouldJoinCEE(EUExpansionCheckliCee.value)
     if (shouldJoinCEEResult.shouldJoinCEE) {
-      addAgentMessage('已加入 CEE，无需计算CEE成本。');
+      addAgentMessage('已加入 CEE，无需计算CEE成本。')
     } else {
-      addAgentMessage('正在计算 CEE 成本...');
-      const soldCount = panEUResult.value.totalSoldDE || 10000;
-      const hasPolishVAT = shouldJoinCEEResult.hasPolishVAT;
-      const hasCzechVAT = shouldJoinCEEResult.hasCzechVAT;
+      addAgentMessage('正在计算 CEE 成本...')
+      const soldCount = panEUResult.value.totalSoldDE || 10000
+      const hasPolishVAT = shouldJoinCEEResult.hasPolishVAT
+      const hasCzechVAT = shouldJoinCEEResult.hasCzechVAT
       console.log(soldCount, hasPolishVAT, hasCzechVAT)
-      ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT);
+      ceeResult.value = CeeService.calculateCEECosts(soldCount, hasPolishVAT, hasCzechVAT)
       console.log(ceeResult.value)
-      addAgentMessage('CEE 成本计算完成 ✓');
+      addAgentMessage('CEE 成本计算完成 ✓')
     }
-    
+
     // 4. 生成行动总结
     const actionService = new ActionService(
-        panEUResult,
-        diResult,
-        ceeResult,
-        EUExpansionCheckli.value
-      );
-      
-    actionResult.value = actionService.calculateAll();
+      panEUResult,
+      diResult,
+      ceeResult,
+      EUExpansionCheckli.value,
+    )
+
+    actionResult.value = actionService.calculateAll()
 
     // 5. 生成政策信息
-    addAgentMessage('政策信息生成中...');
+    addAgentMessage('政策信息生成中...')
     const policyService = new PolicyService()
-    policyResult.value = await policyService.processAndRun(EUExpansionCheckli.value, sellerCID.value)
-    addAgentMessage('政策信息生成完成 ✓');
+    policyResult.value = await policyService.processAndRun(
+      EUExpansionCheckli.value,
+      sellerCID.value,
+    )
+    addAgentMessage('政策信息生成完成 ✓')
 
     // 5. 标记报告生成完成
-    reportGenerated.value = true;
-    addAgentMessage('📊 报告生成完成！请查看右侧报告区域。');
-    
+    reportGenerated.value = true
+    addAgentMessage('📊 报告生成完成！请查看右侧报告区域。')
   } catch (error) {
-    console.error('报告生成失败:', error);
-    addAgentMessage(`报告生成失败: ${error.message}`);
+    console.error('报告生成失败:', error)
+    addAgentMessage(`报告生成失败: ${error.message}`)
   } finally {
-    isGeneratingReport.value = false;
-    scrollToBottom();
+    isGeneratingReport.value = false
+    scrollToBottom()
   }
-};
+}
 
-
-const closeUniReport = () => { showUniReport.value = false; };
+const closeUniReport = () => {
+  showUniReport.value = false
+}
 
 const triggerPanEUFileUpload = () => {
-  panEUFileInputRef.value?.click();
-};
+  panEUFileInputRef.value?.click()
+}
 
 const triggerDIFileUpload = () => {
-  diFileInputRef.value?.click();
-};
+  diFileInputRef.value?.click()
+}
 
 // 文件验证函数
 const validatePanEUFiles = (files) => {
-  const errors = [];
+  const errors = []
   const requiredFiles = {
-    masterSheet: { 
-      keywords: ['EU_expansion_checkli'], 
+    masterSheet: {
+      keywords: ['EU_expansion_checkli'],
       count: 0,
       requiredCount: 2,
-      displayName: '体检表 (2份)'
+      displayName: '体检表 (2份)',
     },
-    sku: { 
-      keywords: ['sku', 'cost', '成本'], 
+    sku: {
+      keywords: ['sku', 'cost', '成本'],
       count: 0,
       requiredCount: 1,
-      displayName: 'SKU report'
+      displayName: 'SKU report',
     },
-    paneu: { 
-      keywords: ['pan-eu', 'paneu', '欧洲整合', 'inventory'], 
+    paneu: {
+      keywords: ['pan-eu', 'paneu', '欧洲整合', 'inventory'],
       count: 0,
       requiredCount: 1,
-      displayName: 'Pan-EU report'
+      displayName: 'Pan-EU report',
     },
-    multicountry: { 
-      keywords: ['多国库存', 'multicountry', 'inventory'], 
+    multicountry: {
+      keywords: ['多国库存', 'multicountry', 'inventory'],
       count: 0,
       requiredCount: 1,
-      displayName: '多国库存报告'
-    }
-  };
-  
-  // 检查文件格式
-  const validExtensions = ['.csv', '.xlsx', '.xls'];
-  const invalidFiles = files.filter(file => {
-    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    return !validExtensions.includes(extension);
-  });
-  
-  if (invalidFiles.length > 0) {
-    errors.push(`不支持的文件格式: ${invalidFiles.map(f => f.name).join(', ')}。请上传 CSV 或 Excel 文件。`);
+      displayName: '多国库存报告',
+    },
   }
-  
+
+  // 检查文件格式
+  const validExtensions = ['.csv', '.xlsx', '.xls']
+  const invalidFiles = files.filter((file) => {
+    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
+    return !validExtensions.includes(extension)
+  })
+
+  if (invalidFiles.length > 0) {
+    errors.push(
+      `不支持的文件格式: ${invalidFiles.map((f) => f.name).join(', ')}。请上传 CSV 或 Excel 文件。`,
+    )
+  }
+
   // 检查必需文件类型
-  files.forEach(file => {
-    const fileName = file.name.toLowerCase();
-    Object.keys(requiredFiles).forEach(type => {
-      if (requiredFiles[type].keywords.some(keyword => fileName.includes(keyword.toLowerCase()))) {
-        requiredFiles[type].count++;
+  files.forEach((file) => {
+    const fileName = file.name.toLowerCase()
+    Object.keys(requiredFiles).forEach((type) => {
+      if (
+        requiredFiles[type].keywords.some((keyword) => fileName.includes(keyword.toLowerCase()))
+      ) {
+        requiredFiles[type].count++
       }
-    });
-  });
-  
+    })
+  })
+
   // 检查缺失
   const missingTypes = Object.keys(requiredFiles)
-    .filter(type => requiredFiles[type].count < requiredFiles[type].requiredCount)
-    .map(type => {
-      const missing = requiredFiles[type].requiredCount - requiredFiles[type].count;
-      return `${requiredFiles[type].displayName}（缺少 ${missing} 份）`;
-    });
-    
-  if (missingTypes.length > 0) {
-    errors.push(`PanEU 缺少必要文件：${missingTypes.join('、')}`);
-  }
-  
-  return errors;
-};
+    .filter((type) => requiredFiles[type].count < requiredFiles[type].requiredCount)
+    .map((type) => {
+      const missing = requiredFiles[type].requiredCount - requiredFiles[type].count
+      return `${requiredFiles[type].displayName}（缺少 ${missing} 份）`
+    })
 
+  if (missingTypes.length > 0) {
+    errors.push(`PanEU 缺少必要文件：${missingTypes.join('、')}`)
+  }
+
+  return errors
+}
 
 const validateDIFiles = (files) => {
-  const errors = [];
+  const errors = []
   const requiredFiles = {
-    mpg: { 
-      keywords: ['List_of_recommendations'], 
+    mpg: {
+      keywords: ['List_of_recommendations'],
       found: false,
-      displayName: 'MPG report'
+      displayName: 'MPG report',
     },
-    asin: { 
-      keywords: ['asin', 'list'], 
+    asin: {
+      keywords: ['asin', 'list'],
       found: false,
-      displayName: 'ASIN list'
+      displayName: 'ASIN list',
     },
-    sku: { 
-      keywords: ['sku', 'cost', '成本'], 
+    sku: {
+      keywords: ['sku', 'cost', '成本'],
       found: false,
-      displayName: 'SKU report'
-    }
-  };
-  
-  // 检查文件格式
-  const validExtensions = ['.csv', '.xlsx', '.xls'];
-  const invalidFiles = files.filter(file => {
-    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    return !validExtensions.includes(extension);
-  });
-  
-  if (invalidFiles.length > 0) {
-    errors.push(`不支持的文件格式: ${invalidFiles.map(f => f.name).join(', ')}。请上传 CSV 或 Excel 文件。`);
+      displayName: 'SKU report',
+    },
   }
-  
-  // 检查必需文件类型
-  files.forEach(file => {
-    const fileName = file.name.toLowerCase();
-    Object.keys(requiredFiles).forEach(type => {
-      if (requiredFiles[type].keywords.some(keyword => fileName.includes(keyword.toLowerCase()))) {
-        requiredFiles[type].found = true;
-      }
-    });
-  });
-  
-  const missingTypes = Object.keys(requiredFiles)
-    .filter(type => !requiredFiles[type].found)
-    .map(type => requiredFiles[type].displayName);
-    
-  if (missingTypes.length > 0) {
-    errors.push(`DI 缺少必要文件：${missingTypes.join('、')}`);
-  }
-  
-  return errors;
-};
 
+  // 检查文件格式
+  const validExtensions = ['.csv', '.xlsx', '.xls']
+  const invalidFiles = files.filter((file) => {
+    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
+    return !validExtensions.includes(extension)
+  })
+
+  if (invalidFiles.length > 0) {
+    errors.push(
+      `不支持的文件格式: ${invalidFiles.map((f) => f.name).join(', ')}。请上传 CSV 或 Excel 文件。`,
+    )
+  }
+
+  // 检查必需文件类型
+  files.forEach((file) => {
+    const fileName = file.name.toLowerCase()
+    Object.keys(requiredFiles).forEach((type) => {
+      if (
+        requiredFiles[type].keywords.some((keyword) => fileName.includes(keyword.toLowerCase()))
+      ) {
+        requiredFiles[type].found = true
+      }
+    })
+  })
+
+  const missingTypes = Object.keys(requiredFiles)
+    .filter((type) => !requiredFiles[type].found)
+    .map((type) => requiredFiles[type].displayName)
+
+  if (missingTypes.length > 0) {
+    errors.push(`DI 缺少必要文件：${missingTypes.join('、')}`)
+  }
+
+  return errors
+}
 
 // 通用上传处理
 const handleFileUpload = (event, category, validateFn, errorRef, uploadedFlagRef) => {
-  const files = Array.from(event.target.files);
-  if (files.length === 0) return;
+  const files = Array.from(event.target.files)
+  if (files.length === 0) return
 
   // 清空之前的错误信息
-  errorRef.value = '';
+  errorRef.value = ''
 
   // 已上传的此类文件
-  const existingFiles = uploadedFiles.value.filter(f => f.category === category);
+  const existingFiles = uploadedFiles.value.filter((f) => f.category === category)
 
   // 验证用文件集合（已有的 + 新的）
-  const filesToValidate = [
-    ...existingFiles.map(f => f.file),
-    ...files
-  ];
+  const filesToValidate = [...existingFiles.map((f) => f.file), ...files]
 
   // 执行验证
-  const validationErrors = validateFn(filesToValidate);
+  const validationErrors = validateFn(filesToValidate)
   if (validationErrors.length > 0) {
-    errorRef.value = validationErrors.join('\n');
-    event.target.value = ''; // 清空输入
+    errorRef.value = validationErrors.join('\n')
+    event.target.value = '' // 清空输入
   } else {
-    uploadedFlagRef.value = true; // 标记当前类别文件已上传
+    uploadedFlagRef.value = true // 标记当前类别文件已上传
   }
 
   // 添加文件到上传列表
-  const newFiles = files.map(file => ({
+  const newFiles = files.map((file) => ({
     id: Date.now() + Math.random(),
     name: file.name,
     size: file.size,
     type: file.type,
     file,
     uploadTime: new Date().toLocaleString(),
-    category
-  }));
+    category,
+  }))
 
-  uploadedFiles.value.push(...newFiles);
+  uploadedFiles.value.push(...newFiles)
 
   // 检查是否两类文件都已上传
-  checkAllFilesUploaded();
+  checkAllFilesUploaded()
 
   // 清空 input
-  event.target.value = '';
+  event.target.value = ''
 
   // 滚动到底部
-  scrollToBottom();
-};
+  scrollToBottom()
+}
 
 // PanEU 上传
 const handlePanEUFileUpload = (event) => {
-  handleFileUpload(
-    event,
-    'paneu',
-    validatePanEUFiles,
-    panEUValidationError,
-    panEUFilesUploaded
-  );
-};
+  handleFileUpload(event, 'paneu', validatePanEUFiles, panEUValidationError, panEUFilesUploaded)
+}
 
 // DI 上传
 const handleDIFileUpload = (event) => {
-  handleFileUpload(
-    event,
-    'di',
-    validateDIFiles,
-    diValidationError,
-    diFilesUploaded
-  );
-};
+  handleFileUpload(event, 'di', validateDIFiles, diValidationError, diFilesUploaded)
+}
 
 // 删除文件
 const removeFile = (fileId) => {
-  uploadedFiles.value = uploadedFiles.value.filter(file => file.id !== fileId);
+  uploadedFiles.value = uploadedFiles.value.filter((file) => file.id !== fileId)
 
   // 删除后需要重新验证每一类文件，并更新状态
-  recheckFiles('paneu', validatePanEUFiles, panEUValidationError, panEUFilesUploaded);
-  recheckFiles('di', validateDIFiles, diValidationError, diFilesUploaded);
+  recheckFiles('paneu', validatePanEUFiles, panEUValidationError, panEUFilesUploaded)
+  recheckFiles('di', validateDIFiles, diValidationError, diFilesUploaded)
 
   // 再次检查整体上传状态
-  checkAllFilesUploaded();
-};
+  checkAllFilesUploaded()
+}
 
 // 重新检查某一类文件
 const recheckFiles = (category, validateFn, errorRef, uploadedFlagRef) => {
-  const files = uploadedFiles.value.filter(f => f.category === category).map(f => f.file);
+  const files = uploadedFiles.value.filter((f) => f.category === category).map((f) => f.file)
 
   if (files.length === 0) {
-    uploadedFlagRef.value = false;
-    errorRef.value = '';
-    return;
+    uploadedFlagRef.value = false
+    errorRef.value = ''
+    return
   }
 
-  const validationErrors = validateFn(files);
+  const validationErrors = validateFn(files)
   if (validationErrors.length > 0) {
-    errorRef.value = validationErrors.join('\n');
-    uploadedFlagRef.value = false;
+    errorRef.value = validationErrors.join('\n')
+    uploadedFlagRef.value = false
   } else {
-    errorRef.value = '';
-    uploadedFlagRef.value = true;
+    errorRef.value = ''
+    uploadedFlagRef.value = true
   }
-};
+}
 
 // 清空所有文件
 const clearAllFiles = () => {
-  uploadedFiles.value = [];
+  uploadedFiles.value = []
 
   // 清空 PanEU / DI 状态
-  panEUValidationError.value = '';
-  diValidationError.value = '';
-  panEUFilesUploaded.value = false;
-  diFilesUploaded.value = false;
-};
-
+  panEUValidationError.value = ''
+  diValidationError.value = ''
+  panEUFilesUploaded.value = false
+  diFilesUploaded.value = false
+}
 
 // 检查所有文件是否都已上传
 const checkAllFilesUploaded = () => {
   if (allFilesUploaded.value) {
-
     // 添加用户文件消息
-    addUserMessage('files', [...uploadedFiles.value]);
+    addUserMessage('files', [...uploadedFiles.value])
 
     // 延迟显示CEE状态询问
     setTimeout(() => {
-      addAgentMessage('🎉 所有文件上传完成！现在开始生成报告流程。');
+      addAgentMessage('🎉 所有文件上传完成！现在开始生成报告流程。')
       setTimeout(async () => {
-        await startReportGeneration();
-      }, 1000);
-    }, 500);
+        await startReportGeneration()
+      }, 1000)
+    }, 500)
   }
-};
-
-
+}
 
 const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
 
 // 反馈表单相关方法
 const toggleFeedbackForm = () => {
-  showFeedbackForm.value = !showFeedbackForm.value;
-};
+  showFeedbackForm.value = !showFeedbackForm.value
+}
 
 const submitFeedbackForm = () => {
-  console.log('提交反馈表单:', feedbackForm.value);
+  console.log('提交反馈表单:', feedbackForm.value)
   // 这里可以添加表单验证和提交逻辑
-  alert('反馈已提交！');
-  showFeedbackForm.value = false;
+  alert('反馈已提交！')
+  showFeedbackForm.value = false
   // 重置表单
   feedbackForm.value = {
     sellerId: '',
     meetingTime: '',
     amFeedback: '',
     sellerFeedback: '',
-    sellerConcerns: []
-  };
-};
+    sellerConcerns: [],
+  }
+}
 
 // 组件挂载后初始化
 onMounted(() => {
-  scrollToBottom();
-  
+  scrollToBottom()
+
   // 监听DOM变化，自动滚动到底部
   if (messageContainer.value) {
     const observer = new MutationObserver(() => {
-      scrollToBottom();
-    });
-    
+      scrollToBottom()
+    })
+
     observer.observe(messageContainer.value, {
       childList: true,
       subtree: true,
-      attributes: true
-    });
+      attributes: true,
+    })
   }
 
   // 延迟显示初始提示
-  setTimeout(async() => {
-    await initializeMessages();
-  }, 200);
-});
+  setTimeout(async () => {
+    await initializeMessages()
+  }, 200)
+})
 </script>
 
 <template>
   <div class="report-container">
-
     <!-- 主要内容区域 -->
     <div class="main-content">
       <!-- 左侧面板 -->
       <div class="left-panel">
         <div class="message-container" ref="messageContainer">
-
           <!-- 动态消息列表 -->
-          <div v-for="msg in messages" :key="msg.id" class="message-item" :class="msg.type === 'user' ? 'user-message' : 'agent-message'">
-            <div class="message-content" :class="{ 
-              'file-message': msg.messageType === 'files',
-              'cee-form-message': msg.messageType === 'cee-form',
-              'cee-status-message': msg.messageType === 'cee-status'
-            }">
+          <div
+            v-for="msg in messages"
+            :key="msg.id"
+            class="message-item"
+            :class="msg.type === 'user' ? 'user-message' : 'agent-message'"
+          >
+            <div
+              class="message-content"
+              :class="{
+                'file-message': msg.messageType === 'files',
+                'cee-form-message': msg.messageType === 'cee-form',
+                'cee-status-message': msg.messageType === 'cee-status',
+              }"
+            >
               <!-- 普通文本消息 - 使用pre标签保留格式 -->
               <pre v-if="msg.messageType === 'text'" class="text-message">{{ msg.content }}</pre>
-              
+
               <!-- 初始Agent 消息 (左侧) - 文件上传提示 -->
               <div v-if="msg.messageType === 'prompt'" class="message-item agent-message">
                 <div class="message-content initial-prompts-container">
-
                   <!-- 新增的卖家CID输入区域 -->
                   <div class="seller-cid-section">
                     <div class="cid-input-container">
                       <label class="cid-label">请输入卖家CID：</label>
                       <div class="input-wrapper">
-                        <input 
-                          type="text" 
-                          v-model="sellerCID" 
-                          class="cid-input" 
-                          placeholder="例如: A2L5B8C9D0E1F"
+                        <input
+                          type="text"
+                          v-model="sellerCID"
+                          class="cid-input"
+                          placeholder=""
                           @keyup.enter="focusNextInput"
                         />
-                        <span class="input-icon">🆔</span>
+                        <!-- <span class="input-icon">🆔</span> -->
                       </div>
                       <div v-if="sellerCID" class="cid-hint">已输入CID: {{ sellerCID }}</div>
                     </div>
@@ -742,19 +735,47 @@ onMounted(() => {
                         📊 PanEU 报告分析&nbsp;&nbsp;&nbsp;CEE报告分析
                         <span v-if="panEUFilesUploaded" class="title-checkmark">✅</span>
                       </h3>
-                      <button 
-                        class="upload-prompt-btn paneu-btn" 
-                        :class="{ 'uploaded': panEUFilesUploaded }"
+                      <button
+                        class="upload-prompt-btn paneu-btn"
+                        :class="{ uploaded: panEUFilesUploaded }"
                         @click="triggerPanEUFileUpload"
                         :disabled="panEUFilesUploaded"
                       >
-                        <svg v-if="!panEUFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg
+                          v-if="!panEUFilesUploaded"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
                         </svg>
-                        <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg
+                          v-else
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M20 6L9 17l-5-5"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
                         </svg>
-                        {{ panEUFilesUploaded ? '已上传 PanEU & CEE文件' : '上传 PanEU & CEE 文件' }}
+                        {{
+                          panEUFilesUploaded ? '已上传 PanEU & CEE文件' : '上传 PanEU & CEE 文件'
+                        }}
                       </button>
                     </div>
                     <pre class="file-paths-text">{{ panEUText }}</pre>
@@ -775,17 +796,43 @@ onMounted(() => {
                         🔍 DI 分析报告
                         <span v-if="diFilesUploaded" class="title-checkmark">✅</span>
                       </h3>
-                      <button 
-                        class="upload-prompt-btn di-btn" 
-                        :class="{ 'uploaded': diFilesUploaded }"
+                      <button
+                        class="upload-prompt-btn di-btn"
+                        :class="{ uploaded: diFilesUploaded }"
                         @click="triggerDIFileUpload"
                         :disabled="diFilesUploaded"
                       >
-                        <svg v-if="!diFilesUploaded" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 715.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg
+                          v-if="!diFilesUploaded"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 715.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
                         </svg>
-                        <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg
+                          v-else
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M20 6L9 17l-5-5"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
                         </svg>
                         {{ diFilesUploaded ? '已上传 DI' : '上传 DI 文件' }}
                       </button>
@@ -803,16 +850,50 @@ onMounted(() => {
               <!-- 文件消息 -->
               <div v-else-if="msg.messageType === 'files'" class="files-message">
                 <div class="files-message-header">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                   <span>已发送 {{ msg.content.length }} 个文件</span>
                 </div>
                 <div class="files-preview">
-                  <div v-for="file in msg.content.slice(0, 3)" :key="file.id" class="file-preview-item">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <div
+                    v-for="file in msg.content.slice(0, 3)"
+                    :key="file.id"
+                    class="file-preview-item"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
                     </svg>
                     <span>{{ file.name }}</span>
                   </div>
@@ -821,18 +902,29 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
-        
+
         <!-- 上传文件列表 -->
         <div v-if="uploadedFiles.length > 0 && !allFilesUploaded" class="uploaded-files-area">
           <div class="files-header">
             <h4>已上传文件 ({{ uploadedFiles.length }})</h4>
             <button class="clear-all-btn" @click="clearAllFiles" title="清空所有文件">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
           </div>
@@ -840,19 +932,51 @@ onMounted(() => {
             <div v-for="file in uploadedFiles" :key="file.id" class="file-item">
               <div class="file-info">
                 <div class="file-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                 </div>
                 <div class="file-details">
                   <div class="file-name" :title="file.name">{{ file.name }}</div>
-                  <div class="file-meta">{{ formatFileSize(file.size) }} • {{ file.uploadTime }}</div>
+                  <div class="file-meta">
+                    {{ formatFileSize(file.size) }} • {{ file.uploadTime }}
+                  </div>
                 </div>
               </div>
               <button class="remove-file-btn" @click="removeFile(file.id)" title="删除文件">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               </button>
             </div>
@@ -860,55 +984,73 @@ onMounted(() => {
         </div>
 
         <!-- 聊天输入区域 -->
-        <div class="chat-input-area" :class="{ 'disabled': showInitialPrompts }">
+        <div class="chat-input-area" :class="{ disabled: showInitialPrompts }">
           <div class="input-container">
-            <input 
-              type="text" 
-              v-model="message" 
-              class="message-input" 
+            <input
+              type="text"
+              v-model="message"
+              class="message-input"
               placeholder="输入您的消息..."
               @keyup.enter="sendMessage"
               :disabled="showInitialPrompts"
             />
             <div class="button-group">
-              <button 
-                class="send-btn" 
+              <button
+                class="send-btn"
                 @click="sendMessage"
                 :disabled="showInitialPrompts || !message.trim()"
                 :class="{ 'has-content': message.trim() || uploadedFiles.length > 0 }"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M22 2L11 13"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M22 2L15 22L11 13L2 9L22 2Z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               </button>
             </div>
             <!-- 隐藏的文件输入 -->
-            <input 
-              type="file" 
+            <input
+              type="file"
               ref="fileInputRef"
               @change="handleFileUpload"
               multiple
               accept=".csv,.xlsx,.xls,.pdf,.txt,.json"
-              style="display: none;"
+              style="display: none"
             />
             <!-- PanEU 文件输入 -->
-            <input 
-              type="file" 
+            <input
+              type="file"
               ref="panEUFileInputRef"
               @change="handlePanEUFileUpload"
               multiple
               accept=".csv,.xlsx,.xls,.pdf,.txt,.json"
-              style="display: none;"
+              style="display: none"
             />
             <!-- DI 文件输入 -->
-            <input 
-              type="file" 
+            <input
+              type="file"
               ref="diFileInputRef"
               @change="handleDIFileUpload"
               multiple
               accept=".csv,.xlsx,.xls,.pdf,.txt,.json"
-              style="display: none;"
+              style="display: none"
             />
           </div>
         </div>
@@ -918,7 +1060,7 @@ onMounted(() => {
       <div class="right-panel">
         <!-- 反馈表单遮罩层 -->
         <div class="feedback-overlay" v-if="showFeedbackForm" @click="toggleFeedbackForm"></div>
-        
+
         <!-- 反馈表单区域 -->
         <div class="feedback-form-container" v-if="showFeedbackForm" @click.stop>
           <div class="feedback-form-header">
@@ -929,37 +1071,61 @@ onMounted(() => {
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">卖家CID：</label>
-                <input type="text" v-model="feedbackForm.sellerId" class="form-input" placeholder="请填写卖家CID" />
+                <input
+                  type="text"
+                  v-model="feedbackForm.sellerId"
+                  class="form-input"
+                  placeholder="请填写卖家CID"
+                />
               </div>
             </div>
-            
+
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">会议时间：</label>
-                <input type="text" v-model="feedbackForm.meetingTime" class="form-input" placeholder="请填写会议时间" />
+                <input
+                  type="text"
+                  v-model="feedbackForm.meetingTime"
+                  class="form-input"
+                  placeholder="请填写会议时间"
+                />
               </div>
             </div>
-            
+
             <div class="form-row">
               <div class="form-group full-width">
                 <label class="form-label">AM反馈：</label>
-                <textarea v-model="feedbackForm.amFeedback" class="form-textarea" placeholder="请填写AM反馈内容" rows="3"></textarea>
+                <textarea
+                  v-model="feedbackForm.amFeedback"
+                  class="form-textarea"
+                  placeholder="请填写AM反馈内容"
+                  rows="3"
+                ></textarea>
               </div>
             </div>
-            
+
             <div class="form-row">
               <div class="form-group full-width">
                 <label class="form-label">卖家反馈：</label>
-                <textarea v-model="feedbackForm.sellerFeedback" class="form-textarea" placeholder="请填写卖家反馈内容" rows="3"></textarea>
+                <textarea
+                  v-model="feedbackForm.sellerFeedback"
+                  class="form-textarea"
+                  placeholder="请填写卖家反馈内容"
+                  rows="3"
+                ></textarea>
               </div>
             </div>
-            
+
             <div class="form-row">
               <div class="form-group full-width">
                 <label class="form-label">卖家最关心的问题：</label>
                 <div class="concern-options">
                   <label class="checkbox-label">
-                    <input type="checkbox" value="新政策指导" v-model="feedbackForm.sellerConcerns" />
+                    <input
+                      type="checkbox"
+                      value="新政策指导"
+                      v-model="feedbackForm.sellerConcerns"
+                    />
                     新政策指导（ New policy guidence ）
                   </label>
                   <label class="checkbox-label">
@@ -981,14 +1147,14 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            
+
             <div class="form-actions">
               <button class="submit-btn" @click="submitFeedbackForm">提交反馈</button>
               <button class="cancel-btn" @click="toggleFeedbackForm">取消</button>
             </div>
           </div>
         </div>
-        
+
         <!-- 使用 ReportTab 组件 -->
         <ReportTab
           :report-generated="reportGenerated"
@@ -1004,8 +1170,20 @@ onMounted(() => {
         <div class="button-area">
           <div class="button-left">
             <button class="feedback-btn" @click="toggleFeedbackForm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
               反馈收集
             </button>
@@ -1187,10 +1365,12 @@ onMounted(() => {
 }
 
 @keyframes blink {
-  0%, 50% {
+  0%,
+  50% {
     opacity: 1;
   }
-  51%, 100% {
+  51%,
+  100% {
     opacity: 0;
   }
 }
@@ -1474,7 +1654,8 @@ onMounted(() => {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Tab 导航栏样式 */
@@ -1645,7 +1826,8 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.preview-btn, .feedback-btn {
+.preview-btn,
+.feedback-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1661,18 +1843,21 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
 }
 
-.preview-btn:hover, .feedback-btn:hover {
+.preview-btn:hover,
+.feedback-btn:hover {
   background-color: #1e3d30;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(45, 90, 69, 0.3);
 }
 
-.preview-btn:active, .feedback-btn:active {
+.preview-btn:active,
+.feedback-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(45, 90, 69, 0.2);
 }
 
-.preview-btn svg, .feedback-btn svg {
+.preview-btn svg,
+.feedback-btn svg {
   flex-shrink: 0;
 }
 
@@ -1725,7 +1910,8 @@ onMounted(() => {
   gap: 8px;
 }
 
-.attachment-btn, .send-btn {
+.attachment-btn,
+.send-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -1739,7 +1925,8 @@ onMounted(() => {
   transition: background-color 0.2s;
 }
 
-.attachment-btn:hover, .send-btn:hover {
+.attachment-btn:hover,
+.send-btn:hover {
   background-color: #f5f5f5;
 }
 
@@ -2139,34 +2326,34 @@ onMounted(() => {
   .report-frame {
     font-size: 14px;
   }
-  
+
   .tab-navigation {
     padding: 0 12px;
   }
-  
+
   .tab-container {
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .tab-item {
     padding: 12px 16px;
     font-size: 14px;
     border-radius: 6px 6px 0 0;
   }
-  
+
   .content-panel {
     padding: 16px 12px;
   }
-  
+
   .content-header h2 {
     font-size: 28px;
   }
-  
+
   .content-description {
     font-size: 16px;
   }
-  
+
   .content-body {
     padding: 16px 12px;
   }
@@ -2176,11 +2363,11 @@ onMounted(() => {
   .main-content {
     flex-direction: column;
   }
-  
+
   .header-title h1 {
     font-size: 20px;
   }
-  
+
   .report-container {
     padding: 15px;
   }
@@ -2291,16 +2478,20 @@ onMounted(() => {
   margin-bottom: 5px;
 }
 
-.form-input, .form-textarea {
+.form-input,
+.form-textarea {
   padding: 8px 12px;
   border: 1px solid #d0d7de;
   border-radius: 6px;
   font-size: 13px;
   background-color: #f6f8fa;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
-.form-input:focus, .form-textarea:focus {
+.form-input:focus,
+.form-textarea:focus {
   outline: none;
   border-color: #2d5a45;
   box-shadow: 0 0 0 2px rgba(45, 90, 69, 0.1);
@@ -2335,7 +2526,7 @@ onMounted(() => {
   background-color: #f6f8fa;
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type='checkbox'] {
   margin-right: 6px;
   transform: scale(0.9);
 }
@@ -2349,7 +2540,8 @@ onMounted(() => {
   border-top: 1px solid #e0e0e0;
 }
 
-.submit-btn, .cancel-btn {
+.submit-btn,
+.cancel-btn {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -2472,12 +2664,12 @@ onMounted(() => {
     margin-bottom: 15px;
     padding-bottom: 15px;
   }
-  
+
   .cid-input {
     padding: 10px 14px 10px 36px;
     font-size: 13px;
   }
-  
+
   .input-icon {
     left: 10px;
     font-size: 14px;
@@ -2501,21 +2693,21 @@ onMounted(() => {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .concern-options {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .feedback-form-container {
     width: 95%;
     max-width: 500px;
     max-height: 90vh;
   }
-  
+
   .feedback-form-content {
     max-height: 60vh;
   }
