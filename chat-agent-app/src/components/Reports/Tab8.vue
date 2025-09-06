@@ -21,8 +21,14 @@
             <!-- 第一行: new policy -->
             <tr v-if="computedActionResult.newPolicy">
               <td class="ranking">1</td>
-              <td class="action">合规 - new policy (NL/IT)</td>
-              <td class="logic">{{ computedActionResult.newPolicy }}</td>
+              <td class="action">合规-新政策</td>
+              <td class="logic">
+                <ul>
+                  <li v-for="(item, index) in computedActionResult.newPolicy" :key="index">
+                    {{ item }}
+                  </li>
+                </ul>
+              </td>
               <td class="status">
                 <select v-model="inputs.newPolicyDone">
                   <option value="否">否</option>
@@ -35,9 +41,9 @@
             </tr>
 
             <!-- 第二行: 仓储没开税号 -->
-            <tr v-if="computedActionResult.warehouseVATCompliance && computedActionResult.warehouseVATCompliance.length">
+            <tr v-if="computedActionResult.warehouseVATCompliance">
               <td class="ranking">2</td>
-              <td class="action">合规 - 开了仓储没开税号</td>
+              <td class="action">合规-已开启仓储但缺失税号</td>
               <td class="logic">
                 <ul>
                   <li v-for="(item, index) in computedActionResult.warehouseVATCompliance" :key="index">{{ item }}</li>
@@ -55,9 +61,9 @@
             </tr>
 
             <!-- 第三行: pan-EU placement -->
-            <tr v-if="computedActionResult.panEUCostSaving && computedActionResult.panEUCostSaving.length">
+            <tr v-if="computedActionResult.panEUCostSaving">
               <td class="ranking">3</td>
-              <td class="action">cost saving - pan-EU placement</td>
+              <td class="action">成本节约-PanEU-开启仓储</td>
               <td class="logic">
                 <ul>
                   <li v-for="(item, index) in computedActionResult.panEUCostSaving" :key="index">{{ item }}</li>
@@ -77,7 +83,7 @@
             <!-- 第四行: pan-EU ASIN parity -->
             <tr v-if="computedActionResult.panEUASINParity">
               <td class="ranking">4</td>
-              <td class="action">cost saving - pan-EU ASIN parity</td>
+              <td class="action">成本节约-PanEU-同步ASIN</td>
               <td class="logic">{{ computedActionResult.panEUASINParity }}</td>
               <td class="status">
                 <select v-model="inputs.panEUASINDone">
@@ -93,7 +99,7 @@
             <!-- 第五行: DI incentive -->
             <tr v-if="computedActionResult.diIncentive">
               <td class="ranking">5</td>
-              <td class="action">cost saving - DI</td>
+              <td class="action">成本节约-DI</td>
               <td class="logic">
                 <div v-for="(item, index) in computedActionResult.diIncentive" :key="index" class="growth-item">
                   <strong>{{ item.title }}:</strong> {{ item.description }}
@@ -113,7 +119,7 @@
             <!-- 第六行: CEE cost saving -->
             <tr v-if="computedActionResult.ceeCostSaving">
               <td class="ranking">6</td>
-              <td class="action">cost saving - CEE</td>
+              <td class="action">成本节约-CEE</td>
               <td class="logic">{{ computedActionResult.ceeCostSaving }}</td>
               <td class="status">
                 <select v-model="inputs.ceeDone">

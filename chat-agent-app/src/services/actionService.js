@@ -1,38 +1,84 @@
 // src/services/actionService.js
 
 class ActionService {
-    constructor(panEUResult, diResult, ceeResult, EU_expansion_checkli) {
+    constructor(panEUResult, diResult, ceeResult, EU_expansion_checkli, policyResult) {
       this.panEUResult = panEUResult;
       this.diResult = diResult;
       this.ceeResult = ceeResult;
       this.EU_expansion_checkli = EU_expansion_checkli;
+      this.policyResult = policyResult;
     }
   
     // 逻辑1：合规 - new policy (NL/IT)
-    checkNewPolicy() {
-      const result = {}
+    // checkNewPolicy() {
+    //   const result = {}
 
-      const vatItem = this.EU_expansion_checkli.find(item => item["指标"] === "持有有效增值税号国家");
+    //   const vatItem = this.EU_expansion_checkli.find(item => item["指标"] === "持有有效增值税号国家");
       
-      if (!vatItem) {
-        result.content = "-";
-        result.value = 0
-      };
+    //   if (!vatItem) {
+    //     result.content = "-";
+    //     result.value = 0
+    //   };
       
-      if (vatItem["意大利"] === 1) {
-        result.content = "意大利税号需注意";
-        result.value = 1
-      } else {
-        result.content = "-";
-        result.value = 0
+    //   if (vatItem["意大利"] === 1) {
+    //     result.content = "意大利税号需注意";
+    //     result.value = 1
+    //   } else {
+    //     result.content = "-";
+    //     result.value = 0
+    //   }
+      
+    //   return {
+    //     newPolicy: result.content,
+    //     newPolicyValue: result.value
+    //   };
+    // }
+  
+
+    // 逻辑1：合规 - new policy (NL/IT)
+    checkNewPolicy() {
+      const results = [];
+      let value = 0; // 默认值
+
+      // 1. NL policy
+      if (Array.isArray(this.panEUResult?.value?.nlPolicy)) {
+        if (this.panEUResult.value.nlPolicy.length > 0) {
+          results.push(`需同步到荷兰的ASIN数量：${this.panEUResult.value.nlPolicy.length}`);
+        } else {
+          results.push("目前没有需要同步至荷兰站的ASIN，但需要注意，未来上新的ASIN需要将listing同步至荷兰站；");
+        }
       }
-      
+
+      // 2. IT logic1
+      if (this.policyResult?.it_logic1_result?.option === 2) {
+        results.push(
+          "意大利税号失效将会影响您的Pan-EU资格。建议在意大利税号失效前申请其他欧盟国家的税号并启用库存配置（例如选择德国、法国进行VAT税号注册），以确保继续Pan-EU资格。"
+        );
+      }
+
+      // 3. IT logic2
+      if (this.policyResult?.it_logic2_result?.option === 1) {
+        results.push(
+          "请注意：您需要密切和您的税代保持沟通，以确保意大利税局是否通知您进行保证金政策相关的缴纳。"
+        );
+        // 保持 newPolicyValue = 0 或 1
+        value = value || 1;
+      }
+
+      // 4. CID
+      const cid = this.policyResult?.cid_result;
+      if (cid?.is_in_cid1 || cid?.is_in_cid2) {
+        results.push("请尽快提供IEN信息，否则将无法创建新的发往英国的货件");
+      }
+
       return {
-        newPolicy: result.content,
-        newPolicyValue: result.value
+        newPolicy: results,
+        newPolicyValue: value
       };
     }
-  
+
+
+
     // 逻辑2：合规 - 开了仓储没开税号
     checkWarehouseVATCompliance() {
       const vatItem = this.EU_expansion_checkli.find(item => item["指标"] === "持有有效增值税号国家");
@@ -63,13 +109,16 @@ class ActionService {
         }
         
         if (warehouseStatus === 1 && vatStatus === 1) {
-          groupedResults.compliant.push(country);
+          // groupedResults.compliant.push(country);
+          return;
         } else if (warehouseStatus === 1 && vatStatus === 0) {
           groupedResults.needVAT.push(country);
         } else if (warehouseStatus === 0 && vatStatus === 1) {
-          groupedResults.canOpenWarehouse.push(country);
+          // groupedResults.canOpenWarehouse.push(country);
+          return;
         } else if (warehouseStatus === 0 && vatStatus === 0) {
-          groupedResults.needVATAndWarehouse.push(country);
+          // groupedResults.needVATAndWarehouse.push(country);
+          return;
         }
       });
       
@@ -81,11 +130,11 @@ class ActionService {
       }
       
       if (groupedResults.needVAT.length > 0) {
-        results.push(`${groupedResults.needVAT.join('、')}需上传税号;`);
+        results.push(`您已开启${groupedResults.needVAT.join('、')}仓储，请尽快上传 ${groupedResults.needVAT.join('、')}税号，否则将面临合规风险。`);
       }
       
       if (groupedResults.canOpenWarehouse.length > 0) {
-        results.push(`${groupedResults.canOpenWarehouse.join('、')}可以开启本地仓储，享受本地配送费，`);
+        results.push(`${groupedResults.canOpenWarehouse.join('、')}可以开启本地仓储，享受本地配送费。`);
       }
       
       if (groupedResults.needVATAndWarehouse.length > 0) {

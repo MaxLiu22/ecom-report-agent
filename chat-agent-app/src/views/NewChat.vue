@@ -346,17 +346,7 @@ const startReportGeneration = async () => {
       addAgentMessage('CEE 成本计算完成 ✓')
     }
 
-    // 4. 生成行动总结
-    const actionService = new ActionService(
-      panEUResult,
-      diResult,
-      ceeResult,
-      EUExpansionCheckli.value,
-    )
-
-    actionResult.value = actionService.calculateAll()
-
-    // 5. 生成政策信息
+    // 4. 生成政策信息
     addAgentMessage('政策信息生成中...')
     const policyService = new PolicyService()
     policyResult.value = await policyService.processAndRun(
@@ -365,7 +355,18 @@ const startReportGeneration = async () => {
     )
     addAgentMessage('政策信息生成完成 ✓')
 
-    // 5. 标记报告生成完成
+
+    // 5. 生成行动总结
+    const actionService = new ActionService(
+      panEUResult,
+      diResult,
+      ceeResult,
+      EUExpansionCheckli.value,
+      policyResult.value
+    )
+    actionResult.value = actionService.calculateAll()
+
+    // 6. 标记报告生成完成
     reportGenerated.value = true
     addAgentMessage('📊 报告生成完成！请查看右侧报告区域。')
   } catch (error) {
