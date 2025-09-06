@@ -1155,17 +1155,19 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 使用 ReportTab 组件 -->
-        <ReportTab
-          :report-generated="reportGenerated"
-          :pan-e-u-result="panEUResult"
-          :di-result="diResult"
-          :cee-result="ceeResult"
-          :action-result="actionResult"
-          :eu-expansion-checkli="EUExpansionCheckli"
-          :eu-expansion-checkli-cee="EUExpansionCheckliCee"
-          :policy-result="policyResult"
-        />
+        <!-- 使用 ReportTab 组件（放入可滚动容器，避免放大后底部按钮被挤出视口） -->
+        <div class="report-area">
+          <ReportTab
+            :report-generated="reportGenerated"
+            :pan-e-u-result="panEUResult"
+            :di-result="diResult"
+            :cee-result="ceeResult"
+            :action-result="actionResult"
+            :eu-expansion-checkli="EUExpansionCheckli"
+            :eu-expansion-checkli-cee="EUExpansionCheckliCee"
+            :policy-result="policyResult"
+          />
+        </div>
         <!-- 按键区域 -->
         <div class="button-area">
           <div class="button-left">
