@@ -362,6 +362,8 @@ export default {
     const exportingPdf = ref(false)
     const cancelExportFlag = ref(false)
     const exportProgress = ref({ current: 0, total: 0, message: '', done: false })
+  // 导出上下文：用于在取消时立即清理临时 DOM，避免长时间阻塞
+  const exportCtx = ref({ tempRoot: null })
     const progressPercent = computed(() => {
       if (!exportProgress.value.total) return 0
       return Math.min(100, (exportProgress.value.current / exportProgress.value.total) * 100)
@@ -744,6 +746,8 @@ export default {
         background: '#fff', padding: '0', margin: '0', zIndex: '-1'
       })
       document.body.appendChild(tempRoot)
+      // 记录上下文，供“取消”时快速移除
+      exportCtx.value.tempRoot = tempRoot
 
       const panels = []
       const addPanel = (title, sourceEl, level = 1) => {
@@ -803,14 +807,34 @@ export default {
       selectedSubTab.value = originalSub
       await nextTick()
 
-      // 等待所有图片加载，避免空白
-      const waitForImages = async (root) => {
+      // 等待所有图片加载，避免空白（强制 eager + 超时保护）
+      const waitForImages = async (root, timeoutMs = 6000) => {
         const imgs = Array.from(root.querySelectorAll('img'))
-        await Promise.all(imgs.map(img => {
-          if (img.complete) return Promise.resolve()
-          return new Promise(res => { img.onload = () => res(); img.onerror = () => res() })
-        }))
+        // 强制 eager 加载并触发
+        imgs.forEach(img => {
+          try { img.loading = 'eager' } catch(_) {}
+          try { img.decoding = 'sync' } catch(_) {}
+          // 对 lazy 的图片，如果未开始加载，重新赋值 src 触发
+          if (!img.complete && img.src) {
+            const src = img.src
+            img.src = ''
+            img.src = src
+          }
+        })
+        const perImage = (img) => new Promise(res => {
+          let done = false
+          const finish = () => { if (!done) { done = true; res() } }
+          const tid = setTimeout(finish, timeoutMs)
+          const onEnd = () => { clearTimeout(tid); finish() }
+          if (img.complete) return onEnd()
+          img.addEventListener('load', onEnd, { once: true })
+          img.addEventListener('error', onEnd, { once: true })
+          // 尝试 decode()（如果可用）
+          try { img.decode?.().then(onEnd).catch(onEnd) } catch(_) {}
+        })
+        await Promise.all(imgs.map(perImage))
       }
+      exportProgress.value.message = '加载资源中...'
       await waitForImages(tempRoot)
       // 方案A：先截图全部 panel 存储，再“瀑布流”合成
       exportProgress.value.total = panels.length
@@ -823,7 +847,14 @@ export default {
         exportProgress.value.current++
         exportProgress.value.message = `截图 ${exportProgress.value.current}/${exportProgress.value.total}`
         try {
-          const c = await html2canvas(el, { scale, backgroundColor: '#ffffff', useCORS: true, allowTaint: false, logging: false })
+          const c = await html2canvas(el, {
+            scale,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            allowTaint: false,
+            logging: false,
+            imageTimeout: 6000
+          })
           captured.push({ canvas: c, width: c.width, height: c.height })
         } catch (e) {
           console.error('[PDF] 截图失败，插入占位', e)
@@ -838,7 +869,10 @@ export default {
 
       // 若取消
       if (cancelExportFlag.value) {
-        document.body.removeChild(tempRoot)
+        if (exportCtx.value.tempRoot && exportCtx.value.tempRoot.isConnected) {
+          try { document.body.removeChild(exportCtx.value.tempRoot) } catch (_) {}
+        }
+        exportCtx.value.tempRoot = null
         exportProgress.value.message = '已取消'
         exportProgress.value.done = true
         return
@@ -914,7 +948,10 @@ export default {
         exportProgress.value.message = `分页合成 ${pageIndex}/${groups.length}`
       }
 
-      document.body.removeChild(tempRoot)
+      if (exportCtx.value.tempRoot && exportCtx.value.tempRoot.isConnected) {
+        try { document.body.removeChild(exportCtx.value.tempRoot) } catch (_) {}
+      }
+      exportCtx.value.tempRoot = null
       pdf.save('IntraEU_Report.pdf')
       exportProgress.value.message = 'PDF 已保存'
       exportProgress.value.done = true
@@ -922,7 +959,20 @@ export default {
       setTimeout(()=>{ if (!cancelExportFlag.value) exportingPdf.value = false }, 1400)
     }
 
-    const cancelExport = () => { cancelExportFlag.value = true; exportProgress.value.message = '取消中...'}
+    const cancelExport = () => {
+      // 标记取消
+      cancelExportFlag.value = true
+      exportProgress.value.message = '取消中...'
+      // 立即移除临时 DOM，避免继续占用内存/渲染
+      if (exportCtx.value.tempRoot && exportCtx.value.tempRoot.isConnected) {
+        try { document.body.removeChild(exportCtx.value.tempRoot) } catch (_) {}
+        exportCtx.value.tempRoot = null
+      }
+      // 直接关闭遮罩，避免用户感觉“卡住”
+      exportingPdf.value = false
+      // 标记完成，保证后续逻辑能感知到已取消状态
+      exportProgress.value.done = true
+    }
     const closeExportOverlay = () => { exportingPdf.value = false }
 
     return {
