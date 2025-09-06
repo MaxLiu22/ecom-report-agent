@@ -121,7 +121,7 @@
                     "
                     >2</span
                   >
-                  <span style="color: #333; font-size: 14px">填写 CEE 中欧计划分析参数</span>
+                  <span style="color: #333; font-size: 14px">自动生成定制报告</span>
                 </div>
                 <div style="display: flex; align-items: center">
                   <span
@@ -139,7 +139,7 @@
                     "
                     >3</span
                   >
-                  <span style="color: #333; font-size: 14px">点击生成报告并查看结果</span>
+                  <span style="color: #333; font-size: 14px">可在对话框提问IntraEU相关内容</span>
                 </div>
               </div>
             </div>
