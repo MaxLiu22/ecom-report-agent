@@ -68,7 +68,7 @@
 
               <!-- 提示文字 -->
               <div v-if="missingVAT" class="cee-tip">
-                <strong>卖家申请 {{ missingVAT }} 并开启中欧计划可获得 {{ formatCurrency(ceeResult.finalSaving) }} 成本节约</strong>
+                <strong>卖家申请 {{ missingVAT }} 并开启中欧计划可获得 {{ formatCurrency(ceeResult.finalSaving) }}€ 成本节约</strong>
               </div>
 
               <div class="cee-table-wrapper">
