@@ -22,6 +22,7 @@ class DifyService {
   /**
    * 运行工作流
    * @param {Object} inputs 输入参数
+   * @param {string} apiKey API 密钥
    * @param {string} user 用户标识，默认为 'abc'
    * @param {string} responseMode 响应模式，默认为 'blocking'
    * @returns {Promise<Object>} API 响应结果

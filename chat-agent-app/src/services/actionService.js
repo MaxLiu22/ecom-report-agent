@@ -161,7 +161,7 @@ class ActionService {
       costSaveData.value.forEach(countryData => {
         Object.entries(countryData).forEach(([country, values]) => {
           if (Array.isArray(values) && values.length > 1) {
-            results.push(`可开启 ${country} 仓储，获得配送费用节约 ${values[1]} RMB`);
+            results.push(`可开启 ${country} 仓储，获得配送费用节约 ${values[1].toFixed(2)} RMB`);
           }
         });
       });
