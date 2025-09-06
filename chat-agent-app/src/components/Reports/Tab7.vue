@@ -127,15 +127,6 @@
           </div>
           <div class="policy-updates" style="margin-top: 10px">
             <div class="policy-card">
-              <a
-                href="https://mp.weixin.qq.com/s?__biz=MzkxNzI4NjI5OQ==&mid=2247619861&idx=1&sn=817af8fb84f74681699dc32d95cd6f30&chksm=c0faaf330e446a2765b87002bde225f90919cd3ce9a9cebcc32ddbddfa2a48421e1c89592081&from=industrynews&version=4.1.7.6056&platform=win#rd"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="policy-link"
-              >
-                <img src="/src/assets/政策更新.png" alt="政策更新" class="policy-image" />
-              </a>
-              <div class="img-caption">点击图片查看原文（微信公众平台）</div>
               <!-- ========= 动态展示 policyResult (意大利合规政策专用) ========= -->
               <div class="it-policy-wrapper" v-if="policyResult">
                 <!-- it_logic1_result 逻辑提示 -->
@@ -179,7 +170,15 @@
                 <!-- 直接字符串化展示 policyResult / policyResult.value -->
                 <!-- <pre class="policy-raw-json" aria-label="policyResult 原始JSON">{{ safePolicyString }}</pre> -->
               </div>
-
+              <a
+                href="https://mp.weixin.qq.com/s?__biz=MzkxNzI4NjI5OQ==&mid=2247619861&idx=1&sn=817af8fb84f74681699dc32d95cd6f30&chksm=c0faaf330e446a2765b87002bde225f90919cd3ce9a9cebcc32ddbddfa2a48421e1c89592081&from=industrynews&version=4.1.7.6056&platform=win#rd"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="policy-link"
+              >
+                <img src="/src/assets/政策更新.png" alt="政策更新" class="policy-image" />
+              </a>
+              <div class="img-caption">点击图片查看原文（微信公众平台）</div>
 
             </div>
           </div>
