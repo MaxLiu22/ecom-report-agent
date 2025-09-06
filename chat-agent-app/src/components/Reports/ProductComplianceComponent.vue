@@ -1,7 +1,7 @@
 <template>
   <div class="product-compliance-container">
     <!-- 第一部分：产品合规简介 -->
-    <div class="compliance-section" :class="{ open: openSections.intro }">
+    <!-- <div class="compliance-section" :class="{ open: openSections.intro }">
       <div
         class="compliance-header"
         role="button"
@@ -18,7 +18,6 @@
 
       <transition name="collapse">
       <div class="compliance-content" id="section-intro" v-show="openSections.intro">
-        <!-- 进度条 -->
         <div class="progress-bar">
           <div class="progress-step completed">
             <span class="step-text">欧洲站点拓展评估</span>
@@ -37,13 +36,12 @@
           </div>
         </div>
 
-        <!-- 产品合规简介标题 -->
         <div class="intro-title">
           <h1>产品合规简介</h1>
         </div>
       </div>
       </transition>
-    </div>
+    </div> -->
 
     <!-- 第二部分：需要符合产品合规的情况 -->
     <div class="compliance-section" :class="{ open: openSections.scenarios }">
