@@ -173,6 +173,18 @@ computed: {
   methods: {
     getOpportunityText(metric) {
       switch (metric) {
+        case "账户健康情况": {
+          const unhealthy = this.countries.filter(c => {
+            const row = this.computedeuExpansionCheckliFiltered.find(i => i.指标 === "账户健康情况");
+            return row && row[c] === 0;
+          });
+          if (unhealthy.length > 0) {
+            return `<span style="color:red;">需尽快修复 ${unhealthy.join("、")} 账户健康</span>`;
+          }
+          return "";
+        }
+
+
         case "持有有效增值税号国家": {
           const needVAT = this.actionResult?.warehouseVATComplianceValue?.needVAT;
           if (Array.isArray(needVAT) && needVAT.length > 0) {
