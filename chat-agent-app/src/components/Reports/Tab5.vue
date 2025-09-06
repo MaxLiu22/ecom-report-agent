@@ -29,9 +29,20 @@
               <th>机会点标注</th>
             </tr>
           </thead>
+
           <tbody>
             <tr v-for="item in computedeuExpansionCheckliFiltered" :key="item.指标">
-              <td class="metric-name">{{ item.指标 }}</td>
+              <td class="metric-name">
+                <template v-if="item.指标 === '是否使用英国和欧盟之间的远程配送服务'">
+                  是否使用英国和欧盟之间的远程配送服务<br/>（DI）
+                </template>
+                <template v-else-if="item.指标 === '是否启用中欧计划'">
+                  是否启用中欧计划<br/>（CEE）
+                </template>
+                <template v-else>
+                  {{ item.指标 }}
+                </template>
+              </td>
               <td v-for="country in countries" :key="country" class="value-cell">
                 <span v-if="item[country] === 1" class="checkmark">✓</span>
                 <span v-else-if="item[country] === 0" class="cross">✗</span>
@@ -40,7 +51,17 @@
               </td>
               <td class="opportunity-cell" v-html="getOpportunityText(item.指标)"></td>
             </tr>
+
+            <!-- 底部说明文字 -->
+            <tr>
+              <td colspan="7" class="legend-row">
+                <span class="legend red">红色：税务风险需注意</span>
+                <span class="legend yellow">黄色：可着重注意的机会</span>
+                <span class="legend green">绿色：成本节约</span>
+              </td>
+            </tr>
           </tbody>
+
         </table>
       </div>
     </div>
@@ -351,6 +372,29 @@ computed: {
 .section-content {
   padding: 24px;
 }
+
+.legend-row {
+  text-align: left;  /* ✅ 靠左 */
+  padding: 8px 12px;
+  font-size: 12px;
+  background: #fafafa;
+}
+.legend {
+  margin-right: 16px;
+  font-weight: 500;
+}
+.legend.red {
+  color: #ff4d4f;
+}
+.legend.yellow {
+  color: #faad14;
+}
+.legend.green {
+  color: #00a650;
+}
+
+
+
 
 /* 无数据状态 */
 .no-data {
