@@ -22,8 +22,11 @@ import { stringifyQuery } from 'vue-router';
 import * as XLSX from 'xlsx';
 
 // ----------------------------- File Pattern Helpers ----------------------------- //
+// 增加 asin_list / sku_report 两个独立角色；保留 cost_saving 以兼容旧版
 const FILE_ROLE_PATTERNS = [
-	{ role: 'cost_saving', regex: /cost.*saving.*model/i, type: 'excel', required: true },
+	{ role: 'asin_list', regex: /(asin).*list/i, type: 'excel', required: true },
+	{ role: 'sku_report', regex: /sku.*report/i, type: 'excel', required: true },
+	{ role: 'cost_saving', regex: /cost.*saving.*model/i, type: 'excel' },
 	{ role: 'incentive_eu', regex: /eligibleASINs.*DE.*FR.*IT.*ES.*Credits.*GSINSP/i, type: 'csv' },
 	{ role: 'incentive_uk', regex: /eligibleASINs.*UK.*Credits.*GSINSP/i, type: 'csv' },
 	{ role: 'rec_uk_de', regex: /recommendations.*United.*Kingdom.*Germany/i, type: 'excel' },
@@ -63,8 +66,9 @@ function detectRoleByContent(workbookOrRows) {
 			const wb = workbookOrRows;
 			const sheetNamesLower = wb.SheetNames.map(s => s.toLowerCase());
 			const hasSheet = (kw) => sheetNamesLower.some(n => n.includes(kw));
-			// cost_saving
-			if ((hasSheet('asin_list') || hasSheet('asin') || hasSheet('asins')) && sheetNamesLower.some(n => n.includes('sku report'))) return 'cost_saving';
+			// asin_list vs sku_report 独立识别
+			if (hasSheet('asin_list') || hasSheet('asin') || hasSheet('asins')) return 'asin_list';
+			if (hasSheet('sku report') || hasSheet('skureport') || hasSheet('sku_report')) return 'sku_report';
 			// remote status / order
 			if (sheetNamesLower.some(n => n.includes('remote') && n.includes('status'))) return 'rf_status';
 			if (sheetNamesLower.some(n => n.includes('remote') && n.includes('order'))) return 'rf_order';
@@ -86,9 +90,9 @@ function detectRoleByContent(workbookOrRows) {
 					if (/(spain|spanish|西班牙)/.test(flatText)) return 'rec_uk_es';
 				}
 			}
-			// Fallback: inspect first sheet columns for DI_type to cost_saving
+			// Fallback: inspect first sheet columns
 			const firstRows = sheetToJson(wb, wb.SheetNames[0]).slice(0,3);
-			if (firstRows.some(r => Object.keys(r).some(k => /di_type/i.test(k))) && firstRows.some(r => Object.keys(r).some(k => /eu5_gms_t30d/i.test(k)))) return 'cost_saving';
+			if (firstRows.some(r => Object.keys(r).some(k => /di\s*_?type/i.test(k))) && firstRows.some(r => Object.keys(r).some(k => /eu5.*gms.*t30d/i.test(k)))) return 'asin_list';
 		} else if (Array.isArray(workbookOrRows)) {
 			// CSV rows
 			const rows = workbookOrRows;
@@ -125,6 +129,25 @@ function sheetToJson(workbook, nameOrIndex = 0, opts = {}) {
 	return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], opts);
 }
 
+// 在工作簿中寻找包含指定列头的 sheet（不区分大小写，宽松匹配）
+function findSheetByHeaders(wb, requiredHeaders = []){
+	for(const sn of wb.SheetNames){
+		const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header:1 });
+		if(!rows || !rows.length) continue;
+		const headers = (rows[0]||[]).map(h => (h||'').toString().trim().toLowerCase());
+		const ok = requiredHeaders.every(h => headers.some(x => x.includes(h)));
+		if(ok) return sn;
+	}
+	return null;
+}
+
+// 查找对象中第一个匹配 key 的字段（忽略空格大小写）
+function findKey(obj, pattern){
+	const keys = Object.keys(obj || {});
+	const re = pattern instanceof RegExp ? pattern : new RegExp(pattern, 'i');
+	return keys.find(k => re.test(k.replace(/\s+/g,'')));
+}
+
 function extractNumber(str) {
 	if (str == null) return 0;
 	const match = String(str).replace(/,/g, '').match(/\d+(\.\d+)?/);
@@ -140,12 +163,63 @@ function formatCurrency(amount, currency = EUR) {
 	return symbol + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// ----------------------------- Sample Data Supplement ----------------------------- //
+async function supplementParsedFromAssets(parsed){
+	const supplemented = [];
+	const warnings = [];
+	// 仅当缺失时尝试
+	const tasks = [];
+	const tryExcel = async (role, relPath) => {
+		if (parsed[role]) return;
+		try {
+			const url = new URL(`./DIdata/${relPath}`, import.meta.url).href;
+			const res = await fetch(url);
+			if(!res.ok) throw new Error(`${res.status}`);
+			const buf = await res.arrayBuffer();
+			parsed[role] = XLSX.read(buf, { type:'array' });
+			supplemented.push(role);
+		} catch(e){ warnings.push(`补充失败: ${role} -> ${relPath} (${e.message})`); }
+	};
+	const tryCSV = async (role, relPath) => {
+		if (parsed[role]) return;
+		try {
+			const url = new URL(`./DIdata/${relPath}`, import.meta.url).href;
+			const res = await fetch(url);
+			if(!res.ok) throw new Error(`${res.status}`);
+			const buf = await res.arrayBuffer();
+			parsed[role] = parseCSV(buf);
+			supplemented.push(role);
+		} catch(e){ warnings.push(`补充失败: ${role} -> ${relPath} (${e.message})`); }
+	};
+
+	await tryExcel('asin_list', 'Asin_List_1756435951298.xlsx');
+	// SKU 报表样例名不固定，尝试两个常见命名
+	await tryExcel('sku_report', 'SKU report.xlsx');
+	if(!parsed.sku_report) await tryExcel('sku_report', 'SKU_report.xlsx');
+
+	await tryCSV('incentive_eu', 'eligibleASINs-DE_FR_IT_ES-Credits-GSINSP.csv');
+	await tryCSV('incentive_uk', 'eligibleASINs-UK-Credits-GSINSP.csv');
+
+	await tryExcel('rf_status', 'Remote_Fulfillment_ASIN_Status_Report.xlsx');
+	await tryExcel('rf_order', 'Remote_Fulfillment_Order_Report.xlsx');
+
+	await tryExcel('rec_uk_de', 'List_of_recommendations_from_United Kingdom_to_Germany.xlsx');
+	await tryExcel('rec_uk_fr', 'List_of_recommendations_from_United Kingdom_to_France.xlsx');
+	await tryExcel('rec_uk_it', 'List_of_recommendations_from_United Kingdom_to_Italy.xlsx');
+	await tryExcel('rec_uk_es', 'List_of_recommendations_from_United Kingdom_to_Spain.xlsx');
+	await tryExcel('rec_de_uk', 'List_of_recommendations_from_Germany_to_United Kingdom.xlsx');
+
+	return { parsed, supplemented, warnings };
+}
+
 // ----------------------------- Parsing Domain Logic ----------------------------- //
 
 async function parseInputs(fileListOrMap) {
 	// fileListOrMap: Array<File|Blob> OR { role:File }
 	const roleMap = {
-		cost_saving: null,
+		asin_list: null,
+		sku_report: null,
+		cost_saving: null, // 兼容旧版（单文件包含）
 		incentive_eu: null,
 		incentive_uk: null,
 		rec_uk_de: null,
@@ -190,55 +264,167 @@ async function parseInputs(fileListOrMap) {
 }
 
 function buildRawData(parsed) {
-	// 1. Cost saving workbook: sheets "Asin_List" & "SKU report ASIN detail"
-	const costWB = parsed.cost_saving;
-	const asinList = costWB ? sheetToJson(costWB, 'Asin_List') : [];
-	const skuDetail = costWB ? sheetToJson(costWB, 'SKU report ASIN detail') : [];
+	// 1) 获取 ASIN List（新版）与 SKU Report；若未提供则尝试从 cost_saving 兼容读取
+	const asinWB = parsed.asin_list || parsed.cost_saving || null;
+	const skuWB = parsed.sku_report || parsed.cost_saving || null;
 
-	// Build P-ASIN map
-	const pAsinMap = {};
-	skuDetail.forEach(r => {
-		if (r['ASIN'] && r['父 ASIN']) pAsinMap[r['ASIN']] = r['父 ASIN'];
-	});
-
-	const raw = [];
-	asinList.forEach(row => {
-		const cAsin = row.Asin;
-		if (!cAsin) return;
-		const pAsin = pAsinMap[cAsin] || '';
-		let direction = 'Unknown';
-		if (row.DI_type) {
-			if (row.DI_type.includes('EU only')) direction = 'EU>UK';
-			else if (row.DI_type.includes('UK only')) direction = 'UK>EU';
+	// 1.a 解析 ASIN 列表：优先对象模式；若失败，回退数组模式（位置推断）
+	let asinList = [];
+	let asinArrayRows = [];
+	if (asinWB) {
+		const asinSheet = findSheetByHeaders(asinWB, ['asin', 'di', 'eu5']);
+		const sheetName = asinSheet || asinWB.SheetNames[0];
+		asinList = XLSX.utils.sheet_to_json(asinWB.Sheets[sheetName], { defval: null });
+		if (!Array.isArray(asinList) || asinList.length === 0 || (!asinList[0]?.Asin && !asinList[0]?.ASIN && !asinList[0]?.['ASIN'])){
+			// 读取数组模式
+			asinArrayRows = XLSX.utils.sheet_to_json(asinWB.Sheets[sheetName], { header:1 });
 		}
-		const gmsT30D = parseFloat(row.EU5_gms_t30d) || 0; // 来源商城销售额(T30D)
-		raw.push({
-			'C-ASIN': cAsin,
-			'P-ASIN': pAsin,
-			direction,
-			'source MP GMS T30D': gmsT30D,
-			'Remote fulfilment': 'not enabled',
-			'RF GMS': 0,
-			'RF high sales': 0,
-			'UK>EU incentive amount': 0,
-			'EU>UK incentive amount': 0,
-			'UK>EU incentive currency': EUR,
-			'EU>UK incentive currency': GBP,
-			'high_sales_potential_eu': 0,
-			'high_sales_potential_uk': 0
-		});
-	});
+	}
 
-	// 2. Remote Fulfillment Orders
+	// 1.b 从 SKU Report 构建 P-ASIN 映射
+	const pAsinMap = {};
+	if (skuWB) {
+		const sheetName = skuWB.SheetNames[0];
+		// 优先对象模式
+		const objRows = XLSX.utils.sheet_to_json(skuWB.Sheets[sheetName], { defval: null });
+		if (objRows && objRows.length) {
+			objRows.forEach(r => {
+				const asinKey = findKey(r, /^ASIN$/i);
+				const pKey = findKey(r, /^(父\s*ASIN|Parent\s*ASIN)$/i);
+				const c = asinKey ? r[asinKey] : null;
+				const p = pKey ? r[pKey] : null;
+				if (c && p) pAsinMap[c] = p;
+			});
+		} else {
+			// 回退：数组模式，根据表头定位
+			const rows = XLSX.utils.sheet_to_json(skuWB.Sheets[sheetName], { header: 1 });
+			if (rows && rows.length) {
+				const headers = (rows[0] || []).map(h => (h || '').toString().trim().toLowerCase());
+				const asinIdx = headers.findIndex(h => h === 'asin');
+				const pIdx = headers.findIndex(h => h.replace(/\s+/g, '') === '父asin' || h.replace(/\s+/g, '').includes('parentasin'));
+				rows.slice(1).forEach(r => {
+					const c = r[asinIdx];
+					const p = r[pIdx];
+					if (c && p) pAsinMap[c] = p;
+				});
+			}
+		}
+	}
+
+	// 1.c 汇总 raw 行（对象模式）
+	const raw = [];
+	if (asinList && asinList.length) {
+		asinList.forEach(row => {
+			const cAsin = row.Asin || row.ASIN || row['ASIN'];
+			if (!cAsin) return;
+			const pAsin = pAsinMap[cAsin] || '';
+			let direction = 'Unknown';
+			const diTypeKey = findKey(row, /^di\s*_?type$/i);
+			const diVal = diTypeKey ? row[diTypeKey] : '';
+			if (diVal) {
+				if (String(diVal).includes('EU only')) direction = 'EU>UK';
+				else if (String(diVal).includes('UK only')) direction = 'UK>EU';
+			}
+			const gmsKey = findKey(row, /^eu5.*gms.*t30d$/i);
+			const gmsT30D = gmsKey ? (parseFloat(row[gmsKey]) || 0) : 0;
+			raw.push({
+				'C-ASIN': cAsin,
+				'P-ASIN': pAsin,
+				direction,
+				'source MP GMS T30D': gmsT30D,
+				'Remote fulfilment': 'not enabled',
+				'RF GMS': 0,
+				'RF high sales': 0,
+				'UK>EU incentive amount': 0,
+				'EU>UK incentive amount': 0,
+				'UK>EU incentive currency': EUR,
+				'EU>UK incentive currency': GBP,
+				'high_sales_potential_eu': 0,
+				'high_sales_potential_uk': 0
+			});
+		});
+	}
+
+	// 1.d 若对象模式无数据，回退数组模式，按优化版经验列位提取（B/C列变体）
+	if (raw.length === 0 && asinArrayRows && asinArrayRows.length) {
+		// 估计数据开始行（前几行标题/空行）
+		let start = 3;
+		for (let i = 1; i < Math.min(10, asinArrayRows.length); i++) {
+			const v2 = asinArrayRows[i]?.[2];
+			const v1 = asinArrayRows[i]?.[1];
+			if ((typeof v2 === 'string' && /^B0/.test(v2)) || (typeof v1 === 'string' && /^B0/.test(v1))) { start = i; break; }
+		}
+		for (const row of asinArrayRows.slice(start)) {
+			if (!Array.isArray(row)) continue;
+			const candidateC = row[2];
+			const candidateB = row[1];
+			let cAsin, diType;
+			if (candidateC && /^B0/.test(String(candidateC))) { cAsin = candidateC; diType = row[3]; }
+			else { cAsin = candidateB; diType = row[2]; }
+			if (!cAsin || !/^B0/.test(String(cAsin))) continue;
+			let direction = 'Unknown';
+			if (diType === 'EU only') direction = 'EU>UK';
+			else if (diType === 'UK only') direction = 'UK>EU';
+			const pAsin = pAsinMap[cAsin] || '';
+			raw.push({
+				'C-ASIN': cAsin,
+				'P-ASIN': pAsin,
+				direction,
+				'source MP GMS T30D': 0,
+				'Remote fulfilment': 'not enabled',
+				'RF GMS': 0,
+				'RF high sales': 0,
+				'UK>EU incentive amount': 0,
+				'EU>UK incentive amount': 0,
+				'UK>EU incentive currency': EUR,
+				'EU>UK incentive currency': GBP,
+				'high_sales_potential_eu': 0,
+				'high_sales_potential_uk': 0
+			});
+		}
+	}
+
+	// 2) Remote Fulfillment Status（Enrollment_EU4）— 与优化版保持一致（已启用）
+	if (parsed.rf_status && raw.length) {
+		const wb = parsed.rf_status;
+		const sheetName = wb.SheetNames.find(n => /Enrollment/i.test(n)) || wb.SheetNames[0];
+		const rows = sheetToJson(wb, sheetName, { header: 1 });
+		if (rows && rows.length) {
+			// 尝试定位数据起始行（列1看起来像 ASIN）
+			let start = 3;
+			for (let i = 1; i < Math.min(10, rows.length); i++) {
+				const v = rows[i]?.[1] || rows[i]?.[0];
+				if (typeof v === 'string' && /^B0/i.test(v)) { start = i; break; }
+			}
+			const dataRows = rows.slice(start);
+			// 采用优化版的列索引约定（经验列位）
+			const statusCols = { '法国': 3, '德国': 6, '意大利': 9, '西班牙': 12, '英国': 15 };
+			dataRows.forEach(r => {
+				if (!Array.isArray(r)) return;
+				const asin = r[1] || r[0];
+				if (!asin) return;
+				const item = raw.find(x => x['C-ASIN'] === asin);
+				if (!item) return;
+				if (item.direction === 'UK>EU') {
+					const enabled = ['法国','德国','意大利','西班牙'].some(cty => r[statusCols[cty]] && String(r[statusCols[cty]]).trim() === '已启用');
+					if (enabled) item['Remote fulfilment'] = 'enabled';
+				} else if (item.direction === 'EU>UK') {
+					const enabled = r[statusCols['英国']] && String(r[statusCols['英国']]).trim() === '已启用';
+					if (enabled) item['Remote fulfilment'] = 'enabled';
+				}
+			});
+		}
+	}
+
+	// 3) Remote Fulfillment Orders（若有实际订单金额则累计 RF GMS 并标记 enabled）
 	if (parsed.rf_order) {
 		const wb = parsed.rf_order;
 		const sheetName = wb.SheetNames.find(n => /Orders?/i.test(n)) || wb.SheetNames[0];
 		const rows = sheetToJson(wb, sheetName, { header: 1 });
 		rows.slice(1).forEach(r => {
-			if (r.length < 16) return;
-			const asin = r[8];
-			const currency = r[10];
-			const price = parseFloat(r[11]) || 0;
+			if (!Array.isArray(r) || r.length < 12) return;
+			const asin = r[8]; // I 列
+			const price = parseFloat(r[11]) || parseFloat(r[12]) || 0; // L 或 M
 			if (!asin || !price) return;
 			const item = raw.find(x => x['C-ASIN'] === asin);
 			if (item) {
@@ -249,16 +435,14 @@ function buildRawData(parsed) {
 		});
 	}
 
-	// 3. Incentives
+	// 4) 激励（eligibleASINs CSV）— 以 P-ASIN 对应金额
 	if (parsed.incentive_eu) {
 		parsed.incentive_eu.forEach(row => {
 			const pasin = row['资格值'];
 			if (!pasin) return;
 			const amount = extractNumber(row['可获得的福利代金券（最高）']);
 			if (!amount) return;
-			raw.forEach(item => {
-				if (item['P-ASIN'] === pasin) item['UK>EU incentive amount'] = amount;
-			});
+			raw.forEach(item => { if (item['P-ASIN'] === pasin) item['UK>EU incentive amount'] = amount; });
 		});
 	}
 	if (parsed.incentive_uk) {
@@ -267,34 +451,35 @@ function buildRawData(parsed) {
 			if (!pasin) return;
 			const amount = extractNumber(row['可获得的福利代金券（最高）']);
 			if (!amount) return;
-			raw.forEach(item => {
-				if (item['P-ASIN'] === pasin) item['EU>UK incentive amount'] = amount;
-			});
+			raw.forEach(item => { if (item['P-ASIN'] === pasin) item['EU>UK incentive amount'] = amount; });
 		});
 	}
 
-	// 4. Recommendations (sales forecast) - sheet as header:1 arrays; ASIN at index 2, forecast at index 6
-	const recMap = {
-		rec_uk_de: '德国',
-		rec_uk_fr: '法国',
-		rec_uk_it: '意大利',
-		rec_uk_es: '西班牙',
-		rec_de_uk: '英国'
-	};
+	// 5) 推荐（销售预测）：C 列 ASIN（索引2），G 列预测（索引6）
+	const recMap = { rec_uk_de: '德国', rec_uk_fr: '法国', rec_uk_it: '意大利', rec_uk_es: '西班牙', rec_de_uk: '英国' };
 	Object.entries(recMap).forEach(([role, market]) => {
 		const wb = parsed[role];
 		if (!wb) return;
 		const sheetName = wb.SheetNames.find(n => /recommend/i.test(n)) || wb.SheetNames[0];
-		const rows = sheetToJson(wb, sheetName, { header: 1 });
-		rows.slice(2).forEach(r => {
-			if (r.length < 7) return;
+		let rows = sheetToJson(wb, sheetName, { header: 1 });
+		if (!rows || !rows.length) return;
+		// 尝试自动对齐表头（若前两行是标题则跳过）
+		let startIdx = 2;
+		for (let i = 0; i < Math.min(10, rows.length); i++) {
+			if (rows[i] && rows[i].some(v => /ASIN/i.test(String(v || '')))) { startIdx = i + 1; break; }
+		}
+		rows.slice(startIdx).forEach(r => {
+			if (!Array.isArray(r) || r.length < 7) return;
 			const asin = r[2];
-			const forecast = parseFloat(r[6]) || 0;
+			let potentialStr = r[6];
+			let forecast = 0;
+			if (typeof potentialStr === 'string') {
+				forecast = parseFloat(potentialStr.replace(/[€£$\s,]/g, '')) || 0;
+			} else { forecast = parseFloat(potentialStr) || 0; }
 			if (!asin || !forecast) return;
 			const item = raw.find(x => x['C-ASIN'] === asin);
 			if (item) {
 				item[`${market} sales forecast`] = (item[`${market} sales forecast`] || 0) + forecast;
-				// 标记高销售潜力
 				if (market === '英国') item['high_sales_potential_uk'] = 1; else item['high_sales_potential_eu'] = 1;
 			}
 		});
@@ -448,12 +633,22 @@ function buildReport(raw, stats) {
 // ----------------------------- Public API ----------------------------- //
 export async function analyzeDIOpportunities(inputFiles) {
 	// inputFiles: Array<File|Blob> 或 {cost_saving:File,...}
-	const parsed = await parseInputs(inputFiles);
-	const raw = buildRawData(parsed);
-	let stats = computeStats(raw);
-	stats = adjustStats(stats)
+	let parsed = await parseInputs(inputFiles);
 
-	return buildReport(raw, stats);
+	// 若缺失必要输入，尝试用样例补全（不覆盖已有）
+	const supplement = await supplementParsedFromAssets(parsed);
+	parsed = supplement.parsed;
+	const raw = buildRawData(parsed);
+	const stats = computeStats(raw);
+	const report = buildReport(raw, stats);
+	report.meta = report.meta || {};
+	if (supplement.supplemented?.length) {
+		report.meta.supplemented = Object.assign({}, ...(supplement.supplemented.map(r => ({ [r]: true }))));
+	}
+	if (supplement.warnings?.length){
+		report.meta.warnings = (report.meta.warnings||[]).concat(supplement.warnings);
+	}
+	return report;
 }
 
 // ----------------------------- Auto Detection Public API ----------------------------- //
@@ -468,7 +663,7 @@ export async function analyzeDIOpportunitiesAuto(inputs){
 	const files = Array.isArray(inputs)? inputs : Object.values(inputs||{});
 
 	if(!files.length) throw new Error('未提供任何文件');
-	const roleMap = { cost_saving:null,incentive_eu:null,incentive_uk:null,rec_uk_de:null,rec_uk_fr:null,rec_uk_it:null,rec_uk_es:null,rec_de_uk:null,rf_status:null,rf_order:null };
+	const roleMap = { asin_list:null, sku_report:null, cost_saving:null, incentive_eu:null,incentive_uk:null,rec_uk_de:null,rec_uk_fr:null,rec_uk_it:null,rec_uk_es:null,rec_de_uk:null,rf_status:null,rf_order:null };
 	const warnings=[];
 
 	// First pass: filename regex
@@ -510,7 +705,7 @@ export async function analyzeDIOpportunitiesAuto(inputs){
 
 	// 找出 eligibleASINs 表
 	const matchingFiles = inputs.filter(file => 
-		file.name.toLowerCase().includes('eligibleASINs'.toLowerCase())
+		(file.name||'').toLowerCase().includes('eligibleasins')
 		);
 	if (matchingFiles.length > 0) {
 		report.hasEligibleASINs = true;
@@ -518,9 +713,9 @@ export async function analyzeDIOpportunitiesAuto(inputs){
 		report.hasEligibleASINs = false;
 	}
 
-	// 找出 eligibleASINs 表
+	// 找出 Fulfillment 表
 	const matchingFiles2 = inputs.filter(file => 
-		file.name.toLowerCase().includes('Fulfillment'.toLowerCase())
+		(file.name||'').toLowerCase().includes('fulfillment')
 		);
 	if (matchingFiles2.length > 0) {
 		report.hasFulfillment = true;
@@ -593,36 +788,7 @@ function updateDataTable(report) {
 
 
 
-function adjustStats(stats) {
-// 判断 totals 是否都为 0
-const allTotalsZero = Object.values(stats.totals).every(v => v === 0);
-
-if (allTotalsZero) {
-	const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-	// 修改 totals
-	stats.totals.euHigh = rand(30, 60);
-	stats.totals.euOnly = rand(100, 300);
-	stats.totals.euNotRf = stats.totals.euOnly;
-	stats.totals.ukHigh = rand(30, 60);
-	stats.totals.ukOnly = rand(100, 300);
-	stats.totals.ukNotRf = stats.totals.ukOnly;
-
-	// 修改 sales
-	stats.sales.row1 = rand(100000, 150000);
-	stats.sales.row2 = rand(200000, 250000);
-	stats.sales.row4 = stats.sales.row1;
-	stats.sales.row7 = rand(150000, 200000);
-	stats.sales.row8 = rand(10000, 50000);
-	stats.sales.row10 = stats.sales.row7;
-
-	// 修改 forecast
-	stats.forecast.euToUkSalesForecast = rand(30000, 60000);
-	stats.forecast.ukToEuSalesForecast = rand(200000, 250000);
-}
-
-return stats;
-}
+// 删除随机兜底逻辑（严格遵循优化版的真实数据计算）
 
 
 

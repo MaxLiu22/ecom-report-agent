@@ -232,6 +232,7 @@
           <div class="actions-row">
             <button class="btn" :disabled="diLoading || !diAnalyzeEnabled" @click="analyzeDI">{{ diLoading? '分析中...' : '分析 DI' }}</button>
             <button class="btn btn-secondary" :disabled="diLoading || !diRawFiles.length" @click="resetDI">重置</button>
+            <button class="btn" :disabled="diLoading" @click="analyzeDIWithSamples">用样例一键分析</button>
           </div>
           <div class="error" v-if="diError">{{ diError }}</div>
         </div>
@@ -389,13 +390,16 @@ const diAutoMode = ref(true);
 const diLoading = ref(false);
 const diError = ref('');
 const diReport = ref(null);
-const diRoles = ['cost_saving','incentive_eu','incentive_uk','rec_uk_de','rec_uk_fr','rec_uk_it','rec_uk_es','rec_de_uk','rf_status','rf_order'];
+// 新增展示 asin_list / sku_report 两个优化版核心角色
+const diRoles = ['asin_list','sku_report','cost_saving','incentive_eu','incentive_uk','rec_uk_de','rec_uk_fr','rec_uk_it','rec_uk_es','rec_de_uk','rf_status','rf_order'];
 
 // Manual classification via filename (fallback)
 function classifyDIManual(files){
-  const map = { cost_saving:null,incentive_eu:null,incentive_uk:null,rec_uk_de:null,rec_uk_fr:null,rec_uk_it:null,rec_uk_es:null,rec_de_uk:null,rf_status:null,rf_order:null };
+  const map = { asin_list:null, sku_report:null, cost_saving:null,incentive_eu:null,incentive_uk:null,rec_uk_de:null,rec_uk_fr:null,rec_uk_it:null,rec_uk_es:null,rec_de_uk:null,rf_status:null,rf_order:null };
   files.forEach(f=>{
     const n=f.name.toLowerCase();
+    if(/(asin).*list/.test(n) && !map.asin_list) map.asin_list=f;
+    else if(/sku.*report/.test(n) && !map.sku_report) map.sku_report=f;
     if(/cost.*saving.*model/.test(n) && !map.cost_saving) map.cost_saving=f;
     else if(/eligibleasins.*de.*fr.*it.*es.*credits.*gsinsp/.test(n) && !map.incentive_eu) map.incentive_eu=f;
     else if(/eligibleasins.*uk.*credits.*gsinsp/.test(n) && !map.incentive_uk) map.incentive_uk=f;
@@ -414,26 +418,67 @@ function onDIMultiChange(e){
   diError.value=''; diReport.value=null; diRawFiles.value = Array.from(e.target.files||[]);
 }
 
-const diAnalyzeEnabled = computed(()=> diAutoMode.value ? diRawFiles.value.length >= 1 : (()=>{ const m=classifyDIManual(diRawFiles.value); return !!m.cost_saving; })());
+const diAnalyzeEnabled = computed(()=> {
+  if(diAutoMode.value){ return diRawFiles.value.length >= 1; }
+  const m = classifyDIManual(diRawFiles.value);
+  // 手动模式：优先要求 asin_list + sku_report，就绪；否则兼容单个 cost_saving
+  return (!!m.asin_list && !!m.sku_report) || !!m.cost_saving;
+});
 
 function resetDI(){ diRawFiles.value=[]; diError.value=''; diReport.value=null; }
 
 async function analyzeDI(){
   diError.value=''; diReport.value=null;
-  if(!diAnalyzeEnabled.value){ diError.value='缺少 cost saving model 或文件不足'; return; }
+  if(!diAnalyzeEnabled.value){ diError.value='缺少必需文件：优先需要 ASIN List 与 SKU Report（或提供兼容的 Cost Saving Model）'; return; }
   diLoading.value=true;
   try {
     if(diAutoMode.value){
       diReport.value = await analyzeDIOpportunitiesAuto(diRawFiles.value);
     } else {
       const manual = classifyDIManual(diRawFiles.value);
-      if(!manual.cost_saving){ throw new Error('缺少 cost saving model'); }
       diReport.value = await analyzeDIOpportunities(manual);
     }
   } catch(err){
     console.error(err);
     diError.value = 'DI 分析失败: ' + (err.message||String(err));
   } finally { diLoading.value=false; }
+}
+
+// 一键加载内置样例进行分析验证（从 src/services/DIdata 读取）
+async function analyzeDIWithSamples(){
+  try{
+    diError.value=''; diReport.value=null; diLoading.value=true;
+    const base = new URL('../services/DIdata/', import.meta.url).href;
+    const samplePaths = [
+      'Asin_List_1756435951298.xlsx',
+      'SKU report.xlsx',
+      'List_of_recommendations_from_United Kingdom_to_Germany.xlsx',
+      'List_of_recommendations_from_United Kingdom_to_France.xlsx',
+      'List_of_recommendations_from_United Kingdom_to_Italy.xlsx',
+      'List_of_recommendations_from_United Kingdom_to_Spain.xlsx',
+      'List_of_recommendations_from_Germany_to_United Kingdom.xlsx',
+      'eligibleASINs-DE_FR_IT_ES-Credits-GSINSP.csv',
+      'eligibleASINs-UK-Credits-GSINSP.csv',
+      'Remote_Fulfillment_ASIN_Status_Report.xlsx',
+      'Remote_Fulfillment_Order_Report.xlsx'
+    ];
+    // 以 Blob 列表模拟用户选择的文件
+    const files = [];
+    for(const rel of samplePaths){
+      try{
+        const res = await fetch(base + rel);
+        if(!res.ok) continue;
+        const blob = await res.blob();
+        const file = new File([blob], rel, { type: blob.type });
+        files.push(file);
+      }catch{ /* ignore missing */ }
+    }
+    if(!files.length){ throw new Error('未能加载任何样例文件，请检查构建资源路径'); }
+    diReport.value = await analyzeDIOpportunitiesAuto(files);
+  }catch(err){
+    console.error(err);
+    diError.value = '样例分析失败: ' + (err.message||String(err));
+  }finally{ diLoading.value=false; }
 }
 
 // Checklist state
