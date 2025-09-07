@@ -211,15 +211,48 @@ class ActionService {
   
     // 逻辑6：growth - DI
     getDIIncentive() {
-      if (!this.diResult.value.key_opportunity_analysis || 
-          !this.diResult.value.key_opportunity_analysis.points) {
-        return [];
+      const result = [];
+
+      if (!this.diResult.value) {
+        return result;
       }
-      
-      return this.diResult.value.key_opportunity_analysis.points.map(point => ({
-        title: point.title,
-        description: point.description
-      }));
+
+      const euToUkRows = this.diResult.value.euToUkTable?.rows || [];
+      const ukToEuRows = this.diResult.value.ukToEuTable?.rows || [];
+
+      // 1. euToUkTable
+      euToUkRows.forEach(row => {
+        if (row.metric === '选品指南针推荐同步入库至英国' && row.count > 0) {
+          result.push({
+            title: row.metric,
+            description: row.action
+          });
+        }
+        if (row.metric === '在欧盟有全球拓展大礼包' && row.count > 0) {
+          result.push({
+            title: row.metric,
+            description: row.action
+          });
+        }
+      });
+
+      // 2. ukToEuTable
+      ukToEuRows.forEach(row => {
+        if (row.metric === '选品指南针推荐同步入库至欧盟' && row.count > 0) {
+          result.push({
+            title: row.metric,
+            description: row.action
+          });
+        }
+        if (row.metric === '在英国有全球拓展大礼包' && row.count > 0) {
+          result.push({
+            title: row.metric,
+            description: row.action
+          });
+        }
+      });
+
+      return result;
     }
 
     // 逻辑计算入口函数
