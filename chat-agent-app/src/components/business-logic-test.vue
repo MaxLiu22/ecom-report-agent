@@ -232,62 +232,61 @@
           <div class="actions-row">
             <button class="btn" :disabled="diLoading || !diAnalyzeEnabled" @click="analyzeDI">{{ diLoading? '分析中...' : '分析 DI' }}</button>
             <button class="btn btn-secondary" :disabled="diLoading || !diRawFiles.length" @click="resetDI">重置</button>
-            <button class="btn" :disabled="diLoading" @click="analyzeDIWithSamples">用样例一键分析</button>
           </div>
           <div class="error" v-if="diError">{{ diError }}</div>
         </div>
 
         <div v-if="diReport" class="result-block">
-          <h3>{{ diReport.report_title }}</h3>
-          <div class="summary-chips">
-            <span class="chip info" v-for="p in diReport.key_opportunity_analysis.points" :key="p.title">{{ p.title }}</span>
-          </div>
-          <section class="sub-block">
-            <h4>{{ diReport.key_opportunity_analysis.title }}</h4>
-            <p class="sub">{{ diReport.key_opportunity_analysis.subtitle }}</p>
-            <ul class="points">
-              <li v-for="p in diReport.key_opportunity_analysis.points" :key="p.title"><strong>{{ p.title }}:</strong> {{ p.description }}</li>
-            </ul>
+          <h3>DI 英国 ⇄ 欧盟 机会报告</h3>
+          <!-- 概览说明（HTML已由生成器拼好，直接渲染） -->
+          <section class="sub-block summary-section">
+            <div class="chip-wrap">
+              <span class="chip info">自动识别 · 结构化输出</span>
+              <span class="chip">不依赖 DOM 注入</span>
+            </div>
+            <div class="note">以下内容直接来自 gen.reportData</div>
+            <div class="summary-content" v-html="diReport.opportunitySummaryHtml"></div>
           </section>
-          <section class="sub-block">
-            <h4>{{ diReport.recommended_actions.title }}</h4>
-            <ol class="recs">
-              <li v-for="a in diReport.recommended_actions.actions" :key="a.priority"><span class="prio">P{{ a.priority }}</span> {{ a.recommendation }}</li>
-            </ol>
-          </section>
+
+          <!-- UK > EU 表格 -->
           <section class="sub-block table-wrapper">
-            <h4>数据表</h4>
+            <h4>UK → EU 机会表</h4>
             <table class="table compact">
               <thead>
                 <tr>
-                  <th v-for="h in diReport.data_table.headers" :key="h">{{ h }}</th>
+                  <th v-for="h in diReport.ukToEuTable.headers" :key="'uk-eu-h-'+h">{{ h }}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="r in diReport.data_table.rows" :key="r['#']">
-                  <td>{{ r['#'] }}</td>
-                  <td>{{ r['UK<>EU ASIN'] }}</td>
-                  <td>{{ r['数量'] }}</td>
-                  <td>{{ r['来源商城销售额(T30D)'] }}</td>
-                  <td class="pre">{{ r['机会点及操作'] }}</td>
+                <tr v-for="(row, idx) in diReport.ukToEuTable.rows" :key="'uk-eu-r-'+idx">
+                  <td>{{ row.metric }}</td>
+                  <td><strong class="highlight-count">{{ row.count }}</strong></td>
+                  <td>{{ row.revenue }}</td>
+                  <td class="pre">{{ row.action }}</td>
                 </tr>
               </tbody>
             </table>
           </section>
-          <details class="meta">
-            <summary>DI 假设 & 检测信息</summary>
-            <pre>{{ diReport.meta.assumptions }}</pre>
-            <p class="meta-line">ASIN 基数: {{ diReport.meta.asin_count }} | 生成: {{ new Date(diReport.meta.generated_at).toLocaleString() }}</p>
-            <div v-if="diReport.meta?.detection" class="detect-grid">
-              <span v-for="(v,k) in diReport.meta.detection" :key="k">{{ k }}: <strong :class="{ok:v, miss:!v}">{{ v? '✔':'✘' }}</strong></span>
-            </div>
-            <div v-if="diReport.meta?.warnings?.length" class="warnings">
-              <p>警告:</p>
-              <ul>
-                <li v-for="(w,i) in diReport.meta.warnings" :key="i">{{ w }}</li>
-              </ul>
-            </div>
-          </details>
+
+          <!-- EU > UK 表格 -->
+          <section class="sub-block table-wrapper">
+            <h4>EU → UK 机会表</h4>
+            <table class="table compact">
+              <thead>
+                <tr>
+                  <th v-for="h in diReport.euToUkTable.headers" :key="'eu-uk-h-'+h">{{ h }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in diReport.euToUkTable.rows" :key="'eu-uk-r-'+idx">
+                  <td>{{ row.metric }}</td>
+                  <td><strong class="highlight-count">{{ row.count }}</strong></td>
+                  <td>{{ row.revenue }}</td>
+                  <td class="pre">{{ row.action }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
         </div>
       </div>
     </section>
@@ -314,7 +313,8 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { analyzePanEUOpportunities, analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js';
-import { analyzeDIOpportunities, analyzeDIOpportunitiesAuto } from '@/services/DIService.js';
+// import { DiReportGenerator } from '@/services/DIService.js';
+import { DiReportGenerator } from '@/services/report-script-fixed.js';
 import { analyzeEUExpansionChecklist } from '@/services/checkliService.js';
 import {analyzeSingleEUChecklist} from '@/services/checkliService.js';
 import {analyzeSingleEUChecklistCSV} from '@/services/checkliServiceCsv.js';
@@ -393,6 +393,52 @@ const diReport = ref(null);
 // 新增展示 asin_list / sku_report 两个优化版核心角色
 const diRoles = ['asin_list','sku_report','cost_saving','incentive_eu','incentive_uk','rec_uk_de','rec_uk_fr','rec_uk_it','rec_uk_es','rec_de_uk','rf_status','rf_order'];
 
+// 将 data_table.rows 转换为 UK>EU 和 EU>UK 两个表格数据
+const diUkRows = computed(()=>{
+  const rows = diReport.value?.data_table?.rows || [];
+  // 参照 uk-europe-expansion-report.html 的两张表分类
+  const mapping = [
+    { id:1, category:'仅在英国本地入库的选品' },
+    { id:2, category:'在欧盟有高销售潜力' },
+    { id:3, category:'在欧盟有全球拓展大礼包' },
+    { id:4, category:'未在欧盟远程销售' },
+    { id:5, category:'已在欧盟远程销售' },
+    { id:6, category:'远程销售额>€100' }
+  ];
+  return mapping.map(m=>{
+    const r = rows.find(x => x['#'] === m.id) || {};
+    return {
+      id: m.id,
+      category: m.category,
+      count: r['数量'] ?? 0,
+      sales: r['来源商城销售额(T30D)'] ?? '-',
+      action: r['机会点及操作'] ?? '-'
+    };
+  });
+});
+
+const diEuRows = computed(()=>{
+  const rows = diReport.value?.data_table?.rows || [];
+  const mapping = [
+    { id:7, category:'仅在欧盟本地入库的选品' },
+    { id:8, category:'在英国有高销售潜力' },
+    { id:9, category:'在英国有全球拓展大礼包' },
+    { id:10, category:'未在英国远程销售' },
+    { id:11, category:'已在英国远程销售' },
+    { id:12, category:'远程销售额>£100' }
+  ];
+  return mapping.map(m=>{
+    const r = rows.find(x => x['#'] === m.id) || {};
+    return {
+      id: m.id,
+      category: m.category,
+      count: r['数量'] ?? 0,
+      sales: r['来源商城销售额(T30D)'] ?? '-',
+      action: r['机会点及操作'] ?? '-'
+    };
+  });
+});
+
 // Manual classification via filename (fallback)
 function classifyDIManual(files){
   const map = { asin_list:null, sku_report:null, cost_saving:null,incentive_eu:null,incentive_uk:null,rec_uk_de:null,rec_uk_fr:null,rec_uk_it:null,rec_uk_es:null,rec_de_uk:null,rf_status:null,rf_order:null };
@@ -427,58 +473,80 @@ const diAnalyzeEnabled = computed(()=> {
 
 function resetDI(){ diRawFiles.value=[]; diError.value=''; diReport.value=null; }
 
+// 将 DiReportGenerator 的 processedData 转换为 UI 需要的 diReport 结构
+function buildDiReportFromProcessed(processed){
+  const uk = processed?.ukToEu || {};
+  const eu = processed?.euToUk || {};
+
+  const headers = ['#','类别','数量','来源商城销售额(T30D)','机会点及操作'];
+  const rows = [];
+
+  // UK > EU (#1-6)
+  rows.push({ '#':1, '类别':'仅在英国本地入库的选品', '数量': uk.ukOnlyLocal?.count ?? 0, '来源商城销售额(T30D)': uk.ukOnlyLocal?.revenue ?? '-', '机会点及操作': '-' });
+  rows.push({ '#':2, '类别':'在欧盟有高销售潜力', '数量': uk.highPotentialEu?.count ?? 0, '来源商城销售额(T30D)': uk.highPotentialEu?.revenue ?? '-', '机会点及操作': uk.highPotentialEu?.potentialSales ? `本地入库至欧盟，预计销售额提升${uk.highPotentialEu.potentialSales}（90天内）` : '-' });
+  rows.push({ '#':3, '类别':'在欧盟有全球拓展大礼包', '数量': uk.gsiCredits?.cAsinCount ?? 0, '来源商城销售额(T30D)': uk.gsiCredits?.revenue ?? '£0', '机会点及操作': uk.gsiCredits?.totalCredits ? `同步${uk.gsiCredits.pAsinCount}个P-ASIN，对应${uk.gsiCredits.cAsinCount}个C-ASIN，可领取€${uk.gsiCredits.totalCredits}代金券` : '-' });
+  rows.push({ '#':4, '类别':'未在欧盟远程销售', '数量': uk.notRemote?.count ?? 0, '来源商城销售额(T30D)': uk.notRemote?.revenue ?? '-', '机会点及操作': '将ASIN同步至欧盟，并开启英国至欧盟的远程配送' });
+  const ukRemoteRevenueDisplay = (uk.remoteActive?.remoteRevenue ?? 0) >= 1000
+    ? `已在欧盟产生销售额€${Math.round(uk.remoteActive.remoteRevenue).toLocaleString()}，建议入库至欧盟，享受本地配送费`
+    : '-';
+  rows.push({ '#':5, '类别':'已在欧盟远程销售', '数量': uk.remoteActive?.count ?? 0, '来源商城销售额(T30D)': uk.remoteActive?.revenue ?? '-', '机会点及操作': ukRemoteRevenueDisplay });
+  rows.push({ '#':6, '类别':'远程销售额>€100', '数量': uk.remoteActive?.highVolumeCount ?? 0, '来源商城销售额(T30D)': uk.remoteActive?.highVolumeRevenue ?? '€0', '机会点及操作': '-' });
+
+  // EU > UK (#7-12)
+  rows.push({ '#':7, '类别':'仅在欧盟本地入库的选品', '数量': eu.euOnlyLocal?.count ?? 0, '来源商城销售额(T30D)': eu.euOnlyLocal?.revenue ?? '-', '机会点及操作': '-' });
+  rows.push({ '#':8, '类别':'在英国有高销售潜力', '数量': eu.highPotentialUk?.count ?? 0, '来源商城销售额(T30D)': eu.highPotentialUk?.revenue ?? '-', '机会点及操作': eu.highPotentialUk?.potentialSales ? `本地入库至英国，预计销售额提升${eu.highPotentialUk.potentialSales}（90天内）` : '-' });
+  rows.push({ '#':9, '类别':'在英国有全球拓展大礼包', '数量': eu.gsiCredits?.cAsinCount ?? 0, '来源商城销售额(T30D)': eu.gsiCredits?.revenue ?? '€0', '机会点及操作': eu.gsiCredits?.totalCredits ? `同步${eu.gsiCredits.pAsinCount}个P-ASIN，对应${eu.gsiCredits.cAsinCount}个C-ASIN，可领取£${eu.gsiCredits.totalCredits}代金券` : '-' });
+  rows.push({ '#':10, '类别':'未在英国远程销售', '数量': eu.notRemote?.count ?? 0, '来源商城销售额(T30D)': eu.notRemote?.revenue ?? '-', '机会点及操作': '将ASIN同步至英国，并开启欧盟至英国的远程配送' });
+  const euRemoteRevenueDisplay = (eu.remoteActive?.remoteRevenue ?? 0) >= 1000
+    ? `已在英国产生销售额£${Math.round(eu.remoteActive.remoteRevenue).toLocaleString()}，建议入库至英国，享受本地配送费`
+    : '-';
+  rows.push({ '#':11, '类别':'已在英国远程销售', '数量': eu.remoteActive?.count ?? 0, '来源商城销售额(T30D)': eu.remoteActive?.revenue ?? '-', '机会点及操作': euRemoteRevenueDisplay });
+  rows.push({ '#':12, '类别':'远程销售额>£100', '数量': eu.remoteActive?.highVolumeCount ?? 0, '来源商城销售额(T30D)': eu.remoteActive?.highVolumeRevenue ?? '£0', '机会点及操作': '-' });
+
+  const points = [
+    { title: 'UK > EU 同步入库机会', description: `仅在英国本地入库 ${uk.ukOnlyLocal?.count ?? 0} 个；其中 ${uk.highPotentialEu?.count ?? 0} 个具备高潜力` },
+    ...(uk.gsiCredits?.totalCredits ? [{ title: 'EU 激励', description: `可领取最高 €${uk.gsiCredits.totalCredits} 代金券` }] : []),
+    { title: 'EU > UK 同步入库机会', description: `仅在欧盟本地入库 ${eu.euOnlyLocal?.count ?? 0} 个；其中 ${eu.highPotentialUk?.count ?? 0} 个具备高潜力` },
+    ...(eu.gsiCredits?.totalCredits ? [{ title: 'UK 激励', description: `可领取最高 £${eu.gsiCredits.totalCredits} 代金券` }] : []),
+  ];
+
+  const actions = [
+    { priority: 1, recommendation: '优先处理推荐清单中的高潜力 ASIN，同步入库目标市场并优化上架' },
+    { priority: 2, recommendation: '开启并检查远程配送覆盖，验证 90 天销售潜力后决定本地入库' },
+    { priority: 3, recommendation: '对已产生远程订单的 ASIN 评估物流成本，达阈值后迁移为本地配送' },
+    { priority: 4, recommendation: '如适用，申领全球拓展大礼包代金券以降低费用' },
+  ];
+
+  return {
+    key_opportunity_analysis: { points },
+    recommended_actions: { actions },
+    data_table: { headers, rows },
+    meta: {
+      asin_count: (uk.ukOnlyLocal?.count ?? 0) + (eu.euOnlyLocal?.count ?? 0),
+      generated_at: new Date().toISOString(),
+      detection: {},
+      warnings: [],
+      assumptions: '基于 ASIN List、SKU Report、远程配送状态/订单与推荐清单的综合测算；缺失项按最小化策略回退。'
+    }
+  };
+}
+
 async function analyzeDI(){
   diError.value=''; diReport.value=null;
   if(!diAnalyzeEnabled.value){ diError.value='缺少必需文件：优先需要 ASIN List 与 SKU Report（或提供兼容的 Cost Saving Model）'; return; }
   diLoading.value=true;
   try {
-    if(diAutoMode.value){
-      diReport.value = await analyzeDIOpportunitiesAuto(diRawFiles.value);
-    } else {
-      const manual = classifyDIManual(diRawFiles.value);
-      diReport.value = await analyzeDIOpportunities(manual);
-    }
+    // 无论是否手动模式，这里直接把用户选择的文件交给生成器，让其自动识别
+  const gen = new DiReportGenerator();
+    await gen.handleFileUpload(diRawFiles.value);
+    gen.processData();
+    // 直接使用生成器已生成的结构化报告
+    diReport.value = gen.reportData || buildDiReportFromProcessed(gen.processedData);
+    await nextTick();
   } catch(err){
     console.error(err);
     diError.value = 'DI 分析失败: ' + (err.message||String(err));
   } finally { diLoading.value=false; }
-}
-
-// 一键加载内置样例进行分析验证（从 src/services/DIdata 读取）
-async function analyzeDIWithSamples(){
-  try{
-    diError.value=''; diReport.value=null; diLoading.value=true;
-    const base = new URL('../services/DIdata/', import.meta.url).href;
-    const samplePaths = [
-      'Asin_List_1756435951298.xlsx',
-      'SKU report.xlsx',
-      'List_of_recommendations_from_United Kingdom_to_Germany.xlsx',
-      'List_of_recommendations_from_United Kingdom_to_France.xlsx',
-      'List_of_recommendations_from_United Kingdom_to_Italy.xlsx',
-      'List_of_recommendations_from_United Kingdom_to_Spain.xlsx',
-      'List_of_recommendations_from_Germany_to_United Kingdom.xlsx',
-      'eligibleASINs-DE_FR_IT_ES-Credits-GSINSP.csv',
-      'eligibleASINs-UK-Credits-GSINSP.csv',
-      'Remote_Fulfillment_ASIN_Status_Report.xlsx',
-      'Remote_Fulfillment_Order_Report.xlsx'
-    ];
-    // 以 Blob 列表模拟用户选择的文件
-    const files = [];
-    for(const rel of samplePaths){
-      try{
-        const res = await fetch(base + rel);
-        if(!res.ok) continue;
-        const blob = await res.blob();
-        const file = new File([blob], rel, { type: blob.type });
-        files.push(file);
-      }catch{ /* ignore missing */ }
-    }
-    if(!files.length){ throw new Error('未能加载任何样例文件，请检查构建资源路径'); }
-    diReport.value = await analyzeDIOpportunitiesAuto(files);
-  }catch(err){
-    console.error(err);
-    diError.value = '样例分析失败: ' + (err.message||String(err));
-  }finally{ diLoading.value=false; }
 }
 
 // Checklist state
@@ -719,6 +787,13 @@ input[type=file] { margin:.55rem 0 .65rem; font-size:.7rem; color:#0f172a; }
 /* ---------- State & Feedback ---------- */
 .error { margin-top:.55rem; color:#b91c1c; font-size:.62rem; font-weight:600; letter-spacing:.3px; }
 .result-block { margin-top:1.35rem; }
+
+/* ---- DI 报告分区（结构对齐 uk-europe-expansion-report.html） ---- */
+.report-section h2 { margin:.2rem 0 .8rem; font-size:1.1rem; }
+.summary-section { margin:.8rem 0 1rem; }
+.analysis-tables { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; }
+.table-container h3 { margin:.2rem 0 .5rem; font-size:.9rem; }
+.action-plan { margin-top:1rem; }
 
 /* ---------- Collapse (Checklist) ---------- */
 .collapse { border:1px solid rgba(148,163,184,.35); border-radius:10px; background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.4)); margin-top:.7rem; box-shadow:inset 0 0 0 1px rgba(255,255,255,.35); }

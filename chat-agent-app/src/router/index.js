@@ -22,11 +22,7 @@ const router = createRouter({
       name: 'yesterday',
       component: () => import('../views/Yesterday.vue'),
     },
-    {
-      path: '/business-logic-test',
-      name: 'business-logic-test',
-      component: () => import('../components/business-logic-test.vue'),
-    }
+    // 重复的 '/business-logic-test' 路由已移除，避免重复 name/path 导致的运行期错误
   ],
 })
 

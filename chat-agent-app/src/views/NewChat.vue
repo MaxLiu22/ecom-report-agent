@@ -3,7 +3,8 @@ import { ref, nextTick, onMounted, computed } from 'vue'
 import ReportTab from '@/components/Reports/ReportTab.vue'
 import UniReport from '@/components/Reports/uniReport.vue'
 import { analyzePanEUOpportunitiesAuto } from '@/services/panEUService.js'
-import { analyzeDIOpportunitiesAuto } from '@/services/DIService.js'
+// import { analyzeDIOpportunitiesAuto } from '@/services/DIService.js'
+import { DiReportGenerator } from '@/services/report-script-fixed.js'
 import CeeService from '@/services/CeeService.js'
 import DifyService from '@/services/DifyService.js'
 import { analyzeSingleEUChecklist } from '@/services/checkliService.js'
@@ -324,7 +325,12 @@ const startReportGeneration = async () => {
     addAgentMessage('正在进行 DI 分析...')
 
     if (panEUFiles.length >= 1) {
-      diResult.value = await analyzeDIOpportunitiesAuto(panEUFiles)
+      // diResult.value = await DiReportGenerator(panEUFiles)
+      const gen = new DiReportGenerator();
+      await gen.handleFileUpload(panEUFiles);
+      await gen.processData();
+      // 直接使用生成器已生成的结构化报告
+      diResult.value = gen.reportData;
       addAgentMessage('DI 分析完成 ✓')
     } else {
       addAgentMessage('DI 分析跳过（文件不足）')
