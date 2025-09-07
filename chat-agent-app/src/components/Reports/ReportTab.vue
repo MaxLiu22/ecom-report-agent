@@ -51,7 +51,7 @@
       <div class="actions">
         <button class="export-btn" @click="exportPdfWrapper">导出PDF</button>
         <button class="export-btn" @click="exportHtmlWrapper">导出HTML</button>
-        <button class="export-btn" @click="sendEmailWrapper">发送邮件</button>
+  <button class="export-btn" :disabled="sendingEmail" @click="sendEmailWrapper">{{ sendingEmail ? '准备中…' : '发送邮件' }}</button>
         <!-- <button class="close-btn" @click="closeFloating">×</button> -->
       </div>
     </div>
@@ -364,6 +364,9 @@ export default {
     const exportProgress = ref({ current: 0, total: 0, message: '', done: false })
   // 导出上下文：用于在取消时立即清理临时 DOM，避免长时间阻塞
   const exportCtx = ref({ tempRoot: null })
+    // 发送邮件/生成附件状态 + 短时 PDF 缓存（减少重复生成，降低卡顿感）
+    const sendingEmail = ref(false)
+    const pdfCache = ref({ key: null, blob: null, createdAt: 0 })
     const progressPercent = computed(() => {
       if (!exportProgress.value.total) return 0
       return Math.min(100, (exportProgress.value.current / exportProgress.value.total) * 100)
@@ -537,11 +540,29 @@ export default {
         } else {
           const contentRoot = document.querySelector('.tab-content')
           if (!contentRoot) continue
-          let html = contentRoot.innerHTML
-          html = html.replace(/<button[\s\S]*?<\/button>/g, m => {
-            const text = m.replace(/<[^>]+>/g,'').trim()
-            return `<span class=\"export-static-label\">${text}</span>`
+          // 使用 DOM 克隆，展开手风琴并替换按钮，再序列化为 HTML
+          const clone = contentRoot.cloneNode(true)
+          // 展开 Tab7 的折叠内容（手风琴）
+          if (t.id === 6) {
+            try {
+              clone.querySelectorAll('.acc-item').forEach(el => el.classList.add('open'))
+              clone.querySelectorAll('.acc-body').forEach(el => { if (el && el.style) el.style.display = 'block' })
+              clone.querySelectorAll('[style]')?.forEach(el => {
+                const v = el.getAttribute('style') || ''
+                if (/display\s*:\s*none/i.test(v)) {
+                  el.setAttribute('style', v.replace(/display\s*:\s*none\s*;?/ig, ''))
+                }
+              })
+            } catch (_) {}
+          }
+          // 替换所有按钮为静态文本标签
+          clone.querySelectorAll('button').forEach(btn => {
+            const span = document.createElement('span')
+            span.className = 'export-static-label'
+            span.textContent = (btn.textContent || '').trim()
+            btn.replaceWith(span)
           })
+          const html = clone.innerHTML
           captured.push({ id: t.id, title: t.title, html })
         }
       }
@@ -580,39 +601,99 @@ export default {
       } catch (e) { console.error('导出 ReportTab 页面失败', e) }
     }
 
-    const sendEmailWrapper = async () => {
+    // 计算导出内容的“键”，用于缓存同一份 PDF，避免重复生成
+    const computeExportKey = () => {
+      const safe = (obj) => { try { return JSON.stringify(obj || null) } catch { return '' } }
+      const subIds = (filteredSolutionSubTabs.value || []).map(s => s.id).join(',')
+      return [
+        safe(props.panEUResult),
+        safe(props.diResult),
+        safe(props.ceeResult),
+        safe(props.euExpansionCheckli),
+        safe(props.actionResult),
+        safe(props.policyResult),
+        subIds
+      ].join('|')
+    }
+
+    // 获取或生成 PDF Blob（复用视觉导出进度浮层），TTL 默认 5 分钟
+    const getOrBuildPdfBlob = async (force = false, ttlMs = 5 * 60 * 1000) => {
+      const key = computeExportKey()
+      const now = Date.now()
+      if (!force && pdfCache.value.blob && pdfCache.value.key === key && (now - pdfCache.value.createdAt) < ttlMs) {
+        return pdfCache.value.blob
+      }
       try {
-        const blob = await buildMultiTabHtml()
-        if (!blob) return
-        const fileName = 'ReportTab_Export.html'
-        // 1. Web Share Level 2 尝试
+        // 打开进度浮层，提前给用户反馈
+        exportingPdf.value = true
+        cancelExportFlag.value = false
+        exportProgress.value = { current: 0, total: 0, message: '正在为邮件生成 PDF…', done: false }
+        await nextTick()
+        await sleep(30)
+        // 视觉模式生成（与导出保持一致，包含合规政策 Tab 的强制展开）
+        const blob = await exportPdfVisualMode({ returnBlob: true })
+        if (!blob) throw new Error('PDF 生成失败：返回空 Blob')
+        pdfCache.value = { key, blob, createdAt: Date.now() }
+        return blob
+      } catch (err) {
+        console.warn('[Email] 视觉模式失败，回退文本模式', err)
+        try {
+          const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
+          await exportPdfTextMode(pdf)
+          const blob = pdf.output('blob')
+          pdfCache.value = { key, blob, createdAt: Date.now() }
+          return blob
+        } catch (e2) {
+          console.error('[Email] 文本模式生成也失败', e2)
+          return null
+        }
+      } finally {
+        // 轻柔关闭浮层
+        exportProgress.value.done = true
+        setTimeout(() => { exportingPdf.value = false }, 200)
+      }
+    }
+
+    const sendEmailWrapper = async () => {
+      if (sendingEmail.value) return
+      try {
+        sendingEmail.value = true
+        const fileName = 'IntraEU_Report.pdf'
+        // 获取（或生成）PDF Blob：带进度浮层与缓存，避免“卡住”的体感
+        const pdfBlob = await getOrBuildPdfBlob(false)
+        if (!pdfBlob) { console.warn('未能生成 PDF（可能已取消）'); return }
+
+        // 1. Web Share Level 2 尝试（发送 PDF）
         if (navigator.share && navigator.canShare) {
-          const file = new File([blob], fileName, { type:'text/html' })
-          if (navigator.canShare({ files:[file] })) {
+          const file = new File([pdfBlob], fileName, { type: 'application/pdf' })
+          if (navigator.canShare({ files: [file] })) {
             try {
-              await navigator.share({ title:'IntraEU Report (No AM Tab)', text:'附上导出报告（已去除 AM 指导话术）。', files:[file] })
+              await navigator.share({ title: 'IntraEU Report (No AM Tab)', text: '附上导出报告（PDF，已去除 AM 指导话术）。', files: [file] })
               return
             } catch (err) { console.warn('Web Share 取消或失败，回退 Outlook', err) }
           }
         }
+
         // 2. 回退：生成 helper 页面，指导 Outlook 发送
-        // 2.1 先触发文件下载，保证用户有本地文件
-        const dlUrl = URL.createObjectURL(blob)
+        // 2.1 先触发 PDF 文件下载，保证用户有本地文件
+        const dlUrl = URL.createObjectURL(pdfBlob)
         const a = document.createElement('a'); a.href = dlUrl; a.download = fileName; a.click();
-        setTimeout(()=>URL.revokeObjectURL(dlUrl), 5000)
-        // 2.2 生成 base64 供 helper 按需重新下载
+        setTimeout(() => URL.revokeObjectURL(dlUrl), 5000)
+
+        // 2.2 生成 base64 供 helper 按需重新下载（PDF）
         const reader = new FileReader()
         reader.onload = () => {
           const base64 = reader.result.split(',')[1]
           const mailSubject = 'IntraEU 报告'
-          const mailBody = '您好,\n\n附件为 IntraEU 定制报告。\n\nBR\nJintian\n'
-          const helper = `<!DOCTYPE html><html lang='zh'><head><meta charset='utf-8'><title>发送邮件助手</title><meta name='viewport' content='width=device-width,initial-scale=1'/><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;margin:0;background:linear-gradient(135deg,#f5f7fa,#eef2f7);padding:34px 20px;color:#1f2933;}h1{margin:0 0 18px;font-size:22px;}p{line-height:1.55;margin:0 0 14px;}button{cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-weight:600;letter-spacing:.5px;font-size:13px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,.15);background:#ff9900;color:#232f3e;transition:.25s;}button:hover{background:#ffad33;} .secondary{background:#e5e7eb;color:#333;} .secondary:hover{background:#d5d7da;} .row{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 24px;}textarea{width:100%;min-height:160px;padding:12px 14px;border:1px solid #d0d7de;border-radius:10px;font:13px/1.5 monospace;background:#fff;}textarea:focus{outline:2px solid #ff9900;border-color:#ff9900;}code{background:#232f3e;color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;}footer{margin-top:40px;font-size:11px;color:#6b7280;text-align:center;} .badge{background:#ff9900;color:#232f3e;padding:2px 8px;font-size:11px;border-radius:12px;font-weight:600;letter-spacing:.5px;margin-left:6px;} .hint{font-size:12px;background:#fff8eb;border:1px solid #ffe0b2;padding:10px 12px;border-radius:10px;margin-top:10px;} </style></head><body><main style='max-width:820px;margin:0 auto;background:#fff;border:1px solid #e3e8ee;border-radius:18px;padding:40px 42px;box-shadow:0 10px 26px -6px rgba(0,0,0,.12),0 4px 10px -2px rgba(0,0,0,.06);'><h1>📨 发送报告 <span class='badge'>助手</span></h1><p>已为你生成并自动下载 <code>${fileName}</code>。若需要再次获取，可点击“重新下载”。</p><div class='row'><button id='redl'>重新下载</button><button id='corp' class='secondary'>打开 Outlook (企业)</button><button id='copy' class='secondary'>复制正文</button></div><label style='font-size:13px;font-weight:600;display:block;margin:0 0 6px;'>邮件正文建议：</label><textarea id='body'>${mailBody}</textarea><div class='hint'>提示：浏览器及 mailto 无法自动附加本地文件，请在打开的邮件窗口中手动添加已下载的 ${fileName}。</div><footer>IntraEU Report Helper • 数据仅在本地处理</footer><script>(()=>{const b64='${base64}';const fn='${fileName}';const toBlob=()=>{const byteChars=atob(b64);const aBuf=new ArrayBuffer(byteChars.length);const u8=new Uint8Array(aBuf);for(let i=0;i<byteChars.length;i++)u8[i]=byteChars.charCodeAt(i);return new Blob([u8],{type:'text/html'});} ;const redl=document.getElementById('redl');const corp=document.getElementById('corp');const live=document.getElementById('live');const copy=document.getElementById('copy');const ta=document.getElementById('body');redl.onclick=()=>{const blob=toBlob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);} ;const enc=encodeURIComponent;corp.onclick=()=>{const url='https://outlook.office.com/mail/deeplink/compose?subject='+enc('${mailSubject}')+'&body='+enc(ta.value);window.open(url,'_blank');};live.onclick=()=>{const url='https://outlook.live.com/mail/0/deeplink/compose?subject='+enc('${mailSubject}')+'&body='+enc(ta.value);window.open(url,'_blank');};copy.onclick=async()=>{try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(ta.value);}else{ta.select();document.execCommand('copy');}copy.textContent='已复制';setTimeout(()=>copy.textContent='复制正文',1500);}catch(_){alert('复制失败，请手动选择文本复制');}};})();</`+`script></main></body></html>`
+          const mailBody = '您好,\n\n附件为 IntraEU 定制报告（PDF）。\n\nBR\nJintian\n'
+          const helper = `<!DOCTYPE html><html lang='zh'><head><meta charset='utf-8'><title>发送邮件助手</title><meta name='viewport' content='width=device-width,initial-scale=1'/><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;margin:0;background:linear-gradient(135deg,#f5f7fa,#eef2f7);padding:34px 20px;color:#1f2933;}h1{margin:0 0 18px;font-size:22px;}p{line-height:1.55;margin:0 0 14px;}button{cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-weight:600;letter-spacing:.5px;font-size:13px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,.15);background:#ff9900;color:#232f3e;transition:.25s;}button:hover{background:#ffad33;} .secondary{background:#e5e7eb;color:#333;} .secondary:hover{background:#d5d7da;} .row{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 24px;}textarea{width:100%;min-height:160px;padding:12px 14px;border:1px solid #d0d7de;border-radius:10px;font:13px/1.5 monospace;background:#fff;}textarea:focus{outline:2px solid #ff9900;border-color:#ff9900;}code{background:#232f3e;color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;}footer{margin-top:40px;font-size:11px;color:#6b7280;text-align:center;} .badge{background:#ff9900;color:#232f3e;padding:2px 8px;font-size:11px;border-radius:12px;font-weight:600;letter-spacing:.5px;margin-left:6px;} .hint{font-size:12px;background:#fff8eb;border:1px solid #ffe0b2;padding:10px 12px;border-radius:10px;margin-top:10px;} </style></head><body><main style='max-width:820px;margin:0 auto;background:#fff;border:1px solid #e3e8ee;border-radius:18px;padding:40px 42px;box-shadow:0 10px 26px -6px rgba(0,0,0,.12),0 4px 10px -2px rgba(0,0,0,.06);'><h1>📨 发送报告 <span class='badge'>助手</span></h1><p>已为你生成并自动下载 <code>${fileName}</code>。若需要再次获取，可点击“重新下载”。</p><div class='row'><button id='redl'>重新下载</button><button id='corp' class='secondary'>打开 Outlook (企业)</button><button id='copy' class='secondary'>复制正文</button></div><label style='font-size:13px;font-weight:600;display:block;margin:0 0 6px;'>邮件正文建议：</label><textarea id='body'>${mailBody}</textarea><div class='hint'>提示：浏览器及 mailto 无法自动附加本地文件，请在打开的邮件窗口中手动添加已下载的 ${fileName}。</div><footer>IntraEU Report Helper • 数据仅在本地处理</footer><script>(()=>{const b64='${base64}';const fn='${fileName}';const toBlob=()=>{const byteChars=atob(b64);const aBuf=new ArrayBuffer(byteChars.length);const u8=new Uint8Array(aBuf);for(let i=0;i<byteChars.length;i++)u8[i]=byteChars.charCodeAt(i);return new Blob([u8],{type:'application/pdf'});} ;const redl=document.getElementById('redl');const corp=document.getElementById('corp');const live=document.getElementById('live');const copy=document.getElementById('copy');const ta=document.getElementById('body');redl.onclick=()=>{const blob=toBlob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);} ;const enc=encodeURIComponent;corp.onclick=()=>{const url='https://outlook.office.com/mail/deeplink/compose?subject='+enc('${mailSubject}')+'&body='+enc(ta.value);window.open(url,'_blank');};if(live){live.onclick=()=>{const url='https://outlook.live.com/mail/0/deeplink/compose?subject='+enc('${mailSubject}')+'&body='+enc(ta.value);window.open(url,'_blank');};}copy.onclick=async()=>{try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(ta.value);}else{ta.select();document.execCommand('copy');}copy.textContent='已复制';setTimeout(()=>copy.textContent='复制正文',1500);}catch(_){alert('复制失败，请手动选择文本复制');}};})();</`+`script></main></body></html>`
           const helperBlob = new Blob([helper], { type:'text/html;charset=utf-8' })
           const helperUrl = URL.createObjectURL(helperBlob)
           window.open(helperUrl,'_blank')
         }
-        reader.readAsDataURL(blob)
+        reader.readAsDataURL(pdfBlob)
       } catch (e) { console.error('发送邮件失败', e) }
+      finally { sendingEmail.value = false }
     }
 
     // 点击外部关闭下拉
@@ -728,7 +809,8 @@ export default {
     }
 
     // 视觉模式：截图每个面板
-    const exportPdfVisualMode = async () => {
+    const exportPdfVisualMode = async (options = {}) => {
+      const { returnBlob = false } = options || {}
       const tStart = performance.now()
       const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
       const pageWidth = pdf.internal.pageSize.getWidth()
@@ -750,11 +832,48 @@ export default {
       exportCtx.value.tempRoot = tempRoot
 
       const panels = []
-      const addPanel = (title, sourceEl, level = 1) => {
+      // 将 Tab 内的手风琴（Accordion）强制展开，避免导出时丢失被 v-show 隐藏的详细内容
+      const forceExpandAccordionsInClone = (rootEl) => {
+        if (!rootEl) return
+        // 展开所有 .acc-item（添加 open 类）
+        rootEl.querySelectorAll('.acc-item').forEach(el => {
+          try { el.classList.add('open') } catch (_) {}
+        })
+        // 取消 .acc-body 的 display:none（v-show 会写入内联样式）
+        rootEl.querySelectorAll('.acc-body').forEach(el => {
+          try {
+            if (el.style && (el.style.display === 'none' || /none/i.test(el.style.display))) {
+              el.style.display = 'block'
+            }
+          } catch (_) {}
+        })
+        // 清理所有内联 style 中的 display:none 残留（兜底）
+        rootEl.querySelectorAll('[style]')?.forEach(el => {
+          try {
+            const v = el.getAttribute('style') || ''
+            if (/display\s*:\s*none/i.test(v)) {
+              el.setAttribute('style', v.replace(/display\s*:\s*none\s*;?/ig, ''))
+            }
+          } catch (_) {}
+        })
+      }
+
+      const addPanel = (title, sourceEl, level = 1, opts = {}) => {
         // 深克隆源内容 (保持现有 DOM 结构，而不是 innerHTML 重新解析)
         const clone = sourceEl.cloneNode(true)
-        // 移除所有按钮
-        clone.querySelectorAll('button').forEach(b => b.remove())
+        // 将按钮替换为静态文本，保留可见文字内容（避免统计数丢失）
+        clone.querySelectorAll('button').forEach(btn => {
+          try {
+            const span = document.createElement('span')
+            span.className = 'export-static-label'
+            span.textContent = (btn.textContent || '').trim()
+            btn.replaceWith(span)
+          } catch (_) { try { btn.remove() } catch(_) {} }
+        })
+        // 若要求，强制展开手风琴（用于 Tab7 合规政策等场景）
+        if (opts.forceExpandAccordions) {
+          forceExpandAccordionsInClone(clone)
+        }
         // 包裹容器 + 标题
         const wrapper = document.createElement('div')
         wrapper.style.cssText = 'padding:32px 40px 40px;font-family:Helvetica,Arial,sans-serif;'
@@ -798,7 +917,9 @@ export default {
         } else {
           const contentRoot = document.querySelector('.tab-content')
           if (!contentRoot) continue
-            addPanel(tabCfg.title, contentRoot, 1)
+          // 对 Tab7（合规政策）强制展开手风琴，避免 v-show 折叠导致截图缺失
+          const isComplianceTab = tabCfg.id === 6
+          addPanel(tabCfg.title, contentRoot, 1, { forceExpandAccordions: isComplianceTab })
         }
       }
 
@@ -952,8 +1073,18 @@ export default {
         try { document.body.removeChild(exportCtx.value.tempRoot) } catch (_) {}
       }
       exportCtx.value.tempRoot = null
-      pdf.save('IntraEU_Report.pdf')
-      exportProgress.value.message = 'PDF 已保存'
+      // 输出：根据需要返回 Blob 或直接保存
+      if (returnBlob) {
+        const blob = pdf.output('blob')
+        exportProgress.value.message = 'PDF 已生成'
+        exportProgress.value.done = true
+        // 清理临时 DOM
+        setTimeout(()=>{ if (exportCtx.value.tempRoot?.isConnected) { try { document.body.removeChild(exportCtx.value.tempRoot) } catch(_) {} exportCtx.value.tempRoot = null } }, 0)
+        return blob
+      } else {
+        pdf.save('IntraEU_Report.pdf')
+        exportProgress.value.message = 'PDF 已保存'
+      }
       exportProgress.value.done = true
       console.log(`[PDF] 视觉导出完成(瀑布流), 用时 ${(performance.now()-tStart).toFixed(0)} ms, 页数: ${pdf.getNumberOfPages()}`)
       setTimeout(()=>{ if (!cancelExportFlag.value) exportingPdf.value = false }, 1400)
@@ -993,6 +1124,7 @@ export default {
   togglePreview,
       exportHtmlWrapper,
       sendEmailWrapper,
+      sendingEmail,
       uniReportRef,
       exportPdfWrapper,
       exportingPdf, exportProgress, progressPercent, cancelExport, closeExportOverlay
