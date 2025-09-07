@@ -209,7 +209,7 @@ class ActionService {
       
       const countryText = countries.length > 0 ? `需要注册${countries.join('和')}税号` : "";
       
-      return `可开启中欧计划，获得配送费用节约€${this.ceeResult.value.finalSaving}，${countryText}`;
+      return `可开启中欧计划，获得配送费用节约€${this.ceeResult.value.finalSaving} ${countryText}`;
     }
   
     // 逻辑6：growth - DI
