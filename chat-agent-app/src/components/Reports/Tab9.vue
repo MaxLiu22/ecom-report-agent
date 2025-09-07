@@ -1,7 +1,7 @@
 <template>
   <div class="content-panel">
     <!-- <div class="content-header">
-      <h2>📝 AM 指导话术</h2>
+      <h2>📝 VOS收集</h2>
       <p class="content-description">其他相关信息和补充内容</p>
     </div> -->
     <div class="content-body">
@@ -9,7 +9,8 @@
         <!-- <h3 class="section-title">AM Pitching 话术库</h3>
         <p class="section-subtitle">支持搜索、折叠、行高亮的内部使用脚本</p> -->
         <div class="pitching-embed">
-          <AMPitchingApp />
+          <!-- <AMPitchingApp /> -->
+          <VOS_Interactive />
         </div>
       </div>
     </div>
@@ -18,9 +19,10 @@
 
 <script>
 import AMPitchingApp from './AMPitchingApp.vue'
+import VOS_Interactive from './TianOffered/VOS_Interactive.vue'
 export default {
   name: 'Tab9',
-  components: { AMPitchingApp }
+  components: { AMPitchingApp, VOS_Interactive }
 }
 </script>
 
