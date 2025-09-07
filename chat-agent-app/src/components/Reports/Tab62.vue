@@ -50,7 +50,7 @@
             box-shadow: 0 2px 4px rgba(51, 51, 51, 0.3);
           "
         >
-          英国欧盟双向双入库 vs. 英国和欧盟之间的远程配送
+          英国欧盟双边入库 vs. 英国和欧盟之间的远程配送
         </div>
         <table class="logi-compare-table">
           <thead>
