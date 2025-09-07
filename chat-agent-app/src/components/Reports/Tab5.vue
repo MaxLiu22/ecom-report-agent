@@ -184,7 +184,6 @@ computed: {
           return "";
         }
 
-
         case "持有有效增值税号国家": {
           const needVAT = this.actionResult?.warehouseVATComplianceValue?.needVAT;
           if (Array.isArray(needVAT) && needVAT.length > 0) {
@@ -192,10 +191,12 @@ computed: {
           }
           return ""; // ✅ 为空时整列留空
         }
+
         case "授权仓储国家":
-          return this.actionResult?.panEUCostSaving?.length
-            ? `<span style="color:orange;">${this.actionResult.panEUCostSaving.join("<br/>")}</span>`
+          return this.actionResult?.warehouseVATCompliance?.length
+            ? `<span style="color:orange;">${this.actionResult.warehouseVATCompliance.join("<br/>")}</span>`
             : "";
+
         case "是否启用亚马逊物流欧洲整合服务(PanEU)":
           return this.actionResult?.panEUASINParity
             ? `<span style="color:green;">${this.actionResult.panEUASINParity}</span>`

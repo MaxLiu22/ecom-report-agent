@@ -109,16 +109,13 @@ class ActionService {
         }
         
         if (warehouseStatus === 1 && vatStatus === 1) {
-          // groupedResults.compliant.push(country);
-          return;
+          groupedResults.compliant.push(country);
         } else if (warehouseStatus === 1 && vatStatus === 0) {
           groupedResults.needVAT.push(country);
         } else if (warehouseStatus === 0 && vatStatus === 1) {
-          // groupedResults.canOpenWarehouse.push(country);
-          return;
+          groupedResults.canOpenWarehouse.push(country);
         } else if (warehouseStatus === 0 && vatStatus === 0) {
-          // groupedResults.needVATAndWarehouse.push(country);
-          return;
+          groupedResults.needVATAndWarehouse.push(country);
         }
       });
       
