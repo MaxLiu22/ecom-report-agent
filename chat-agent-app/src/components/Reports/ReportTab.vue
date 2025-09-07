@@ -511,6 +511,12 @@ export default {
           styleBlocks.add(s.innerHTML)
         }
       })
+      // 额外：收集 <link rel="stylesheet"> 外链 CSS，避免导出 HTML 缺样式
+      try {
+        const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        const cssTexts = await Promise.all(links.map(l => fetch(l.href).then(r => r.text()).catch(() => '')))
+        cssTexts.forEach(t => { if (t) styleBlocks.add(t) })
+      } catch (_) {}
       let styles = Array.from(styleBlocks).join('\n')
       // 去掉 scoped data-v 选择器，保证导出后仍生效
       styles = styles.replace(/\[data-v-[^\]]+\]/g, '')
@@ -542,18 +548,58 @@ export default {
           if (!contentRoot) continue
           // 使用 DOM 克隆，展开手风琴并替换按钮，再序列化为 HTML
           const clone = contentRoot.cloneNode(true)
-          // 展开 Tab7 的折叠内容（手风琴）
+          // 通用：在导出前内联图片，避免离线/跨环境丢失
+          const inlineImagesOnEl = async (rootEl, timeoutMs = 5000) => {
+            const imgs = Array.from(rootEl.querySelectorAll('img'))
+            await Promise.all(imgs.map(img => new Promise(resolve => {
+              const src = img.getAttribute('src') || img.src
+              if (!src) return resolve()
+              const image = new Image()
+              image.crossOrigin = 'anonymous'
+              const done = (dataUrl) => { try { if (dataUrl) img.setAttribute('src', dataUrl) } catch(_){} resolve() }
+              const tid = setTimeout(() => done(null), timeoutMs)
+              image.onload = () => {
+                try {
+                  const canvas = document.createElement('canvas')
+                  canvas.width = image.naturalWidth
+                  canvas.height = image.naturalHeight
+                  const ctx = canvas.getContext('2d')
+                  ctx.drawImage(image, 0, 0)
+                  const dataUrl = canvas.toDataURL('image/png')
+                  clearTimeout(tid)
+                  done(dataUrl)
+                } catch (_) { clearTimeout(tid); done(null) }
+              }
+              image.onerror = () => { clearTimeout(tid); done(null) }
+              image.src = src
+            })))
+          }
+          // 展开/显隐修正（用于“概览”和“合规政策”)
+          const forceShowHidden = (rootEl) => {
+            try {
+              // 通用清理：去掉 hidden/aria-hidden、常见隐藏类
+              rootEl.querySelectorAll('[hidden], [aria-hidden="true"]').forEach(el => { el.removeAttribute('hidden'); el.setAttribute('aria-hidden','false') })
+              rootEl.querySelectorAll('.hidden,.is-hidden,.collapsed,.collapse').forEach(el => el.classList.remove('hidden','is-hidden','collapsed','collapse'))
+              // 移除内联 display:none
+              rootEl.querySelectorAll('[style]')?.forEach(el => {
+                const v = el.getAttribute('style') || ''
+                if (/display\s*:\s*none/i.test(v)) el.setAttribute('style', v.replace(/display\s*:\s*none\s*;?/ig, ''))
+                if (/max-height\s*:\s*0/i.test(v)) el.setAttribute('style', v.replace(/max-height\s*:\s*0\s*;?/ig, 'max-height: none;'))
+                if (/visibility\s*:\s*hidden/i.test(v)) el.setAttribute('style', v.replace(/visibility\s*:\s*hidden\s*;?/ig, 'visibility: visible;'))
+              })
+            } catch (_) {}
+          }
+          // 合规政策：强制展开手风琴
           if (t.id === 6) {
             try {
               clone.querySelectorAll('.acc-item').forEach(el => el.classList.add('open'))
-              clone.querySelectorAll('.acc-body').forEach(el => { if (el && el.style) el.style.display = 'block' })
-              clone.querySelectorAll('[style]')?.forEach(el => {
-                const v = el.getAttribute('style') || ''
-                if (/display\s*:\s*none/i.test(v)) {
-                  el.setAttribute('style', v.replace(/display\s*:\s*none\s*;?/ig, ''))
-                }
-              })
+              clone.querySelectorAll('.acc-body').forEach(el => { if (el && el.style) { el.style.display = 'block'; el.style.maxHeight = 'none' } })
             } catch (_) {}
+          }
+          // 针对 概览/合规政策 统一做显隐修正与图片内联
+          if (t.id === 0 || t.id === 6) {
+            forceShowHidden(clone)
+            await inlineImagesOnEl(clone)
           }
           // 替换所有按钮为静态文本标签
           clone.querySelectorAll('button').forEach(btn => {
@@ -571,7 +617,7 @@ export default {
       selectedSubTab.value = originalSub
       await nextTick()
       // 样式（含子菜单）
-      styles += `\n/* Export Frame + Solution SubMenu */\nhtml,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;}*{box-sizing:border-box;}\n.tab-export-root{display:flex;flex-direction:column;min-height:100vh;}\n.export-nav{background:#232f3e;padding:0 12px;display:flex;align-items:center;gap:0;box-shadow:0 2px 8px rgba(35,47,62,.15);position:sticky;top:0;z-index:30;}\n.export-nav .nav-item{color:#fff;padding:12px 16px;cursor:pointer;font-size:13px;position:relative;user-select:none;transition:.25s;border-bottom:3px solid transparent;}\n.export-nav .nav-item.active{color:#ff9900;border-bottom-color:#ff9900;background:rgba(255,153,0,.1);}\n.export-nav .nav-item:hover{background:rgba(255,255,255,.1);}\n.export-nav .nav-item.solution-has-sub:after{content:'▾';font-size:10px;margin-left:6px;opacity:.85;}\n.export-nav .nav-item.solution-has-sub.open:after{content:'▴';}\n.export-submenu{position:absolute;top:100%;left:0;background:#fff;border:1px solid #e5e7eb;box-shadow:0 8px 18px -4px rgba(0,0,0,.15),0 4px 8px -2px rgba(0,0,0,.08);border-radius:8px;padding:6px 0;min-width:300px;z-index:40;display:none;}\n.export-submenu .sub-item{padding:8px 14px;font-size:12px;line-height:1.3;cursor:pointer;border-left:3px solid transparent;white-space:normal;transition:.25s;}\n.export-submenu .sub-item:hover{background:#fff8ec;border-left-color:#ff9900;}\n.export-submenu .sub-item.active{background:#fff3e0;border-left-color:#ff9900;color:#c25600;}\n.export-panels{flex:1;overflow:auto;background:#f5f5f5;}\n.export-panel{display:none;animation:fadeIn .25s ease;position:relative;}\n.export-panel.active{display:block;}\n@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}\n.export-static-label{display:inline-block;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px;color:#555;}\n.solution-panel-wrapper{position:relative;padding:0;margin:0;}\n.sub-panels{position:relative;}\n.sub-panel{display:none;}\n.sub-panel.active{display:block;}\n.content-panel{background:#fff;margin:0;padding:24px;min-height:100%;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #d9d9d9;padding:6px 8px;font-size:12px;}th{background:#232f3e;color:#fff;}\n`
+  styles += `\n/* Export Frame + Solution SubMenu */\nhtml,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;}*{box-sizing:border-box;}\n.tab-export-root{display:flex;flex-direction:column;min-height:100vh;}\n.export-nav{background:#232f3e;padding:0 12px;display:flex;align-items:center;gap:0;box-shadow:0 2px 8px rgba(35,47,62,.15);position:sticky;top:0;z-index:30;}\n.export-nav .nav-item{color:#fff;padding:12px 16px;cursor:pointer;font-size:13px;position:relative;user-select:none;transition:.25s;border-bottom:3px solid transparent;}\n.export-nav .nav-item.active{color:#ff9900;border-bottom-color:#ff9900;background:rgba(255,153,0,.1);}\n.export-nav .nav-item:hover{background:rgba(255,255,255,.1);}\n.export-nav .nav-item.solution-has-sub:after{content:'▾';font-size:10px;margin-left:6px;opacity:.85;}\n.export-nav .nav-item.solution-has-sub.open:after{content:'▴';}\n.export-submenu{position:absolute;top:100%;left:0;background:#fff;border:1px solid #e5e7eb;box-shadow:0 8px 18px -4px rgba(0,0,0,.15),0 4px 8px -2px rgba(0,0,0,.08);border-radius:8px;padding:6px 0;min-width:300px;z-index:40;display:none;}\n.export-submenu .sub-item{padding:8px 14px;font-size:12px;line-height:1.3;cursor:pointer;border-left:3px solid transparent;white-space:normal;transition:.25s;}\n.export-submenu .sub-item:hover{background:#fff8ec;border-left-color:#ff9900;}\n.export-submenu .sub-item.active{background:#fff3e0;border-left-color:#ff9900;color:#c25600;}\n.export-panels{flex:1;overflow:auto;background:#f5f5f5;}\n.export-panel{display:none;animation:fadeIn .25s ease;position:relative;}\n.export-panel.active{display:block;}\n@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}\n.export-static-label{display:inline-block;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:12px;color:#555;}\n.solution-panel-wrapper{position:relative;padding:0;margin:0;}\n.sub-panels{position:relative;}\n.sub-panel{display:none;}\n.sub-panel.active{display:block;}\n.content-panel{background:#fff;margin:0;padding:24px;min-height:100%;}\n.center-wrap{background:#fff;margin:0;padding:24px;min-height:100%;}\ntable{border-collapse:collapse;width:100%;}th,td{border:1px solid #d9d9d9;padding:6px 8px;font-size:12px;}th{background:#232f3e;color:#fff;}\n`
       const solution = captured.find(c=>c._solution)
       const navHtml = captured
         .map((c,i)=>`<div class="nav-item${c._solution ? ' solution-has-sub' : ''}${i===0 ? ' active' : ''}" data-tab="${c.id}">${c.title}</div>`)
