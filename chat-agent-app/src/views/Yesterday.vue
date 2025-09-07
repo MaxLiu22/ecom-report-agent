@@ -6,6 +6,8 @@ const message = ref('');
 const messageContainer = ref(null);
 // 控制 ReportTab 显示全部标签页
 const reportGenerated = ref(false);
+// 聊天消息（复刻 NewChat）
+const messages = ref([]);
 
 // 反馈表单数据
 const showFeedbackForm = ref(false);
@@ -32,6 +34,50 @@ const sendMessage = () => {
     // 发送消息后滚动到底部
     scrollToBottom();
   }
+};
+
+// —— NewChat 风格的简化工具 ——
+const addUserMessage = (type, content) => {
+  messages.value.push({ id: Date.now() + Math.random(), type: 'user', messageType: type, content, timestamp: new Date().toLocaleTimeString() });
+  nextTick(scrollToBottom);
+};
+const addAgentMessage = (text) => {
+  messages.value.push({ id: Date.now() + Math.random(), type: 'agent', messageType: 'text', content: text, timestamp: new Date().toLocaleTimeString() });
+  nextTick(scrollToBottom);
+};
+
+// 预置一段“已上传并已生成”的对话
+const seedHistoryConversation = () => {
+  // 1) 用户请求
+  addUserMessage('text', '请帮我生成一个 IntraEU 卖家分析报告');
+  // 2) 用户发送文件（复刻此前 11 个示例文件）
+  const sampleFiles = [
+    '体检表.csv',
+    'ASIN_list.csv',
+    'SKU_report.xlsx',
+    'Pan_EU_report.csv',
+    '多国库存报告.xlsx',
+    'MPG_reports.zip',
+    'GSI_Credit_福利列表.xlsx',
+    'GSI_Credit_代金券明细.xlsx',
+    'Remote_Fulfillment_ASIN_Status.csv',
+    'Remote_Fulfillment_Order.csv',
+    'NL_ASIN_list.csv',
+  ].map((name, idx) => ({ id: idx + 1, name }));
+  addUserMessage('files', sampleFiles);
+  // 3) 生成流程（与 NewChat 风格一致的提示）
+  addAgentMessage('🎉 所有文件上传完成！现在开始生成报告流程。');
+  addAgentMessage('正在进行 PanEU 分析...');
+  addAgentMessage('PanEU 分析完成 ✓');
+  addAgentMessage('正在进行 DI 分析...');
+  addAgentMessage('DI 分析完成 ✓');
+  addAgentMessage('正在计算 CEE 成本...');
+  addAgentMessage('CEE 成本计算完成 ✓');
+  addAgentMessage('政策信息生成中...');
+  addAgentMessage('政策信息生成完成 ✓');
+  addAgentMessage('📊 报告生成完成！请查看右侧报告区域。');
+  // 标记右侧报告可用
+  reportGenerated.value = true;
 };
 
 const submitCEEForm = () => {
@@ -63,8 +109,8 @@ const submitFeedbackForm = () => {
 // 组件挂载后滚动到底部
 onMounted(() => {
   scrollToBottom();
-  // 挂载后立即展示全部标签页（模拟报告已生成）
-  reportGenerated.value = true;
+  // 复刻 NewChat：直接展示“已上传 & 已生成”的对话
+  seedHistoryConversation();
   
   // 监听DOM变化，自动滚动到底部
   if (messageContainer.value) {
@@ -89,134 +135,29 @@ onMounted(() => {
       <!-- 左侧面板 -->
       <div class="left-panel">
         <div class="message-container" ref="messageContainer">
-          <!-- 用户消息 (右侧) -->
-          <div class="message-item user-message">
+          <!-- 动态消息列表（复刻 NewChat） -->
+          <div
+            v-for="msg in messages"
+            :key="msg.id"
+            class="message-item"
+            :class="msg.type === 'user' ? 'user-message' : 'agent-message'"
+          >
             <div class="message-content">
-              <p>请帮我生成一个 IntraEU 卖家分析报告</p>
-            </div>
-          </div>
-          
-          <!-- Agent 消息 (左侧) -->
-          <div class="message-item agent-message">
-            <div class="message-content">
-              <pre class="file-paths-text">这是你需要上传的文件路径：
-
-【必须下载文件】
-1. 体检表 ✓
-   路径：CN Paid Service EU Expansion Dashboard → part1.master sheet → export to CSV
-
-2. ASIN list ✓
-   路径：CN Paid Service EU Expansion Dashboard → part2.ASIN list → export to CSV
-
-3. SKU report ✓
-   路径：卖家欧洲站后台 → 菜单 → 报告 → 销售成本和费用 → SKU成本报告
-   → 商城选择英德法意西五国，数据汇总级别保持MSKU，日期范围设定义（建议选择过去365天）
-   → 勾选"生成报告" → 在"库存基础费用和附加费"配送基础费用和附加费" → 生成报告 → 下载
-
-4. Pan-EU report ✓
-   路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 报告
-   → 下载欧洲整合服务ASIN清单（第一个，此报告包含符合亚马逊物流欧洲整合服务注册条件的亚马逊物流 ASIN）
-
-5. 多国库存报告 ✓
-   路径：卖家欧洲站后台 → 报告 → 配送 → 在库存列表中点击"显示更多" → 多国库存 → 生成最新报告并下载
-
-6. MPG report ✓
-   路径：卖家欧洲后台 → 菜单 → 增长 → 选品指南针 → 下载推荐 → 商品列表
-   → 下载全部（分别下载UK→DE/FR/IT/ES, DE→UK共5份报告）
-
-【可选下载文件】
-7. GSI Credit report (福利列表) ◯
-   路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载福利列表
-   备注：卖家若无GSI则无下载页面
-
-8. GSI Credit report (代金券明细) ◯
-   路径：卖家欧洲后台 → 首页卡片 → 随时查看您的节省金额 → 全球拓展大礼包 → 下载代金券明细
-   备注：卖家若无GSI则无下载页面
-
-9. Remote_Fulfillment_ASIN_Status_Report ◯
-   路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载ASIN资质报告
-   备注：卖家若未开启远程配送，则无下载页面
-
-10. Remote_Fulfillment_Order_Report ◯
-    路径：卖家欧洲后台 → 菜单 → 库存 → 亚马逊物流远程配送(倒数第二个) → 报告(第四页) → 下载订单报告
-    备注：卖家若未开启远程配送，则无下载页面
-
-11. NL ASIN list ◯
-    路径：卖家欧洲站后台 → 菜单 → 库存 → manage PanEU inventory → 管理商品信息 → 上方"最近更新"下载荷兰ASIN list</pre>
-            </div>
-          </div>
-        
-
-           <!-- 文件上传记录 -->
-           <div class="message-item user-message">
-             <div class="message-content upload-batch-message">
-               <div class="upload-header">
-                 <p><strong>📁 已上传文件 (11个)</strong></p>
-                 <span class="batch-status">✅ 全部完成</span>
-               </div>
-               <div class="upload-list">
-                 <div class="upload-file">📄 体检表.csv</div>
-                 <div class="upload-file">📄 ASIN_list.csv</div>
-                 <div class="upload-file">📊 SKU_report.xlsx</div>
-                 <div class="upload-file">📄 Pan_EU_report.csv</div>
-                 <div class="upload-file">📊 多国库存报告.xlsx</div>
-                 <div class="upload-file">📊 MPG_reports.zip</div>
-                 <div class="upload-file">📊 GSI_Credit_福利列表.xlsx</div>
-                 <div class="upload-file">📊 GSI_Credit_代金券明细.xlsx</div>
-                 <div class="upload-file">📄 Remote_Fulfillment_ASIN_Status.csv</div>
-                 <div class="upload-file">📄 Remote_Fulfillment_Order.csv</div>
-                 <div class="upload-file">📄 NL_ASIN_list.csv</div>
-               </div>
-             </div>
-           </div>
-
-           <!-- Agent 回复消息 -->
-           <div class="message-item agent-message">
-             <div class="message-content">
-               <p>✅ 已收到所有11个文件</p>
-               <p>接下来请输入 CEE 参数：</p>
-             </div>
-           </div>
-
-                       <!-- Agent 回复消息 -->
-            <div class="message-item agent-message">
-              <div class="message-content cee-form-message">
-                <div class="cee-header">
-                  <h4>📊 CEE 中欧计划分析</h4>
+              <!-- 普通文本消息 -->
+              <pre v-if="msg.messageType === 'text'" class="file-paths-text">{{ msg.content }}</pre>
+              <!-- 文件消息：采用上方已有样式 -->
+              <div v-else-if="msg.messageType === 'files'" class="upload-batch-message">
+                <div class="upload-header">
+                  <p><strong>📁 已发送文件 ({{ msg.content.length }} 个)</strong></p>
+                  <span class="batch-status">✅ 已接收</span>
                 </div>
-                
-                <div class="form-section">
-                  <label class="form-label">德国商城过去12个月已售商品数量</label>
-                  <input type="number" class="form-input" placeholder="10000" value="10000">
+                <div class="upload-list">
+                  <div v-for="file in msg.content" :key="file.id" class="upload-file">📄 {{ file.name }}</div>
                 </div>
-
-                <div class="form-section">
-                  <label class="form-label">税号状态</label>
-                  <div class="checkbox-group">
-                    <div class="checkbox-item">
-                      <input type="checkbox" id="poland-tax" class="form-checkbox">
-                      <label for="poland-tax">波兰税号 ✓</label>
-                    </div>
-                    <div class="checkbox-item">
-                      <input type="checkbox" id="czech-tax" class="form-checkbox" checked>
-                      <label for="czech-tax">捷克税号 ✓</label>
-                    </div>
-                  </div>
-                  <p class="form-note">* 备案信息：来源信息→卖家信息上传到各国税务局→业务规模→建议至少12个月的销售周期→已计入商品数量</p>
-                </div>
-
-                <button class="cee-submit-btn" @click="submitCEEForm">开始生成报告</button>
               </div>
             </div>
-
-            <!-- Agent 回复消息 -->
-           <div class="message-item agent-message">
-             <div class="message-content">
-               <p>报告生成完毕，请在右侧窗口查看。</p>
-             </div>
-           </div>
-
           </div>
+        </div>
         
         <!-- 聊天输入区域 -->
         <div class="chat-input-area">
@@ -229,7 +170,7 @@ onMounted(() => {
               @keyup.enter="sendMessage"
             />
             <div class="button-group">
-              <button class="attachment-btn">
+              <button class="attachment-btn" disabled title="历史视图无需上传">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.49" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -241,6 +182,7 @@ onMounted(() => {
                 </svg>
               </button>
             </div>
+            <!-- 历史视图：不提供实际上传入口 -->
           </div>
         </div>
       </div>
