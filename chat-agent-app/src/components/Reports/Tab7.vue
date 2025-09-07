@@ -206,7 +206,7 @@
             <!-- 英国 FHDDS：允许 CID1 与 CID2 同时提示 -->
             <div v-if="cidShowCritical || cidShowUpcoming" class="uk-cid-block-group" :class="{ 'dual': cidShowCritical && cidShowUpcoming }">
               <div v-if="cidShowCritical" class="uk-cid-banner notice-critical" aria-live="polite">
-                <div class="cid-ribbon cid1">CID1</div>
+                <!-- <div class="cid-ribbon cid1">CID1</div> -->
                 <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L2 22h20L12 2z" />
                   <line x1="12" y1="9" x2="12" y2="14" />
@@ -222,7 +222,7 @@
               </div>
 
               <div v-if="cidShowUpcoming" class="uk-cid-banner notice-upcoming" aria-live="polite">
-                <div class="cid-ribbon cid2">CID2</div>
+                <!-- <div class="cid-ribbon cid2">CID2</div> -->
                 <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 6v6l4 2" />
