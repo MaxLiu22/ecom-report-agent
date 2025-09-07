@@ -87,9 +87,11 @@ class ActionService {
       if (!vatItem || !warehouseItem) return [];
       
       // 动态获取国家列表，排除"指标"字段
-      const countries = Object.keys(vatItem).filter(key => key !== "指标");
-      
-      // 按情况分组存储国家
+      const countries = Object.keys(vatItem).filter(
+        key => key !== "指标" && key !== "波兰"
+      );
+
+      // 按情况分组存储国家 
       const groupedResults = {
         compliant: [],      // 已合规：warehouse=1, vat=1
         needVAT: [],        // 需上传税号：warehouse=1, vat=0
