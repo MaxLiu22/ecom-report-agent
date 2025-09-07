@@ -43,7 +43,7 @@
             <!-- 第二行: 仓储没开税号 -->
             <tr v-if="computedActionResult.warehouseVATCompliance">
               <td class="ranking">2</td>
-              <td class="action">合规-已开启仓储但缺失税号</td>
+              <td class="action">合规-仓储</td>
               <td class="logic">
                 <ul>
                   <li v-for="(item, index) in computedActionResult.warehouseVATCompliance" :key="index">{{ item }}</li>
