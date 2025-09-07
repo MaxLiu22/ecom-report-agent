@@ -88,7 +88,7 @@
         @keydown.space.prevent="toggle('tradeBasics')"
       >
         <div class="arrow" :class="{ open: openSections.tradeBasics }" aria-hidden="true"></div>
-        <h2 class="compliance-title">欧洲贸易&产品合规基础信息</h2>
+        <h2 class="compliance-title">欧洲产品合规基础信息-英国站</h2>
       </div>
 
       <transition name="collapse">
@@ -149,7 +149,7 @@
         @keydown.space.prevent="toggle('euBasics')"
       >
         <div class="arrow" :class="{ open: openSections.euBasics }" aria-hidden="true"></div>
-        <h2 class="compliance-title">欧洲产品合规基础信息</h2>
+        <h2 class="compliance-title">欧洲产品合规基础信息-欧盟站</h2>
       </div>
 
       <transition name="collapse">
