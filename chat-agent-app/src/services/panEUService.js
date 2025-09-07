@@ -861,9 +861,9 @@ function countNlPolicy(panEuRows) {
 		"Enrollment Date",
 		"Title",
 		"UK offer status",
-		"DE Offer Status",
-		"FR Offer Status",
-		"IE Offer Status",
+		"DE offer status",
+		"FR offer status",
+		"IT offer status",
 		"ES offer status",
 		"NL offer status"
 	];
