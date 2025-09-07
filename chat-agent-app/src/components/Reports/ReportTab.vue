@@ -349,6 +349,11 @@ export default {
     policyResult: {
       type: Object,
       default: null
+    },
+    // 强制显示 BIXD 子页（用于历史报告等场景）
+    forceShowBIXD: {
+      type: Boolean,
+      default: false
     }
   },
   setup(props) {
@@ -390,12 +395,13 @@ export default {
     })
 
     const filteredSolutionSubTabs = computed(() => {
+      if (props.forceShowBIXD) return solutionSubTabs
       return cidIsInCid3.value ? solutionSubTabs : solutionSubTabs.filter(t => t.id !== 64)
     })
 
     // 若当前选中 id=64 但条件不满足则回退到第一个可用子标签
-    watch([cidIsInCid3, () => props.policyResult], () => {
-      if (!cidIsInCid3.value && selectedSubTab.value === 64) {
+    watch([cidIsInCid3, () => props.policyResult, () => props.forceShowBIXD], () => {
+      if (!props.forceShowBIXD && !cidIsInCid3.value && selectedSubTab.value === 64) {
         const first = filteredSolutionSubTabs.value[0]
         selectedSubTab.value = first ? first.id : null
       }
