@@ -4,7 +4,7 @@ import DifyService from '@/services/DifyService.js'
 class PolicyService {
     constructor() {
         // 定义必需的字段
-        this.apikey = 'app-NzvzC298Z67cFvmS1zSHyZa3'
+        this.apikey = 'app-zlEpRwbnkrRu4DiyN4wTgitu'
       }
 
   /**

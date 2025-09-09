@@ -8,8 +8,8 @@ class DifyService {
   // API 配置
   static config = {
     workflow: {
-      // url: 'https://dv61xke3owce1.cloudfront.net/v1/workflows/run',
-      url: 'http://190.92.198.173:8090/v1/workflows/run',
+      url: 'https://dv61xke3owce1.cloudfront.net/v1/workflows/run',
+      // url: 'http://190.92.198.173:8090/v1/workflows/run',
       // policy_apiKey: 'app-YSNy2PDLfmm8nsemikpGRrqr',
       // apiKey: 'app-ehHrsGNUVvSVC018IimOZoNc'
     },
