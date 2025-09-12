@@ -65,8 +65,8 @@
         <div class="service-item">
           <div class="service-icon"></div>
           <div class="service-content">
-            <h3 class="service-title">AM指导话术</h3>
-            <p class="service-desc">分类话术模板，针对blocker定制话术</p>
+            <h3 class="service-title">VOS收集</h3>
+            <p class="service-desc">收集痛点，可单独下载分析</p>
           </div>
           <!-- <button class="service-btn">查看话术指导</button> -->
         </div>
