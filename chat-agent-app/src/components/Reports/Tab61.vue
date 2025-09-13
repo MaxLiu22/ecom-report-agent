@@ -849,11 +849,16 @@
                     >
                       {{ row.metric }}
                     </td>
-                    <td
-                      style="text-align: center; border: 1px solid #ddd; cursor: pointer; color: orange; font-weight: bold;"
-                      @click="openDetail(row)"
-                    >
-                      {{ row.count }}
+                    <td style="text-align: center; border: 1px solid #ddd;">
+                      <button
+                        class="asin-badge btn-link"
+                        @click.stop="openDetail(row)"
+                        :disabled="!(row.data && row.data.length > 0)"
+                        :title="!(row.data && row.data.length > 0) ? '暂无可展示数据' : '点击查看具体列表'"
+                        aria-label="查看该项的 ASIN 列表"
+                      >
+                        {{ row.count }}
+                      </button>
                     </td>
                     <td
                       v-if="row.operationPoint"
@@ -1059,9 +1064,10 @@ export default {
 .modal-header {
   position: sticky;
   top: 0;
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  padding: 12px 16px;
+  background: #f8f9fa; /* 浅色背景 */
+  color: #232f3e; /* 深色文字 */
+  border-bottom: 1px solid #e5e7eb;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1070,17 +1076,20 @@ export default {
 
 .modal-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px; /* 放大标题 */
+  font-weight: 700; /* 突出显示 */
 }
 
 .modal-close {
   border: none;
   background: transparent;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  color: #666;
+  color: #232f3e; /* 与浅色背景匹配 */
+  opacity: 0.6;
 }
+.modal-close:hover { opacity: 1; }
 
 .modal-body {
   overflow: auto; /* 关键：内部滚动 */
@@ -1122,10 +1131,41 @@ export default {
   white-space: nowrap;
 }
 
+/* Title 列（第2列）允许换行，避免过长内容溢出 */
+.detail-table th:nth-child(2),
+.detail-table td:nth-child(2) {
+  white-space: normal;
+  word-break: break-word;
+}
+
 .detail-table thead th {
   position: sticky;
   top: 0; /* 跟随 modal-body 滚动 */
-  background: #fafafa;
+  background: #232f3e; /* 深色表头 */
+  color: #fff;
+  border-bottom: 1px solid #1b2430;
   z-index: 1;
+}
+
+/* --- 引入 Tab7 风格的徽章按钮样式 --- */
+.asin-badge {
+  background: #232f3e;
+  color: #ffb84d;
+  padding: 2px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.btn-link {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background: transparent;
+}
+.btn-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
