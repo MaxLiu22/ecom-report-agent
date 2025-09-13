@@ -467,8 +467,12 @@
             启用PanEU国家仓储获得配送费用节约
           </h5>
           <div v-if="panEUResult && panEUResult.cost_save">
+            <div v-if="typeof panEUResult.cost_save.title === 'string'" 
+                style="text-align: center; padding: 20px; color: #999">
+              {{ panEUResult.cost_save.title }}
+            </div>
 
-            <table
+            <table v-else 
               style="
                 width: 100%;
                 border-collapse: collapse;
@@ -482,6 +486,8 @@
               <thead>
                 <tr>
                   <th
+                    v-for="(title, index) in panEUResult.cost_save.title"
+                    :key="index"
                     style="
                       background: #333;
                       color: white;
@@ -492,61 +498,12 @@
                       font-size: 9px;
                     "
                   >
-                    跨境配送国家
-                  </th>
-                  <th
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      padding: 10px 8px;
-                      text-align: center;
-                      border-right: 1px solid #555;
-                      font-size: 9px;
-                    "
-                  >
-                    预计可节约费用(RMB)
-                  </th>
-                  <th
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      padding: 10px 8px;
-                      text-align: center;
-                      border-right: 1px solid #555;
-                      font-size: 9px;
-                    "
-                  >
-                    预计节约配送费(RMB)
-                  </th>
-                  <th
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      padding: 10px 8px;
-                      text-align: center;
-                      border-right: 1px solid #555;
-                      font-size: 9px;
-                    "
-                  >
-                    申请VAT所需费用(RMB)
-                  </th>
-                  <th
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      padding: 10px 8px;
-                      text-align: center;
-                      font-size: 9px;
-                    "
-                  >
-                    申请VAT所需时间
+                    {{ title }}
                   </th>
                 </tr>
               </thead>
+
+               
               <tbody>
                   <!-- 遍历每个国家 -->
                   <tr v-for="countryObj in panEUResult.cost_save.value" :key="Object.keys(countryObj)[0]">
