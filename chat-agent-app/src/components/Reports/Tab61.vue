@@ -850,7 +850,8 @@
                       {{ row.metric }}
                     </td>
                     <td
-                      style="text-align: center; border: 1px solid #ddd;" 
+                      style="text-align: center; border: 1px solid #ddd; cursor: pointer; color: orange; font-weight: bold;"
+                      @click="openDetail(row)"
                     >
                       {{ row.count }}
                     </td>
@@ -868,6 +869,7 @@
                     ></td>
                   </tr>
                 </tbody>
+
 
               </table>
 
@@ -887,12 +889,62 @@
       </div>
     </div>
   </div>
+
+
+
+  <!-- 简单弹窗 -->
+  <div v-if="showDialog" 
+      style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+              background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 20px; border-radius: 6px; max-width: 800px; width: 90%;">
+      <h3 style="margin-bottom: 10px;">详细数据</h3>
+
+      <!-- 展示 row.data 表格 -->
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid #ddd;">
+        <thead>
+          <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">ASIN</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Title</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Status</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">DE</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">FR</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">IT</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">ES</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">NL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, i) in currentRowData" :key="i">
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.asin }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.title }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.status }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.DE }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.FR }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.IT }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.ES }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.NL }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button @click="closeDialog" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        关闭
+      </button>
+    </div>
+  </div>
+
 </template>
 <script>
 export default {
   name: 'Tab61',
   props: {
     panEUResult: { type: Object, default: null },
+  },
+  data() {
+    return {
+      showDialog: false,
+      currentRowData: []
+    }
   },
   methods: {
     // 格式化数字，添加千位分隔符
@@ -904,14 +956,16 @@ export default {
       })
     },
 
-    formatNumber2(value) {
-      if (value === '-' || value === undefined || value === null) {
-        return '-';
+    openDetail(row) {
+      if (row.data && row.data.length > 0) {
+        this.currentRowData = row.data
+        this.showDialog = true
       }
-      const num = Number(value);
-      if (isNaN(num)) return value; // 保留原始
-      return num.toLocaleString();
+    },
+    closeDialog() {
+      this.showDialog = false
     }
+
 
 
   },
