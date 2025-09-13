@@ -157,14 +157,29 @@ class ActionService {
       const results = [];
       
       // 遍历所有国家数据
+      // costSaveData.value.forEach(countryData => {
+      //   Object.entries(countryData).forEach(([country, values]) => {
+      //     if (Array.isArray(values) && values.length > 1) {
+      //       results.push(`可开启 ${country} 仓储，获得配送费用节约 ${values[0].toFixed(2)} RMB`);
+      //     }
+      //   });
+      // });
+
+      // 遍历所有国家数据
       costSaveData.value.forEach(countryData => {
         Object.entries(countryData).forEach(([country, values]) => {
-          if (Array.isArray(values) && values.length > 1) {
-            results.push(`可开启 ${country} 仓储，获得配送费用节约 ${values[0].toFixed(2)} RMB`);
+          if (Array.isArray(values) && values.length > 0) {
+            // 取第 0 列（预计可节约费用），去掉千分位逗号并转数值
+            // const saving = parseFloat(String(values[0]).replace(/,/g, ''));
+            const saving = values[0]
+
+            if (!isNaN(saving) && saving > 0 && saving !== "-") {
+              results.push(`可开启 ${country} 仓储，获得配送费用节约 ${saving.toFixed(2)} RMB`);
+            }
           }
         });
       });
-      
+            
       return results;
     }
   

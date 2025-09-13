@@ -467,6 +467,7 @@
             启用PanEU国家仓储获得配送费用节约
           </h5>
           <div v-if="panEUResult && panEUResult.cost_save">
+
             <table
               style="
                 width: 100%;
@@ -530,7 +531,7 @@
                       font-size: 9px;
                     "
                   >
-                    申请VAT所需费用(RMB)**
+                    申请VAT所需费用(RMB)
                   </th>
                   <th
                     style="
@@ -547,135 +548,55 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- 动态生成国家行 -->
-                <tr v-for="(data, country) in panEUResult.cost_save.value[0]" :key="country">
-                  <td
-                    style="
-                      background: #f8f9fa;
-                      color: #333;
-                      font-weight: 600;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ country }}
-                  </td>
-                  <td
-                    style="
-                      color: #333;
-                      font-weight: 500;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ formatNumber(data[0]) }}
-                  </td>
-                  <td
-                    style="
-                      color: #333;
-                      font-weight: 500;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ formatNumber(data[1]) }}
-                  </td>
-                  <td
-                    style="
-                      color: #333;
-                      font-weight: 500;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ formatNumber(data[2]) }}
-                  </td>
-                  <td
-                    style="
-                      color: #333;
-                      font-size: 9px;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ data[3] }}
-                  </td>
-                </tr>
-                <!-- 总额行 -->
-                <tr style="background: #333">
-                  <td
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      font-size: 11px;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    总额
-                  </td>
-                  <td
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      font-size: 11px;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ formatNumber(panEUResult.cost_save['总额'][0]) }}
-                  </td>
-                  <td
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      font-size: 11px;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ formatNumber(panEUResult.cost_save['总额'][1]) }}
-                  </td>
-                  <td
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      font-size: 11px;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ formatNumber(panEUResult.cost_save['总额'][2]) }}
-                  </td>
-                  <td
-                    style="
-                      background: #333;
-                      color: white;
-                      font-weight: 600;
-                      font-size: 11px;
-                      padding: 8px;
-                      border: 1px solid #ddd;
-                      text-align: center;
-                    "
-                  >
-                    {{ panEUResult.cost_save['总额'][3] }}
-                  </td>
-                </tr>
+                  <!-- 遍历每个国家 -->
+                  <tr v-for="countryObj in panEUResult.cost_save.value" :key="Object.keys(countryObj)[0]">
+                    <td
+                      style="background: #f8f9fa; color: #333; font-weight: 600; padding: 8px; border: 1px solid #ddd; text-align: center;"
+                    >
+                      {{ Object.keys(countryObj)[0] }}
+                    </td>
+                    <td
+                      style="color: #333; font-weight: 500; padding: 8px; border: 1px solid #ddd; text-align: center;"
+                    >
+                      {{ formatNumber(Object.values(countryObj)[0][0]) }}
+                    </td>
+                    <td
+                      style="color: #333; font-weight: 500; padding: 8px; border: 1px solid #ddd; text-align: center;"
+                    >
+                      {{ formatNumber(Object.values(countryObj)[0][1]) }}
+                    </td>
+                    <td
+                      style="color: #333; font-weight: 500; padding: 8px; border: 1px solid #ddd; text-align: center;"
+                    >
+                      {{ formatNumber(Object.values(countryObj)[0][2]) }}
+                    </td>
+                    <td
+                      style="color: #333; font-size: 9px; padding: 8px; border: 1px solid #ddd; text-align: center;"
+                    >
+                      {{ Object.values(countryObj)[0][3] }}
+                    </td>
+                  </tr>
+
+                  <!-- 总额行 -->
+                  <tr>
+                    <td
+                      style="background: #f1f3f5; color: #222; font-weight: 700; padding: 8px; border: 1px solid #ddd; text-align: center;"
+                    >
+                      总额
+                    </td>
+                    <td
+                      v-for="(item, idx) in panEUResult.cost_save['总额']"
+                      :key="idx"
+                      style="color: #222; font-weight: 600; padding: 8px; border: 1px solid #ddd; text-align: center;"
+                    >
+                      {{ item === '-' ? '-' : formatNumber(item) }}
+                    </td>
+                  </tr>
+
               </tbody>
             </table>
+
+
           </div>
           <div v-else style="text-align: center; padding: 20px; color: #999">暂无成本节约数据</div>
         </div>
@@ -872,7 +793,7 @@
       </div>
       <div class="section-content">
         <div>
-          <h4 style="color: #333; font-size: 16px; margin: 10px 0" v-if="panEUResult.report_title">
+          <!-- <h4 style="color: #333; font-size: 16px; margin: 10px 0" v-if="panEUResult.report_title">
             {{ panEUResult.report_title }}
           </h4>
           <p
@@ -880,7 +801,7 @@
             v-if="panEUResult.report_subtitle"
           >
             {{ panEUResult.report_subtitle }}
-          </p>
+          </p> -->
           <div v-if="panEUResult.excel_data" style="margin: 20px 0">
             <h5 style="color: #333; font-size: 14px; margin-bottom: 15px">PanEU ASIN 机会概览</h5>
             <div style="overflow-x: auto">
@@ -897,7 +818,7 @@
                 <thead>
                   <tr>
                     <th
-                      v-for="header in panEUResult.excel_data.headers.slice(0, 5)"
+                      v-for="header in panEUResult.excel_data.headers.slice(0, 4)"
                       :key="header"
                       style="
                         background: #333;
@@ -911,29 +832,47 @@
                     </th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  <tr v-for="row in panEUResult.excel_data.rows" :key="row.metric">
-                    <td style="padding: 10px 8px; border: 1px solid #ddd">{{ row.metric }}</td>
+                  <tr v-for="(row, idx) in panEUResult.excel_data.rows" :key="idx">
                     <td
-                      style="
-                        padding: 10px 8px;
-                        border: 1px solid #ddd;
-                        text-align: center;
-                        font-weight: bold;
-                        color: #333;
-                      "
+                      :rowspan="parseInt(1)"
+                      :style="{
+                        background: '#f8f9fa',
+                        fontWeight: 600,
+                        textAlign: 'center',
+                        padding: '8px',
+                        border: '1px solid #ddd',
+                        paddingLeft: (row.indentLevel || 0) * 20 + 'px',
+                        width: '140px' 
+                      }"
+                    >
+                      {{ row.metric }}
+                    </td>
+                    <td
+                      style="text-align: center; border: 1px solid #ddd;" 
                     >
                       {{ row.count }}
                     </td>
-                    <td style="padding: 10px 8px; border: 1px solid #ddd">
-                      {{ row.operationPoint }}
-                    </td>
-                    <td style="padding: 10px 8px; border: 1px solid #ddd">{{ row.action }}</td>
-                    <td style="padding: 10px 8px; border: 1px solid #ddd">{{ row.description }}</td>
-                    <!-- <td style="padding:10px 8px; border:1px solid #ddd;">{{ row.formula }}</td> -->
+                    <td
+                      v-if="row.operationPoint"
+                      :rowspan="parseInt(row.operationPointRowspan || 1)"
+                      v-html="row.operationPoint"
+                      style="text-align: left; border: 1px solid #ddd; padding: 8px; color: #555;"
+                    ></td>
+                    <td
+                      v-if="row.action"
+                      :rowspan="parseInt(row.actionRowspan || 1)"
+                      v-html="row.action"
+                      style="text-align: left; border: 1px solid #ddd; padding: 8px; color: #007bff;"
+                    ></td>
                   </tr>
                 </tbody>
+
               </table>
+
+
+
             </div>
           </div>
         </div>
@@ -964,6 +903,17 @@ export default {
         maximumFractionDigits: 2,
       })
     },
+
+    formatNumber2(value) {
+      if (value === '-' || value === undefined || value === null) {
+        return '-';
+      }
+      const num = Number(value);
+      if (isNaN(num)) return value; // 保留原始
+      return num.toLocaleString();
+    }
+
+
   },
 }
 </script>

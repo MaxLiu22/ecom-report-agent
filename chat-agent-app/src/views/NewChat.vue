@@ -317,7 +317,8 @@ const startReportGeneration = async () => {
     console.log('开始 PanEU 分析...')
     addAgentMessage('正在进行 PanEU 分析...')
     const panEUFiles = allFiles // 传递所有文件给分析函数
-    panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value)
+    // panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, EUExpansionCheckli.value)
+    panEUResult.value = await analyzePanEUOpportunitiesAuto(panEUFiles, checkliResutl.paneuData.matrix)
     addAgentMessage('PanEU 分析完成 ✓')
 
     // 2. 调用 analyzeDI
