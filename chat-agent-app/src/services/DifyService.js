@@ -35,9 +35,9 @@ class DifyService {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
           'Accept': '*/*',
-          'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
-          'Host': 'dv61xke3owce1.cloudfront.net',
-          'Connection': 'keep-alive'
+          // 'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
+          // 'Host': 'dv61xke3owce1.cloudfront.net',
+          // 'Connection': 'keep-alive'
         },
         body: JSON.stringify({
           inputs: inputs,
@@ -73,9 +73,9 @@ class DifyService {
           'Authorization': `Bearer ${this.config.chat.apiKey}`,
           'Content-Type': 'application/json',
           'Accept': '*/*',
-          'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
-          'Host': 'dv61xke3owce1.cloudfront.net',
-          'Connection': 'keep-alive'
+          // 'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
+          // 'Host': 'dv61xke3owce1.cloudfront.net',
+          // 'Connection': 'keep-alive'
         },
         body: JSON.stringify({
           inputs,
