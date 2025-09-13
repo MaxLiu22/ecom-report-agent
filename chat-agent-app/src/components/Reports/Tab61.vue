@@ -892,44 +892,47 @@
 
 
 
-  <!-- 简单弹窗 -->
-  <div v-if="showDialog" 
-      style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-              background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;">
-    <div style="background: #fff; padding: 20px; border-radius: 6px; max-width: 800px; width: 90%;">
-      <h3 style="margin-bottom: 10px;">详细数据</h3>
+  <!-- 详情弹窗（自适应高度，内部滚动） -->
+  <div v-if="showDialog" class="modal-overlay" @click.self="closeDialog">
+    <div class="modal-container" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3>详细数据</h3>
+        <button class="modal-close" @click="closeDialog" aria-label="关闭">×</button>
+      </div>
 
-      <!-- 展示 row.data 表格 -->
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid #ddd;">
-        <thead>
-          <tr>
-            <th style="border: 1px solid #ddd; padding: 8px;">ASIN</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Title</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Status</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">DE</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">FR</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">IT</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">ES</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">NL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, i) in currentRowData" :key="i">
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.asin }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.title }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.status }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.DE }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.FR }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.IT }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.ES }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.NL }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="modal-body">
+        <!-- 展示 row.data 表格 -->
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>ASIN</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>DE</th>
+              <th>FR</th>
+              <th>IT</th>
+              <th>ES</th>
+              <th>NL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, i) in currentRowData" :key="i">
+              <td>{{ item.asin }}</td>
+              <td>{{ item.title }}</td>
+              <td>{{ item.status }}</td>
+              <td>{{ item.DE }}</td>
+              <td>{{ item.FR }}</td>
+              <td>{{ item.IT }}</td>
+              <td>{{ item.ES }}</td>
+              <td>{{ item.NL }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <button @click="closeDialog" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-        关闭
-      </button>
+      <!-- <div class="modal-footer">
+        <button class="primary" @click="closeDialog">关闭</button>
+      </div> -->
     </div>
   </div>
 
@@ -945,6 +948,12 @@ export default {
       showDialog: false,
       currentRowData: []
     }
+  },
+  mounted() {
+    window.addEventListener('keydown', this.onKeydown)
+  },
+  unmounted() {
+    window.removeEventListener('keydown', this.onKeydown)
   },
   methods: {
     // 格式化数字，添加千位分隔符
@@ -964,6 +973,12 @@ export default {
     },
     closeDialog() {
       this.showDialog = false
+    }
+
+    ,onKeydown(e) {
+      if (this.showDialog && (e.key === 'Escape' || e.key === 'Esc')) {
+        this.closeDialog()
+      }
     }
 
 
@@ -1015,5 +1030,102 @@ export default {
 }
 .analysis-section .section-content {
   padding: 20px 24px;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px; /* 保证小屏也有内边距 */
+}
+
+.modal-container {
+  background: #fff;
+  width: min(1100px, 100%);
+  max-width: 95vw;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; /* 关键：不会超过视口高度 */
+  overflow: hidden; /* 由 body 负责滚动 */
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  overflow: auto; /* 关键：内部滚动 */
+  padding: 12px 16px;
+}
+
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-footer .primary {
+  padding: 6px 12px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border: 1px solid #ddd;
+}
+
+.detail-table th,
+.detail-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.detail-table thead th {
+  position: sticky;
+  top: 0; /* 跟随 modal-body 滚动 */
+  background: #fafafa;
+  z-index: 1;
 }
 </style>
