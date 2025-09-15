@@ -366,22 +366,29 @@ export default {
     }
   },
   computed: {
+    computed: {
     nlPolicyList() {
-      const list = this.panEUResult && Array.isArray(this.panEUResult.nlPolicy)
-        ? this.panEUResult.nlPolicy
-        : []
-      return list
-    },
+      if (!this.panEUResult?.excel_data?.rows) return [];
+      const row = this.panEUResult.excel_data.rows.find(
+        item => item.metric === "缺少荷兰(NL)报价ASIN"
+      );
+      return row ? row.data : [];
+    }
+  },
+
+
     nlPolicyCount() {
-      return this.nlPolicyList.length
-      // return 0
+      if (!this.panEUResult?.excel_data?.rows) return 0;
+      const row = this.panEUResult.excel_data.rows.find(
+        item => item.metric === "缺少荷兰(NL)报价ASIN"
+      );
+      return row ? row.count : 0;
     },
     nlPolicyColumns() {
       if (!this.nlPolicyCount) return []
       // 预设优先顺序
       const preferred = [
-        'ASIN', 'MerchantSKU', 'Enrol', 'FNSKU', 'Pan-EU status', 'Enrollment Date', 'Title',
-        'UK offer status', 'DE Offer Status', 'FR Offer Status', 'IE Offer Status', 'ES offer status', 'NL offer status'
+         "ASIN", "Title",	"Status",	"DE",	"FR",	"IT",	"ES",	"NL"
       ]
       const first = this.nlPolicyList[0]
       const keys = new Set()
