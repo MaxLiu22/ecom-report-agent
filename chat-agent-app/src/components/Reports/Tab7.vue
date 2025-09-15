@@ -300,23 +300,39 @@
                   <thead>
                     <tr>
                       <th class="col-idx">#</th>
-                      <th v-for="col in nlPolicyColumns" :key="col">{{ col }}</th>
+                      <th>ASIN</th>
+                      <th>Title</th>
+                      <th>Status</th>
+                      <th>DE</th>
+                      <th>FR</th>
+                      <th>IT</th>
+                      <th>ES</th>
+                      <th>NL</th>
                       <th class="col-ops">操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="(row, rIndex) in nlPolicyList" :key="rIndex">
                       <td class="idx">{{ rIndex + 1 }}</td>
-                      <td v-for="col in nlPolicyColumns" :key="col" :class="['cell', 'cell-' + (col.replace(/\s+/g,'-').toLowerCase())]">
-                        <template v-if="statusPillClass(row[col], col)">
-                          <span class="status-pill" :class="statusPillClass(row[col], col)" :title="formatNlPolicyValue(row[col], col)">{{ formatNlPolicyValue(row[col], col) }}</span>
+                      <td class="cell cell-asin">
+                        <span class="cell-text" :title="valOf(row, 'ASIN')">{{ valOf(row, 'ASIN') }}</span>
+                      </td>
+                      <td class="cell cell-title">
+                        <span class="cell-text" :title="valOf(row, 'Title')">{{ valOf(row, 'Title') }}</span>
+                      </td>
+                      <td class="cell cell-status">
+                        <span class="cell-text" :title="valOf(row, 'Status')">{{ valOf(row, 'Status') }}</span>
+                      </td>
+                      <td v-for="mkt in ['DE','FR','IT','ES','NL']" :key="mkt" :class="['cell', 'cell-' + mkt.toLowerCase()]">
+                        <template v-if="statusPillClass(valOf(row, mkt), mkt)">
+                          <span class="status-pill" :class="statusPillClass(valOf(row, mkt), mkt)" :title="formatNlPolicyValue(valOf(row, mkt), mkt)">{{ formatNlPolicyValue(valOf(row, mkt), mkt) }}</span>
                         </template>
                         <template v-else>
-                          <span class="cell-text" :title="formatNlPolicyValue(row[col], col)">{{ formatNlPolicyValue(row[col], col) }}</span>
+                          <span class="cell-text" :title="formatNlPolicyValue(valOf(row, mkt), mkt)">{{ formatNlPolicyValue(valOf(row, mkt), mkt) }}</span>
                         </template>
                       </td>
                       <td class="ops">
-                        <button class="op-btn" @click="copyToClipboard(row.ASIN || row['ASIN'] || '')" :disabled="!row.ASIN && !row['ASIN']" title="复制 ASIN">复制</button>
+                        <button class="op-btn" @click="copyToClipboard(valOf(row, 'ASIN') || '')" :disabled="!valOf(row, 'ASIN')" title="复制 ASIN">复制</button>
                       </td>
                     </tr>
                   </tbody>
@@ -366,41 +382,22 @@ export default {
     }
   },
   computed: {
-    computed: {
+    // computed: {
     nlPolicyList() {
       if (!this.panEUResult?.excel_data?.rows) return [];
       const row = this.panEUResult.excel_data.rows.find(
         item => item.metric === "缺少荷兰(NL)报价ASIN"
       );
       return row ? row.data : [];
-    }
-  },
+    },
+  
 
 
     nlPolicyCount() {
-      if (!this.panEUResult?.excel_data?.rows) return 0;
-      const row = this.panEUResult.excel_data.rows.find(
-        item => item.metric === "缺少荷兰(NL)报价ASIN"
-      );
-      return row ? row.count : 0;
+      // 基于实际列表长度计算，避免依赖上游的 count 字段
+      return Array.isArray(this.nlPolicyList) ? this.nlPolicyList.length : 0;
     },
-    nlPolicyColumns() {
-      if (!this.nlPolicyCount) return []
-      // 预设优先顺序
-      const preferred = [
-         "ASIN", "Title",	"Status",	"DE",	"FR",	"IT",	"ES",	"NL"
-      ]
-      const first = this.nlPolicyList[0]
-      const keys = new Set()
-      // 收集所有对象键（避免有些列后面才出现）
-      this.nlPolicyList.forEach(it => {
-        if (it && typeof it === 'object') Object.keys(it).forEach(k => keys.add(k))
-      })
-      // 按 preferred 排序，追加其它未包含键
-      const ordered = preferred.filter(k => keys.has(k))
-      keys.forEach(k => { if (!ordered.includes(k)) ordered.push(k) })
-      return ordered
-    },
+    
     // 解析意大利逻辑字段 it_logic1_result.option (返回 0 / 1 或 null)
     itLogic1Option() {
       const pr = this.policyResult
@@ -559,6 +556,20 @@ export default {
         this.openSections[key] = !this.openSections[key]
       }
     },
+    // 大小写不敏感读取属性值；优先精确键，其次大写/小写别名
+    valOf(row, key) {
+      if (!row || typeof row !== 'object') return ''
+      if (!key) return ''
+      // 直接命中
+      if (row[key] !== undefined && row[key] !== null && row[key] !== '') return row[key]
+      const upper = typeof key === 'string' ? key.toUpperCase() : key
+      const lower = typeof key === 'string' ? key.toLowerCase() : key
+      if (row[upper] !== undefined && row[upper] !== null && row[upper] !== '') return row[upper]
+      if (row[lower] !== undefined && row[lower] !== null && row[lower] !== '') return row[lower]
+      // 特例映射
+      if (key === 'ASIN' && row.asin) return row.asin
+      return ''
+    },
     openNlPolicyModal() {
       if (this.nlPolicyCount === 0) return
       this.showNlPolicyModal = true
@@ -601,16 +612,22 @@ export default {
       return String(val)
     },
     statusPillClass(val, key) {
-      if (!val || typeof val !== 'string') return ''
-      const v = val.toLowerCase()
+      if (val === undefined || val === null) return ''
+      const v = String(val).toLowerCase()
       if (key === 'Pan-EU status') {
         if (v.includes('enrolled')) return 'pill-success'
         if (v.includes('pending')) return 'pill-warning'
         if (v.includes('suspend') || v.includes('stop')) return 'pill-danger'
       }
-      if (key.toLowerCase().includes('offer status')) {
+      // Offer/站点列状态
+      if (typeof key === 'string' && key.toLowerCase().includes('offer status')) {
         if (v.includes('no listing')) return 'pill-danger'
         if (v.includes('no offer required')) return 'pill-neutral'
+        if (v.includes('active') || v.includes('ok')) return 'pill-success'
+      }
+      // 站点价格列通常是价格文本，此处只对 NL 列的 "No listing" 做显著标记
+      if (key === 'NL') {
+        if (v.includes('no listing')) return 'pill-danger'
         if (v.includes('active') || v.includes('ok')) return 'pill-success'
       }
       return ''
