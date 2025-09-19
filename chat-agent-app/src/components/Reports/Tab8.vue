@@ -154,6 +154,11 @@ export default {
     actionResult: {
       type: Object,
       default: null
+    },
+    // 父组件传入的持久化输入对象（ref.value）
+    persistedInputs: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -177,6 +182,10 @@ export default {
     };
   },
   created() {
+    // 若有外部持久化对象则直接引用，保持同一引用供父组件读取
+    if (this.persistedInputs) {
+      this.inputs = this.persistedInputs
+    }
     if (!this.actionResult) {
       this.calculateWithDefaults();
     } else {
@@ -285,9 +294,7 @@ export default {
   width: 100px;
 }
 
-.logic-col {
-  /* 剩余空间 */
-}
+
 
 .ranking {
   font-weight: bold;

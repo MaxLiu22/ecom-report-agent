@@ -233,7 +233,7 @@
 
       <!-- Tab 8: 行动计划 -->
       <div v-if="activeTab === 7" class="center-wrap">
-        <Tab8 :actionResult="actionResult" />
+        <Tab8 :actionResult="actionResult" :persistedInputs="actionPlanInputs" />
       </div>
 
       <!-- Tab 9: 其他 -->
@@ -369,6 +369,15 @@ export default {
     const exportProgress = ref({ current: 0, total: 0, message: '', done: false })
   // 导出上下文：用于在取消时立即清理临时 DOM，避免长时间阻塞
   const exportCtx = ref({ tempRoot: null })
+    // 行动计划输入持久化（避免 Tab8 v-if 卸载重置）
+    const actionPlanInputs = ref({
+      newPolicyDue: '', newPolicyDone: '否',
+      warehouseDue: '', warehouseDone: '否',
+      panEUDue: '', panEUDone: '否',
+      panEUASINDue: '', panEUASINDone: '否',
+      diDue: '', diDone: '否',
+      ceeDue: '', ceeDone: '否'
+    })
     // 发送邮件/生成附件状态 + 短时 PDF 缓存（减少重复生成，降低卡顿感）
     const sendingEmail = ref(false)
     const pdfCache = ref({ key: null, blob: null, createdAt: 0 })
@@ -554,6 +563,36 @@ export default {
           if (!contentRoot) continue
           // 使用 DOM 克隆，展开手风琴并替换按钮，再序列化为 HTML
           const clone = contentRoot.cloneNode(true)
+          // 行动计划(Tab8 id=7)：将 select 和 date 输入转为静态文本，保留当前值
+          if (t.id === 7) {
+            try {
+              const origSelects = contentRoot.querySelectorAll('select')
+              const cloneSelects = clone.querySelectorAll('select')
+              for (let i = 0; i < cloneSelects.length; i++) {
+                const selOrig = origSelects[i]; const selClone = cloneSelects[i]
+                if (!selOrig || !selClone) continue
+                const opt = selOrig.options[selOrig.selectedIndex]
+                const txt = (opt && opt.textContent ? opt.textContent : selOrig.value) || '—'
+                const span = document.createElement('span')
+                span.className = 'export-static-field'
+                span.textContent = txt.trim()
+                span.style.cssText = 'display:inline-block;padding:4px 8px;border:1px solid #d0d7de;border-radius:6px;background:#f5f5f5;font-size:12px;min-width:46px;color:#232f3e;font-weight:600;'
+                selClone.replaceWith(span)
+              }
+              const origDates = contentRoot.querySelectorAll('input[type="date"]')
+              const cloneDates = clone.querySelectorAll('input[type="date"]')
+              for (let i = 0; i < cloneDates.length; i++) {
+                const inOrig = origDates[i]; const inClone = cloneDates[i]
+                if (!inOrig || !inClone) continue
+                const val = inOrig.value || '—'
+                const span = document.createElement('span')
+                span.className = 'export-static-field'
+                span.textContent = val
+                span.style.cssText = 'display:inline-block;padding:4px 8px;border:1px solid #d0d7de;border-radius:6px;background:#f5f5f5;font-size:12px;min-width:88px;color:#232f3e;'
+                inClone.replaceWith(span)
+              }
+            } catch(e) { console.warn('[HTML Export] 行动计划控件静态化失败', e) }
+          }
           // 通用：在导出前内联图片，避免离线/跨环境丢失
           const inlineImagesOnEl = async (rootEl, timeoutMs = 5000) => {
             const imgs = Array.from(rootEl.querySelectorAll('img'))
@@ -852,7 +891,34 @@ export default {
           selectedSubTab.value = originalSub; await nextTick()
         } else {
           const contentRoot = document.querySelector('.tab-content'); if (!contentRoot) continue
-          const text = extractPlainText(contentRoot.innerHTML)
+          let htmlSource = contentRoot.innerHTML
+          if (tabCfg.id === 7) { // 行动计划：静态化 select/date
+            try {
+              const clone = contentRoot.cloneNode(true)
+              const origSelects = contentRoot.querySelectorAll('select')
+              const cloneSelects = clone.querySelectorAll('select')
+              for (let i = 0; i < cloneSelects.length; i++) {
+                const selOrig = origSelects[i]; const selClone = cloneSelects[i]
+                if (!selOrig || !selClone) continue
+                const opt = selOrig.options[selOrig.selectedIndex]
+                const txt = (opt && opt.textContent ? opt.textContent : selOrig.value) || '—'
+                const span = document.createElement('span')
+                span.textContent = txt.trim()
+                selClone.replaceWith(span)
+              }
+              const origDates = contentRoot.querySelectorAll('input[type="date"]')
+              const cloneDates = clone.querySelectorAll('input[type="date"]')
+              for (let i = 0; i < cloneDates.length; i++) {
+                const inOrig = origDates[i]; const inClone = cloneDates[i]
+                if (!inOrig || !inClone) continue
+                const span = document.createElement('span')
+                span.textContent = inOrig.value || '—'
+                inClone.replaceWith(span)
+              }
+              htmlSource = clone.innerHTML
+            } catch(e) { console.warn('[PDF Text] 行动计划控件静态化失败', e) }
+          }
+          const text = extractPlainText(htmlSource)
           addSectionHeader(tabCfg.title)
           addParagraphLines(text || '(无数据)')
         }
@@ -922,6 +988,36 @@ export default {
             btn.replaceWith(span)
           } catch (_) { try { btn.remove() } catch(_) {} }
         })
+        // 行动计划(Tab8) 视觉 PDF：select / date 静态化
+        if (opts.transformActionPlan) {
+          try {
+            const origSelects = sourceEl.querySelectorAll('select')
+            const cloneSelects = clone.querySelectorAll('select')
+            for (let i = 0; i < cloneSelects.length; i++) {
+              const selOrig = origSelects[i]; const selClone = cloneSelects[i]
+              if (!selOrig || !selClone) continue
+              const opt = selOrig.options[selOrig.selectedIndex]
+              const txt = (opt && opt.textContent ? opt.textContent : selOrig.value) || '—'
+              const span = document.createElement('span')
+              span.className = 'export-static-field'
+              span.textContent = txt.trim()
+              span.style.cssText = 'display:inline-block;padding:4px 8px;border:1px solid #d0d7de;border-radius:6px;background:#f5f5f5;font-size:12px;min-width:46px;color:#232f3e;font-weight:600;'
+              selClone.replaceWith(span)
+            }
+            const origDates = sourceEl.querySelectorAll('input[type="date"]')
+            const cloneDates = clone.querySelectorAll('input[type="date"]')
+            for (let i = 0; i < cloneDates.length; i++) {
+              const inOrig = origDates[i]; const inClone = cloneDates[i]
+              if (!inOrig || !inClone) continue
+              const val = inOrig.value || '—'
+              const span = document.createElement('span')
+              span.className = 'export-static-field'
+              span.textContent = val
+              span.style.cssText = 'display:inline-block;padding:4px 8px;border:1px solid #d0d7de;border-radius:6px;background:#f5f5f5;font-size:12px;min-width:88px;color:#232f3e;'
+              inClone.replaceWith(span)
+            }
+          } catch(e) { console.warn('[PDF Visual] 行动计划控件静态化失败', e) }
+        }
         // 若要求，强制展开手风琴（用于 Tab7 合规政策等场景）
         if (opts.forceExpandAccordions) {
           forceExpandAccordionsInClone(clone)
@@ -971,7 +1067,8 @@ export default {
           if (!contentRoot) continue
           // 对 Tab7（合规政策）强制展开手风琴，避免 v-show 折叠导致截图缺失
           const isComplianceTab = tabCfg.id === 6
-          addPanel(tabCfg.title, contentRoot, 1, { forceExpandAccordions: isComplianceTab })
+          const isActionPlan = tabCfg.id === 7
+          addPanel(tabCfg.title, contentRoot, 1, { forceExpandAccordions: isComplianceTab, transformActionPlan: isActionPlan })
         }
       }
 
@@ -1180,6 +1277,7 @@ export default {
       uniReportRef,
       exportPdfWrapper,
       exportingPdf, exportProgress, progressPercent, cancelExport, closeExportOverlay
+      , actionPlanInputs
     }
   },
 }
