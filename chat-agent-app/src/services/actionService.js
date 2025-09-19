@@ -185,26 +185,12 @@ class ActionService {
   
     // 逻辑4：cost saving - pan-EU ASIN parity
     calculatePanEUASINParity() {
-      const excel_data = this.panEUResult?.value?.excel_data;
+      const costSavingPaneu = this.panEUResult?.value?.costSavingPaneu;
+      
+      return costSavingPaneu
 
-      // excel_data 必须存在且有 rows 数组
-      if (!excel_data || !Array.isArray(excel_data.rows) || excel_data.rows.length === 0) {
-        return '-';
-      }
-
-      // 获取最后一行数据（假设是“可加入PanEU ASIN”）
-      const lastRow = excel_data.rows[excel_data.rows.length - 1];
-
-      // 累加第 1-3 行的 count
-      const sum = excel_data.rows
-        .slice(1, 4) // 取第 2~4 行
-        .reduce((acc, row) => {
-          const num = parseFloat(row.formula);
-          return acc + (isNaN(num) ? 0 : num);
-        }, 0);
-
-      return `同步 ${lastRow?.count ?? 0} ASIN，获得配送费用节约€${sum.toFixed(2)}`;
     }
+
 
   
     // 逻辑5：cost saving - CEE

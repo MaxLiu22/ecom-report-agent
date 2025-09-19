@@ -797,14 +797,15 @@
                       :style="{
                         background: '#f8f9fa',
                         fontWeight: 600,
-                        textAlign: 'center',
+                        textAlign: 'left',
                         padding: '8px',
                         border: '1px solid #ddd',
-                        paddingLeft: (row.indentLevel || 0) * 20 + 'px',
-                        width: '140px' 
+                        paddingLeft: (row.indentLevel === 0 ? 20 : row.indentLevel * 20) + 'px',
+                        width: '140px' ,
+                        whiteSpace: 'pre-line'
                       }"
                     >
-                      {{ row.metric }}
+                      {{ row.metric === '失效PanEU ASIN' ? '失效PanEU ASIN\n(已失效 & 即将失效)' : row.metric }}
                     </td>
                     <td style="text-align: center; border: 1px solid #ddd;">
                       <button

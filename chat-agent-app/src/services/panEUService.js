@@ -614,7 +614,7 @@ function generateTable1(expansionChecklist) {
 		
 		// Then generate Table1 (ASIN level opportunities)
 		console.log('Generating Table1...');
-		const excelData = displayResults(analysis, skuFinancialMap);
+		const {excelData, costSavingPaneu} = displayResults(analysis, skuFinancialMap);
 
 		// 统计 荷兰政策
 		const nlPolicy = countNlPolicy(paneuData)
@@ -632,7 +632,9 @@ function generateTable1(expansionChecklist) {
 	
 			nlPolicy: nlPolicy,
 	
-			totalSoldDE: totalSoldDE
+			totalSoldDE: totalSoldDE,
+
+			costSavingPaneu: costSavingPaneu
 	
 		};
 
@@ -703,6 +705,11 @@ function displayResults(analysis, skuFinancialMap = {}) {
 	const countriesWithData = ['DE','FR','IT','ES','NL'].filter(c => analysis[`缺少3个报价-仅${c}可售`].length > 0);
 	const singleCountry = countriesWithData.length === 1 ? countriesWithData[0] : null;
 
+	// 统计各panEU数量
+	const missing12PanetTotal = analysis['缺少1至2个报价'].length;
+	const missing3PanetTotal = analysis['缺少3个报价（仅在X国可售）'].length;
+	const expiredPaneuTotal = analysis['失效PanEU ASIN'].length;
+
 	// Calculate financial benefits for subcategories
 	const missing12Savings = calculateSavings(analysis['缺少1至2个报价'], 'delivery');
 	const missing3Sales = calculateSavings(analysis['缺少3个报价（仅在X国可售）'], 'sales');
@@ -718,13 +725,14 @@ function displayResults(analysis, skuFinancialMap = {}) {
 	  };
 	  
 	// 已加入PanEU
+	const baseRowspan = (missing12PanetTotal ? 1 : 0) + (missing3PanetTotal ? 1 : 0) + 1;
 	if (paneuJoinedTotal > 0) {
 	excelData.rows.push({
 		metric: "未加入PanEU",
 		count: paneuJoinedTotal,
 		operationPoint:
 		"ASIN需在德法意西荷5国活跃销售以获得泛欧福利。若没有同步选品，会导致：<br>1. 未同步选品的国家产生远程配送费；<br>2. 可通过拓展ASIN获得潜在销售机会；<br>3.转化率低于本地配送ASIN",
-		operationPointRowspan: `${3 + (singleCountry ? 0 : countriesWithData.length)}`,
+		operationPointRowspan: `${baseRowspan + (singleCountry ? 0 : countriesWithData.length)}`,
 		action: "在德法意西荷同步选品，以获取完整PanEU福利",
 		data: paneuJoinedAsins.map(asin => ({
 		asin: asin.asin,
@@ -746,6 +754,7 @@ function displayResults(analysis, skuFinancialMap = {}) {
 		count: missing12.length,
 		operationPoint: "",
 		action: `完成ASIN同步预计可节省€${missing12Savings.toLocaleString()}/年`,
+		indentLevel: 1,
 		data: missing12.map(asin => ({
 				asin: asin.asin,
 				title: asin.title,
@@ -869,8 +878,10 @@ function displayResults(analysis, skuFinancialMap = {}) {
 		});
 	});
 
+	// 计算cost saving paneu
+	const costSavingPaneu = `同步${(paneuJoinedTotal + expiredPaneuTotal).toLocaleString()}个ASIN，预计可节省€${(missing12Savings + expiredSavings).toFixed(2).toLocaleString()}，预计可提升销售额€${missing3Sales.toLocaleString()}`
 
-	return excelData;
+	return { excelData, costSavingPaneu };
 }
 
 function generateTable2HTML(expansionChecklist) {

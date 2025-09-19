@@ -135,7 +135,7 @@ computed: {
 
       // 1) 过滤不需要的指标
       const filtered = base.filter(
-        (item) => !["FBA BA /3P BA %", "FBA GMS/total GMS %"].includes(item.指标)
+        (item) => !["FBA BA /3P BA %", "FBA GMS/total GMS %", "FBA潜在销售机会 (数量)*"].includes(item.指标)
       );
 
       // 2) 插入 “是否启用中欧计划” 行（仅当 cee 数据存在）
